@@ -114,8 +114,6 @@
             openBtn.addEventListener("click", openMenu);
             closeBtn.addEventListener("click", closeMenu);
 
-            // This goes after you've already defined `closeMenu()`
-
             // Close the menu if any nav link inside it is clicked
             menu.querySelectorAll("a").forEach(link => {
             link.addEventListener("click", () => {
