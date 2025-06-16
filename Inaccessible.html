@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discover Mercury - Journey to the Innermost Planet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Space+Grotesk:wght@300;400;700&display=swap');
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #0a0a1a;
+            color: #e0e0ff;
+            overflow-x: hidden;
+        }
+        
+        .orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #3a0077 0%, #7b2cbf 50%, #e0aaff 100%);
+        }
+        
+        .mercury-surface {
+            background-image: url('images/mercury-surface.avif');
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay;
+            background-color: rgba(139, 92, 246, 0.3);
+        }
+        
+        .package-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 50px -12px rgba(224, 170, 255, 0.3);
+        }
+        
+        .countdown-digit {
+            background: rgba(224, 170, 255, 0.1);
+            border: 1px solid rgba(224, 170, 255, 0.3);
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 10px rgba(224, 170, 255, 0.7);
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .floating {
+            animation: floating 6s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-black bg-opacity-80 backdrop-blur-md fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-purple-400 text-2xl font-bold orbitron">DISCOVER MERCURY</span>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#" class="text-purple-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                        <a href="#packages" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Packages</a>
+                        <a href="#experience" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Experience</a>
+                        <a href="#faq" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">FAQ</a>
+                        <a href="#contact" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Contact</a>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium orbitron pulse">
+                        BOOK NOW <i class="fas fa-rocket ml-1"></i>
+                    </button>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient min-h-screen flex items-center justify-center relative overflow-hidden pt-16">
+        <div class="absolute inset-0 bg-black opacity-40"></div>
+        <div class="absolute top-0 left-0 w-full h-full">
+            <div class="absolute top-1/4 left-1/4 w-20 h-20 rounded-full bg-purple-500 opacity-20 filter blur-3xl"></div>
+            <div class="absolute top-1/3 right-1/4 w-32 h-32 rounded-full bg-indigo-500 opacity-20 filter blur-3xl"></div>
+            <div class="absolute bottom-1/4 right-1/3 w-40 h-40 rounded-full bg-pink-500 opacity-20 filter blur-3xl"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h1 class="text-5xl md:text-7xl font-bold mb-6 text-white orbitron glow-text">
+                        DISCOVER <span class="text-purple-300">MERCURY</span>
+                    </h1>
+                    <p class="text-xl text-purple-100 mb-8 max-w-lg">
+                        Experience the extreme beauty of our solar system's innermost planet. Witness breathtaking sunrises that happen only once every 176 Earth days.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <button class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-lg text-lg font-bold orbitron pulse">
+                            BOOK YOUR VOYAGE <i class="fas fa-rocket ml-2"></i>
+                        </button>
+                        <button class="border-2 border-purple-400 text-purple-100 hover:bg-purple-900 hover:bg-opacity-30 px-8 py-4 rounded-lg text-lg font-medium">
+                            LEARN MORE
+                        </button>
+                    </div>
+                </div>
+                <div class="relative floating">
+                    <div class="relative">
+                        <img src="images/PIA15162.jpg" alt="Mercury surface" class="rounded-2xl shadow-2xl border-4 border-purple-300 transform rotate-6">
+                        <div class="absolute -bottom-6 -right-6 bg-purple-900 p-4 rounded-xl shadow-lg">
+                            <div class="text-center">
+                                <div class="text-yellow-300 text-sm orbitron">NEXT LAUNCH IN</div>
+                                <div class="flex justify-center space-x-2 mt-2">
+                                    <div class="countdown-digit px-3 py-1 rounded orbitron">14</div>
+                                    <div class="countdown-digit px-3 py-1 rounded orbitron">22</div>
+                                    <div class="countdown-digit px-3 py-1 rounded orbitron">08</div>
+                                </div>
+                                <div class="flex justify-center space-x-5 text-xs mt-1 text-purple-200">
+                                    <span>DAYS</span>
+                                    <span>HRS</span>
+                                    <span>MIN</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="bg-gray-900 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div class="p-6 rounded-xl bg-gray-800 bg-opacity-50 backdrop-blur-sm">
+                    <div class="text-purple-400 text-4xl font-bold orbitron">88</div>
+                    <div class="text-gray-300 mt-2">Earth Days in a Mercury Year</div>
+                </div>
+                <div class="p-6 rounded-xl bg-gray-800 bg-opacity-50 backdrop-blur-sm">
+                    <div class="text-purple-400 text-4xl font-bold orbitron">430°C</div>
+                    <div class="text-gray-300 mt-2">Daytime Temperature</div>
+                </div>
+                <div class="p-6 rounded-xl bg-gray-800 bg-opacity-50 backdrop-blur-sm">
+                    <div class="text-purple-400 text-4xl font-bold orbitron">-180°C</div>
+                    <div class="text-gray-300 mt-2">Nighttime Temperature</div>
+                </div>
+                <div class="p-6 rounded-xl bg-gray-800 bg-opacity-50 backdrop-blur-sm">
+                    <div class="text-purple-400 text-4xl font-bold orbitron">3.7m/s²</div>
+                    <div class="text-gray-300 mt-2">Surface Gravity</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Packages Section -->
+    <section id="packages" class="py-20 mercury-surface">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-white orbitron mb-4">MERCURY TRAVEL PACKAGES</h2>
+                <p class="text-xl text-purple-200 max-w-3xl mx-auto">Choose from our exclusive range of interplanetary experiences</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <!-- Package 1 -->
+                <div class="bg-gray-900 bg-opacity-80 rounded-2xl overflow-hidden shadow-xl package-card transition-all duration-300">
+                    <div class="relative">
+                        <img src="images/mercury-mariner.jpg" alt="Mercury Flyby" class="w-full h-64 object-cover">
+                        <div class="absolute top-4 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-bold orbitron">POPULAR</div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-2xl font-bold text-white orbitron">Mercury Flyby</h3>
+                            <div class="bg-purple-900 text-purple-100 px-3 py-1 rounded-full text-sm orbitron">7 DAYS</div>
+                        </div>
+                        <p class="text-gray-300 mt-3">Experience a close orbit around Mercury with breathtaking views of its cratered surface.</p>
+                        
+                        <div class="mt-6">
+                            <div class="flex items-center text-yellow-400 mb-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                                <span class="text-gray-400 ml-2 text-sm">4.7 (128 reviews)</span>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <span class="text-3xl font-bold text-white">$249,999</span>
+                                <span class="text-gray-400 line-through ml-2">$299,999</span>
+                                <span class="text-green-400 text-sm ml-2">Save $50,000</span>
+                            </div>
+                            
+                            <div class="mt-6 grid grid-cols-2 gap-2 text-sm">
+                                <div class="flex items-center text-purple-300">
+                                    <i class="fas fa-space-shuttle mr-2"></i>
+                                    <span>SpaceX Starship</span>
+                                </div>
+                                <div class="flex items-center text-purple-300">
+                                    <i class="fas fa-user-astronaut mr-2"></i>
+                                    <span>AI Guide</span>
+                                </div>
+                                <div class="flex items-center text-purple-300">
+                                    <i class="fas fa-utensils mr-2"></i>
+                                    <span>Gourmet Meals</span>
+                                </div>
+                                <div class="flex items-center text-purple-300">
+                                    <i class="fas fa-vr-cardboard mr-2"></i>
+                                    <span>VR Experiences</span>
+                                </div>
+                            </div>
+                            
+                            <button class="w-full mt-6 bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-bold orbitron transition-colors">
+                                BOOK NOW <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Package 2 -->
+                <div class="bg-gray-900 bg-opacity-80 rounded-2xl overflow-hidden shadow-xl package-card transition-all duration-300">
+                    <div class="relative">
+                        <img src="images/bubble.jpg" alt="Mercury Landing" class="w-full h-64 object-cover">
+                        <div class="absolute top-4 right-4 bg-yellow-600 text-white px-3 py-1 rounded-full text-sm font-bold orbitron">BEST VALUE</div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-2xl font-bold text-white orbitron">Mercury Landing</h3>
+                            <div class="bg-purple-900 text-purple-100 px-3 py-1 rounded-full text-sm orbitron">14 DAYS</div>
+                        </div>
+                        <p class="text-gray-300 mt-3">Walk on Mercury's surface in our state-of-the-art thermal suits and explore ancient craters.</p>
+                        
+                        <div class="mt-6">
+                            <div class="flex items-center text-yellow-400 mb-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <span class="text-gray-400 ml-2 text-sm">5.0 (64 reviews)</span>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <span class="text-3xl font-bold text-white">$499,999</span>
+                                <span class="text-gray-400 line-through ml-2">$599,999</span>
+                                <span class="text-green-400 text-sm ml-2">Save $100,000</span>
+                            </div>
+                            
+                            <div class="mt-6 grid grid-cols-2 gap-2 text-sm">
+                                <div class="flex items-center text-purple-300">
+                                    <i class="fas fa-space-shuttle mr-2"></i>
+                                    <span>Blue Origin</span>
+                                </div>
+                                <div class="flex items-center text-purple-300">
+                                    <i class="fas fa-user-astronaut mr-2"></i>
+                                    <span>Expert Guide</span>
+                                </div>
+                                <div class="flex items-center text-purple-300">
+                                    <i class="fas fa-utensils mr-2"></i>
+                                    <span>5-Star Dining</span>
+                                </div>
+                                <div class="flex items-center text-purple-300">
+                                    <i class="fas fa-gem mr-2"></i>
+                                    <span>VIP Suites</span>
+                                </div>
+                            </div>
+                            
+                            <button class="w-full mt-6 bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-bold orbitron transition-colors">
+                                BOOK NOW <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Package 3 -->
+                <div class="bg-gray-900 bg-opacity-80 rounded-2xl overflow-hidden shadow-xl package-card transition-all duration-300">
+                    <div class="relative">
+                        <img src="images/extra-solar.jpg" alt="Mercury Grand Tour" class="w-full h-64 object-cover">
+                        <div class="absolute top-4 right-4 bg-pink-600 text-white px-3 py-1 rounded-full text-sm font-bold orbitron">LUXURY</div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-2xl font-bold text-white orbitron">Grand Mercury Tour</h3>
+                            <div class="bg-purple-900 text-purple-100 px-3 py-1 rounded-full text-sm orbitron">30 DAYS</div>
+                        </div>
+                        <p class="text-gray-300 mt-3">The ultimate Mercury experience with extended stays at multiple locations across the planet.</p>
+                        
+                        <div class="mt-6">
+                            <div class="flex items-center text-yellow-400 mb-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <span class="text-gray-400 ml-2 text-sm">5.0 (32 reviews)</span>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <span class="text-3xl font-bold text-white">$999,999</span>
+                                <span class="text-gray-400">/person</span>
+                            </div>
+                            
+                            <div class="mt-6 grid grid-cols-2 gap-2 text-sm">
+                                <div class="flex items-center text-purple-300">
+                                    <i class="fas fa-space-shuttle mr-2"></i>
+                                    <span>Virgin Galactic</span>
+                                </div>
+                                <div class="flex items-center text-purple-300">
+                                    <i class="fas fa-user-astronaut mr-2"></i>
+                                    <span>2 Guides</span>
+                                </div>
+                                <div class="flex items-center text-purple-300">
+                                    <i class="fas fa-utensils mr-2"></i>
+                                    <span>Private Chef</span>
+                                </div>
+                                <div class="flex items-center text-purple-300">
+                                    <i class="fas fa-swimming-pool mr-2"></i>
+                                    <span>Zero-G Pool</span>
+                                </div>
+                            </div>
+                            
+                            <button class="w-full mt-6 bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-bold orbitron transition-colors">
+                                BOOK NOW <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-16">
+                <button class="border-2 border-purple-400 text-purple-100 hover:bg-purple-900 hover:bg-opacity-30 px-8 py-3 rounded-lg text-lg font-medium">
+                    VIEW ALL PACKAGES <i class="fas fa-chevron-down ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section id="experience" class="py-20 bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-white orbitron mb-4">THE MERCURY EXPERIENCE</h2>
+                <p class="text-xl text-purple-200 max-w-3xl mx-auto">What makes a journey to Mercury truly unforgettable</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-gray-800 rounded-xl p-8 hover:bg-gray-700 transition-all duration-300">
+                    <div class="text-purple-400 text-4xl mb-4">
+                        <i class="fas fa-sun"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Double Sunrises</h3>
+                    <p class="text-gray-300">Witness the rare phenomenon where the sun appears to rise, set, and rise again due to Mercury's unique orbit.</p>
+                </div>
+                
+                <div class="bg-gray-800 rounded-xl p-8 hover:bg-gray-700 transition-all duration-300">
+                    <div class="text-purple-400 text-4xl mb-4">
+                        <i class="fas fa-meteor"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Crater Exploration</h3>
+                    <p class="text-gray-300">Explore ancient impact craters with our guided tours, including the massive Caloris Basin.</p>
+                </div>
+                
+                <div class="bg-gray-800 rounded-xl p-8 hover:bg-gray-700 transition-all duration-300">
+                    <div class="text-purple-400 text-4xl mb-4">
+                        <i class="fa-solid fa-user-astronaut"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Low-Gravity Activities</h3>
+                    <p class="text-gray-300">Experience Mercury's 38% Earth gravity with our specially designed activities and sports.</p>
+                </div>
+                
+                <div class="bg-gray-800 rounded-xl p-8 hover:bg-gray-700 transition-all duration-300">
+                    <div class="text-purple-400 text-4xl mb-4">
+                        <i class="fas fa-temperature-high"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Thermal Suit Experience</h3>
+                    <p class="text-gray-300">Our state-of-the-art thermal suits allow you to safely experience Mercury's extreme temperatures.</p>
+                </div>
+                
+                <div class="bg-gray-800 rounded-xl p-8 hover:bg-gray-700 transition-all duration-300">
+                    <div class="text-purple-400 text-4xl mb-4">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Stellar Observations</h3>
+                    <p class="text-gray-300">With no atmosphere to speak of, enjoy the clearest views of the cosmos ever seen by human eyes.</p>
+                </div>
+                
+                <div class="bg-gray-800 rounded-xl p-8 hover:bg-gray-700 transition-all duration-300">
+                    <div class="text-purple-400 text-4xl mb-4">
+                        <i class="fas fa-flag"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-3">Historic Landing Sites</h3>
+                    <p class="text-gray-300">Visit the landing sites of historic missions like MESSENGER and BepiColombo.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-20 mercury-surface">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-white orbitron mb-4">TRAVELER TESTIMONIALS</h2>
+                <p class="text-xl text-purple-200 max-w-3xl mx-auto">Hear from those who've experienced Mercury firsthand</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-gray-900 bg-opacity-80 rounded-xl p-8">
+                    <div class="flex items-center mb-4">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sarah J." class="w-12 h-12 rounded-full border-2 border-purple-400">
+                        <div class="ml-4">
+                            <h4 class="text-white font-bold">Sarah J.</h4>
+                            <div class="flex text-yellow-400 text-sm">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 italic">"The Mercury Flyby was worth every penny. Seeing the sun from that close was terrifying and beautiful. The AI guide was incredibly knowledgeable and made the experience unforgettable."</p>
+                </div>
+                
+                <div class="bg-gray-900 bg-opacity-80 rounded-xl p-8">
+                    <div class="flex items-center mb-4">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Michael T." class="w-12 h-12 rounded-full border-2 border-purple-400">
+                        <div class="ml-4">
+                            <h4 class="text-white font-bold">Michael T.</h4>
+                            <div class="flex text-yellow-400 text-sm">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 italic">"Walking on Mercury felt like being on another world (obviously). The thermal suits worked perfectly - I never felt uncomfortable despite the extreme temperatures outside."</p>
+                </div>
+                
+                <div class="bg-gray-900 bg-opacity-80 rounded-xl p-8">
+                    <div class="flex items-center mb-4">
+                        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Priya K." class="w-12 h-12 rounded-full border-2 border-purple-400">
+                        <div class="ml-4">
+                            <h4 class="text-white font-bold">Priya K.</h4>
+                            <div class="flex text-yellow-400 text-sm">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 italic">"The Grand Tour was the adventure of a lifetime. Two weeks exploring different regions of Mercury, with luxury accommodations that made it feel like a 5-star hotel in space."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-white orbitron mb-4">FREQUENTLY ASKED QUESTIONS</h2>
+                <p class="text-xl text-purple-200 max-w-3xl mx-auto">Everything you need to know about traveling to Mercury</p>
+            </div>
+            
+            <div class="max-w-3xl mx-auto">
+                <div class="space-y-4">
+                    <div class="bg-gray-800 rounded-xl overflow-hidden">
+                        <button class="w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                            <span class="text-xl font-medium text-white">Is it safe to travel to Mercury?</span>
+                            <i class="fas fa-chevron-down text-purple-400 transition-transform duration-300"></i>
+                        </button>
+                        <div class="px-6 pb-6 text-gray-300 hidden">
+                            <p>Absolutely! Our spacecraft are equipped with the latest radiation shielding and thermal protection systems. All travelers undergo extensive training and are provided with advanced thermal suits that maintain comfortable temperatures regardless of Mercury's extreme surface conditions.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-800 rounded-xl overflow-hidden">
+                        <button class="w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                            <span class="text-xl font-medium text-white">How long does the journey take?</span>
+                            <i class="fas fa-chevron-down text-purple-400 transition-transform duration-300"></i>
+                        </button>
+                        <div class="px-6 pb-6 text-gray-300 hidden">
+                            <p>The duration depends on planetary alignment, but typically our high-speed transports make the journey in about 3 months. We use gravity assists from Venus to optimize fuel efficiency and travel time. During transit, you'll enjoy luxury accommodations and various entertainment options.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-800 rounded-xl overflow-hidden">
+                        <button class="w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                            <span class="text-xl font-medium text-white">What's the best time of year to visit?</span>
+                            <i class="fas fa-chevron-down text-purple-400 transition-transform duration-300"></i>
+                        </button>
+                        <div class="px-6 pb-6 text-gray-300 hidden">
+                            <p>Mercury doesn't have seasons like Earth, but we schedule our tours during optimal orbital positions when surface temperatures are most manageable (relatively speaking) and solar activity is predictable. Our launch calendar is designed to maximize your experience.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-800 rounded-xl overflow-hidden">
+                        <button class="w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                            <span class="text-xl font-medium text-white">What should I pack?</span>
+                            <i class="fas fa-chevron-down text-purple-400 transition-transform duration-300"></i>
+                        </button>
+                        <div class="px-6 pb-6 text-gray-300 hidden">
+                            <p>Very little! All necessary equipment including thermal suits, breathing apparatus, and safety gear is provided. You'll want to bring personal items like digital entertainment (we provide VR headsets), comfortable clothing for the spacecraft, and any personal medications. A full packing list is provided after booking.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-800 rounded-xl overflow-hidden">
+                        <button class="w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                            <span class="text-xl font-medium text-white">Are there physical requirements?</span>
+                            <i class="fas fa-chevron-down text-purple-400 transition-transform duration-300"></i>
+                        </button>
+                        <div class="px-6 pb-6 text-gray-300 hidden">
+                            <p>Travelers must pass a comprehensive medical examination to ensure they can handle the rigors of space travel. While Mercury's gravity is only 38% of Earth's, the journey requires good cardiovascular health. We accommodate a range of physical abilities - contact us to discuss any specific concerns.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-12">
+                    <button class="border-2 border-purple-400 text-purple-100 hover:bg-purple-900 hover:bg-opacity-30 px-8 py-3 rounded-lg text-lg font-medium">
+                        VIEW ALL FAQS <i class="fas fa-chevron-down ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 hero-gradient">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold text-white orbitron mb-6">READY FOR THE JOURNEY OF A LIFETIME?</h2>
+            <p class="text-xl text-purple-200 max-w-3xl mx-auto mb-10">Join the select few who have experienced the wonders of Mercury firsthand.</p>
+            
+            <div class="flex flex-wrap justify-center gap-6">
+                <button class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-lg text-lg font-bold orbitron pulse">
+                    BOOK YOUR VOYAGE <i class="fas fa-rocket ml-2"></i>
+                </button>
+                <button class="border-2 border-purple-400 text-purple-100 hover:bg-purple-900 hover:bg-opacity-30 px-8 py-4 rounded-lg text-lg font-medium">
+                    SPEAK TO A CONSULTANT <i class="fas fa-headset ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-4xl md:text-5xl font-bold text-white orbitron mb-6">CONTACT US</h2>
+                    <p class="text-xl text-purple-200 mb-8">Have questions about traveling to Mercury? Our interplanetary travel consultants are standing by.</p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="text-purple-400 text-2xl mr-4 mt-1">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-bold">Headquarters</h4>
+                                <p class="text-gray-300">Orbital Office Complex, Lagrange Point 1</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="text-purple-400 text-2xl mr-4 mt-1">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-bold">Contact</h4>
+                                <p class="text-gray-300">+1 (555) MERCURY (637-2879)</p>
+                                <p class="text-gray-300">Available 24/7 via quantum entanglement comms</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="text-purple-400 text-2xl mr-4 mt-1">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-bold">Email</h4>
+                                <p class="text-gray-300">bookings@mercuryvoyages.space</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-xl p-8">
+                    <form>
+                        <div class="mb-6">
+                            <label for="name" class="block text-white mb-2">Your Name</label>
+                            <input type="text" id="name" class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="email" class="block text-white mb-2">Email Address</label>
+                            <input type="email" id="email" class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="interest" class="block text-white mb-2">Interest</label>
+                            <select id="interest" class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option>Mercury Flyby</option>
+                                <option>Mercury Landing</option>
+                                <option>Grand Mercury Tour</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="message" class="block text-white mb-2">Message</label>
+                            <textarea id="message" rows="4" class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-bold orbitron transition-colors">
+                            SEND MESSAGE <i class="fas fa-paper-plane ml-2"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-white text-xl font-bold orbitron mb-4">DISCOVER MERCURY</h3>
+                    <p class="text-gray-400">The premier provider of interplanetary travel experiences to Mercury since 2042.</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-bold mb-4">Explore</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Home</a></li>
+                        <li><a href="#packages" class="text-gray-400 hover:text-white">Packages</a></li>
+                        <li><a href="#experience" class="text-gray-400 hover:text-white">Experience</a></li>
+                        <li><a href="#faq" class="text-gray-400 hover:text-white">FAQ</a></li>
+                        <li><a href="#contact" class="text-gray-400 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-bold mb-4">Credits</h4>
+                    <ul class="space-y-2">
+                        <li><a href="https://photojournal.jpl.nasa.gov/catalog/PIA15162" class="text-gray-400 hover:text-white text-xl"> PIA15162 by NASA</a></li>
+                        <li><a href="https://unsplash.com/photos/mars-on-a-black-background-N3BQHYOVq5E?utm_content=creditShareLink&utm_medium=referral&utm_source=unsplash" class="text-gray-400 hover:text-white text-xl">Mercury by NASA</a></li>
+                        <li><a href="https://unsplash.com/photos/mercury-on-a-black-background-71W3CWeZF7A" class="text-gray-400 hover:text-white text-xl">Mariner 10's first image of Mercury</a></li>
+                        <li><a href="https://unsplash.com/photos/two-planets-are-shown-in-this-artists-rendering-G6VuDeDrejc" class="text-gray-400 hover:text-white text-xl">Hubble Extrasolar planet</a></li>
+                        <li><a href="https://unsplash.com/photos/green-blue-and-pink-planet-sXzN474Z8Bw" class="text-gray-400 hover:text-white text-xl">Bubble</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-bold mb-4">Credits</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white text-xl"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white text-xl"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <h5 class="text-white font-bold mb-2">Subscribe to Newsletter</h5>
+                        <div class="flex">
+                            <input type="email" placeholder="Your email" class="px-4 py-2 rounded-l-lg bg-gray-800 text-white focus:outline-none w-full">
+                            <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 rounded-r-lg">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm">© 2042 Mercury Voyages. All rights reserved.</p>
+                <p class="text-gray-400 text-sm mt-4 md:mt-0">A subsidiary of Galactic Travel Holdings LLC.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // FAQ accordion functionality
+        document.querySelectorAll('#faq button').forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                const icon = button.querySelector('i');
+                
+                content.classList.toggle('hidden');
+                icon.classList.toggle('rotate-180');
+            });
+        });
+        
+        // Simple countdown timer (for demo purposes)
+        function updateCountdown() {
+            const daysElement = document.querySelector('.countdown-digit:nth-child(1)');
+            const hoursElement = document.querySelector('.countdown-digit:nth-child(2)');
+            const minutesElement = document.querySelector('.countdown-digit:nth-child(3)');
+            
+            // For demo, we'll just decrement the minutes
+            let minutes = parseInt(minutesElement.textContent);
+            minutes = (minutes - 1 + 60) % 60;
+            minutesElement.textContent = minutes.toString().padStart(2, '0');
+            
+            if (minutes === 59) {
+                let hours = parseInt(hoursElement.textContent);
+                hours = (hours - 1 + 24) % 24;
+                hoursElement.textContent = hours.toString().padStart(2, '0');
+                
+                if (hours === 23) {
+                    let days = parseInt(daysElement.textContent);
+                    days = (days - 1);
+                    daysElement.textContent = days.toString().padStart(2, '0');
+                }
+            }
+        }
+        
+        setInterval(updateCountdown, 60000);
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
