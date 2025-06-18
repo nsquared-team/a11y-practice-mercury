@@ -37,7 +37,7 @@
             margin: 0.3125rem;
             text-decoration: none;
             position: static;
-            width: 7rem;
+            width: 12rem;
             height: auto;
             overflow: visible;
             clip: auto;
@@ -58,6 +58,8 @@
             border: 0;
         }
 
+
+/*ENTIRE PAGE TW CSS UTILITIES*/
         body {
             font-family: 'Space Grotesk', sans-serif;
             background-color: #0a0a1a;
@@ -115,10 +117,24 @@
             100% { transform: translateY(0px); }
         }
 
-/* MOBILE MODAL */
-  .no-scroll {
-    overflow: hidden;
-    height: 100%;
-  }
+        /* MOBILE MODAL */
+        .no-scroll {
+            overflow: hidden;
+            height: 100%;
+        }
+
+
+
+        /*FLIP CHEVRONS*/
+        .button-chevron,
+        .select-chevron {
+            display: inline-block;
+            transition: tranform 0.5s ease;
+        }
+
+        .flipped {
+            transform: rotate(180deg);
+        }
 
 /* TEST AREA============================================================*/
+

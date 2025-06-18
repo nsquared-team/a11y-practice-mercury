@@ -129,6 +129,7 @@
 
 
 //CLOCK FUNCTIONALITY
+
         // Simple countdown timer (for demo purposes)
             const countdownElements = document.querySelectorAll('.countdown-digit');
             const [daysElement, hoursElement, minutesElement] = countdownElements;
@@ -252,4 +253,26 @@
                 }
             });
 
+
+
+//FLIP CHEVRONS
+            const buttons = document.querySelectorAll('.toggle-button');
+            
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const buttonchevron = button.querySelector('.button-chevron');
+                    buttonchevron.classList.toggle('flipped');
+                })
+            })
+
+            const selects = document.querySelectorAll('.select-wrapper');
+
+            selects.forEach(selectWrapper => {
+            selectWrapper.addEventListener('click', () => {
+                const selectchevron = selectWrapper.querySelector('.select-chevron');
+                selectchevron.classList.toggle('flipped');
+            });
+            });
+
 //TEST AREA ==================================================
+
