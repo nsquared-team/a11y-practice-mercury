@@ -63,7 +63,7 @@
         body {
             font-family: 'Space Grotesk', sans-serif;
             background-color: #0a0a1a;
-            color: #e0e0ff;
+            color: #;
             overflow-x: hidden;
         }
         
@@ -73,6 +73,10 @@
         
         .hero-gradient {
             background: linear-gradient(135deg, #3a0077 0%, #7b2cbf 50%, #e0aaff 100%);
+        }
+
+        .hero-gradient-travel {
+            background: linear-gradient(135deg, #111827 0%, #374151 50%, #6b7280 100%);
         }
         
         .mercury-surface {
