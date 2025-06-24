@@ -6,97 +6,99 @@
     <title>Discover Mercury - Journey to the Suns closest neighbor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="Accessible.css">
+    <link rel="stylesheet" href="accessible.css">
 </head>
 
-<body class="text-[clamp(1.5rem,2vw,1.6rem)] sm:text-[clamp(0.5rem,2.5vw,0.7rem)] md:text-[clamp(0.7rem,3vw,0.9rem)] lg:text-[clamp(0.7rem,4vw,1rem)] leading-relaxed text-white orbitron break-words hyphens-auto">
+<body class="text-base leading-normal text-white break-words hyphens-auto">
 
 <!--ACCESSIBILITY LINKS-->
 <a href="#DM-Header-sktm-focus" class="skip-to-main-link bg-purple-600 text-white rounded-md">
-    <div class="relative flex items-center justify-center">
-        <span class="absolute inset-0 m-0 my-0 bg-black bg-opacity-40 rounded" aria-hidden="true"></span>
+    <div class="relative text-center items-center">
+        <span class="absolute inset-0 bg-black bg-opacity-40 rounded" aria-hidden="true"></span>
         <span class="relative z-10 color-white orbitron">Skip to Main</span>
     </div>
 </a>
 
+
 <!--DESKTOP NAVIGATION MENU-->
-<header>
-<div class="bg-black bg-opacity-80 backdrop-blur-md w-full z-50 md:fixed px-5 sm:-px-1 md:-px-2 lg:px-3">
-    <div class="mx-auto px-4 sm:px-2 md:px-3 lg:px-8">
-        <div class="flex flex-col lg:flex-row items-center justify-between py-2 px-5 sm:py-5 sm:px-5 md:px-5 md:px-5">
-            <div class="flex items-center">
-                <div class="text-center flex lg:flex-col">
-                    <p class="text-[clamp(1rem,3vw,2.3rem)] md:block text-white font-bold glow-text hidden">DISCOVER</p>
-                    <p class="text-[clamp(1rem,3vw,2.3rem)] md:block text-purple-400 font-bold glow-text hidden">MERCURY</p>
+<header class="text-[clamp(1.5rem,2vw,1.6rem)] sm:text-[clamp(0.5rem,2.5vw,0.7rem)] md:text-[clamp(0.7rem,3vw,0.9rem)] lg:text-[clamp(0.7rem,4vw,1rem)]">
+    <div class="bg-black bg-opacity-80 backdrop-blur-md w-full z-50 md:fixed leading-none">
+        
+<!--REDUCE MOTION-->
+        <div class="mt-3 -mb-3 mx-2">
+            <button id="reduce-motion-toggle" class="relative bg-purple-600 focus:bg-purple-800 hover:bg-purple-800 text-white px-3 py-2 rounded-md font-md hidden lg:inline flex items-center">
+                <div class="relative flex items-center justify-center">
+                    <span class="absolute inset-0 -mx-2 -my-1 bg-black bg-opacity-40 rounded" aria-hidden="true"></span>
+                    <span id="reduce-motion-label" class="relative z-10 color-white orbitron">Reduce Motion: Off</span>
+                </div>
+            </button>
+        </div>
+
+        <div class="flex items-center justify-start md:justify-between">
+                <div class="flex ml-2">
+                    <p class="text-[clamp(1rem,4vw,1.5rem)] lg:block text-white font-bold hidden glow-text orbitron">DISCOVER</p>
+                    <p class="text-[clamp(1rem,4vw,1.5rem)] lg:block text-purple-400 font-bold hidden glow-text orbitron ml-1">MERCURY</p>
                 </div>
 
-                <div class="text-center flex">
-                    <p class="text-[clamp(2rem,3vw,2.5rem)] leading-relaxed glow-text text-white font-bold md:hidden">D</p>
-                    <p class="text-[clamp(2rem,3vw,2.5rem)] leading-relaxed glow-text text-purple-400 font-bold md:hidden">M</p>
-                </div>
+        <div class="flex items-center justify-center w-full lg:hidden">
+            <div class="flex justify-center items-center gap-1">
+                <p class="text-[clamp(2rem,3vw,2.5rem)] glow-text text-white font-bold orbitron">D</p>
+                <p class="text-[clamp(2rem,3vw,2.5rem)] glow-text text-purple-400 font-bold orbitron">M</p>
+            </div>
 
-        <!--MOBILE MENU BUTTON-->
-            <button id="open-menu" aria-expanded="false" aria-controls="mobile-menu-modal" class="md:hidden rounded-lg p-4 m-4 text-gray-400 focus:text-white focus:bg-gray-700 hover:text-white hover:bg-gray-700 border border-2 border-gray-200">
+<!--MOBILE MENU BUTTON-->
+            <button id="open-menu" aria-controls="mobile-menu-modal" class="lg:hidden rounded-lg p-4 m-4 text-gray-200 focus:text-white focus:bg-gray-700 hover:text-white hover:bg-gray-700 border border-2 border-gray-200">
                     <span class="sr-only">Open menu</span>
                 <i aria-hidden="true" class="font-bold fas fa-bars"></i>
             </button>
+        </div>
 
-                <div id="aria-status" class="sr-only" role="status" aria-live="polite"></div>
-
-
-            <!--ACCESSIBILITY CONTROLS-->
-                <button id="reduce-motion-toggle" class="relative ml-4 bg-purple-600 focus:bg-purple-800 hover:bg-purple-800 text-white px-3 py-1 rounded-md  font-md hidden md:inline flex items-center justify-center">
-                    <div class="relative flex items-center justify-center">
-                        <span class="absolute inset-0 -m-2 my-0 bg-black bg-opacity-40 rounded" aria-hidden="true"></span>
-                        <span id="reduce-motion-label" class="relative z-10 color-white orbitron">Reduce Motion: Off</span>
-                    </div>
-                </button>
-            </div>
 
 <!--DESKTOP NAV MENU-->
-<ul>
-    <nav class="hidden md:inline">
-        <div class="items-center flex items-baseline space-x-0">
-            <li>
-                <a href="#facts" aria-label="same-page, facts" class="text-purple-200 focus:bg-gray-300 focus:bg-opacity-30 focus:text-white hover:bg-gray-300 hover:bg-opacity-30 hover:text-white px-3 py-2 rounded-md md:mb-1 md:mt-1">Facts</a>
-            </li>
-
-            <li>
-                <a href="#packages" aria-label="same-page, packages" class="text-purple-200 focus:bg-gray-300 focus:bg-opacity-30 focus:text-white hover:bg-gray-300 hover:bg-opacity-30 hover:text-white px-3 py-2 rounded-md md:mb-1 mt-1">Packages</a>
-            </li>
+        <div class="flex items-center text-center justify-center">
+                <ul class="flex items-center">
+                    <nav class="hidden lg:inline">
+                        <div class="items-center flex mr-10">
+                            <li>
+                                <a href="#facts" aria-label="same-page, facts" class="text-purple-200 focus:bg-gray-300 focus:bg-opacity-30 focus:text-white hover:bg-gray-300 hover:bg-opacity-30 hover:text-white px-3 py-2 rounded-md md:mb-1 md:mt-1">Facts</a>
+                            </li>
                 
-            <li>
-                <a href="#experience" aria-label="same-page, experience" class="text-purple-200 focus:bg-gray-300 focus:bg-opacity-30 focus:text-white hover:bg-gray-300 hover:bg-opacity-30 hover:text-white px-3 py-2 rounded-md md:mb-1 mt-1">Experience</a>
-            </li>
+                            <li>
+                                <a href="#packages" aria-label="same-page, packages" class="text-purple-200 focus:bg-gray-300 focus:bg-opacity-30 focus:text-white hover:bg-gray-300 hover:bg-opacity-30 hover:text-white px-3 py-2 rounded-md md:mb-1 mt-1">Packages</a>
+                            </li>
+                                
+                            <li>
+                                <a href="#experience" aria-label="same-page, experience" class="text-purple-200 focus:bg-gray-300 focus:bg-opacity-30 focus:text-white hover:bg-gray-300 hover:bg-opacity-30 hover:text-white px-3 py-2 rounded-md md:mb-1 mt-1">Experience</a>
+                            </li>
+                                
+                            <li>
+                                <a href="#reviews" aria-label="same-page, reviews" class="text-purple-200 focus:bg-gray-300 focus:bg-opacity-30 focus:text-white hover:bg-gray-300 hover:bg-opacity-30 hover:text-white px-3 py-2 rounded-md md:mb-1 mt-1">Reviews</a>
+                            </li>
+                                
+                            <li>
+                                <a href="#faq" aria-label="same-page, FAQ" class="text-purple-200 focus:bg-gray-300 focus:bg-opacity-30 focus:text-white hover:bg-gray-300 hover:bg-opacity-30 hover:text-white px-3 py-2 rounded-md md:mb-1 mt-1">FAQ</a>
+                            </li>
+                                
+                            <li>
+                                <a href="#contact" aria-label="same-page, contact us" class="text-purple-200 focus:bg-gray-300 focus:bg-opacity-30 focus:text-white hover:bg-gray-300 hover:bg-opacity-30 hover:text-white px-3 py-2 rounded-md md:mb-1 mt-1">Contact</a>
+                            </li>
+                        </div>
+                    </nav>
+                </ul>
                 
-            <li>
-                <a href="#reviews" aria-label="same-page, reviews" class="text-purple-200 focus:bg-gray-300 focus:bg-opacity-30 focus:text-white hover:bg-gray-300 hover:bg-opacity-30 hover:text-white px-3 py-2 rounded-md md:mb-1 mt-1">Reviews</a>
-            </li>
-                
-            <li>
-                <a href="#faq" aria-label="same-page, FAQ" class="text-purple-200 focus:bg-gray-300 focus:bg-opacity-30 focus:text-white hover:bg-gray-300 hover:bg-opacity-30 hover:text-white px-3 py-2 rounded-md md:mb-1 mt-1">FAQ</a>
-            </li>
-                
-            <li>
-                <a href="#contact" aria-label="same-page, contact us" class="text-purple-200 focus:bg-gray-300 focus:bg-opacity-30 focus:text-white hover:bg-gray-300 hover:bg-opacity-30 hover:text-white px-3 py-2 rounded-md md:mb-1 mt-1">Contact</a>
-            </li>
+                    <div class="text-[clamp(0.6rem,3vw,1rem)] hidden lg:inline mx-6 my-4">
+                        <button class="bg-purple-600 hover:bg-purple-800 focus:bg-purple-800 hover:bg-purple-800 text-white px-3 py-3 rounded-md orbitron pulse">
+                            <div class="relative items-center justify-center">
+                                <span class="absolute inset-0 -mx-2 -my-2 bg-black bg-opacity-40 rounded" aria-hidden="true"></span>
+                                <span class="relative z-10 color-white ">
+                                    BOOK NOW <i aria-hidden="True" class="fas fa-rocket ml-1"></i>
+                                </span>
+                            </div>
+                        </button>
+                    </div>
             </div>
-    </nav>
-</ul>
-
-    <div class="hidden md:inline mt-2">
-        <button class="bg-purple-600 hover:bg-purple-800 focus:bg-purple-800 hover:bg-purple-800 text-white px-4 py-2 rounded-md orbitron pulse">
-            <div class="relative flex items-center justify-center">
-                <span class="absolute inset-0 -mx-3 -my-1 bg-black bg-opacity-40 rounded" aria-hidden="true"></span>
-                <span class="relative z-10 color-white">
-                    BOOK NOW <i aria-hidden="True" class="hidden lg:inline fas fa-rocket ml-1"></i>
-                </span>
-            </div>
-        </button>
+        </div>
     </div>
-    </div>
-</div>
-</div>
 </div>
 </header>
 
@@ -112,35 +114,39 @@
                 <div class="absolute bottom-[25%] right-[33%] w-40 h-40 rounded-full bg-pink-500 opacity-20 filter blur-3xl"></div>
 </div>
 
-<!--MAIN CONTENT CONTAINER-->
+<!--MAIN CONTENT - CONTAINER-->
 <div class="w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-[clamp(4rem,8vw,8rem)]">
-    <div class="flex flex-col md:flex-row gap-[clamp(2rem,4vw,4rem)] items-center">
+    <div class="flex flex-col md:flex-row gap-6 md:gap-10 items-center">
 
 <!--TEXT BLOCK-->
-<div class="flex-1 mt-4">
-    <h1 class="text-[clamp(2rem,7vw,5rem)] font-bold mb-[clamp(1rem,2vw,2rem)] text-white orbitron glow-text">
-        DISCOVER <span class="text-purple-300">MERCURY</span>
+<div class="flex-1 mb-[clamp(1rem,2vw,2rem)] leading-none">
+    <h1 class="text-[clamp(2rem,7vw,5rem)] font-bold text-white orbitron glow-text">
+        DISCOVER <span class="space-y-0 text-purple-300">MERCURY</span>
     </h1>
 
-    <p class="text-purple-100 mb-[clamp(1rem,2vw,2rem)] max-w-lg text-[clamp(1rem,2.5vw,1.5rem)] leading-relaxed">
-        Experience the extreme beauty of our solar system's innermost planet. Witness breathtaking sunrises that happen only once every 176 Earth days.
+    <p class="text-purple-100 mb-[clamp(1rem,2vw,2rem)] max-w-md text-[clamp(1rem,2.5vw,1.5rem)] my-4 leading-normal">
+        Experience the extreme beauty of our solar system's
+        innermost planet. Witness breathtaking sunrises that
+        happen only once every 176 Earth days.
     </p>
 
-            <!--MAIN CONTENT BUTTONS-->
-<div class="flex flex-wrap gap-4">
-    <button class="bg-purple-600 focus:bg-purple-800 hover:bg-purple-800 text-white px-8 py-6 rounded-lg font-bold orbitron pulse">
-    <div class="relative flex items-center justify-center">
-        <span class="absolute inset-0 -mx-6 -my-4 bg-black bg-opacity-40 rounded-lg" aria-hidden="true"></span>
-        <span class="relative z-10 color-white orbitron">
-            BOOK YOUR VOYAGE <i aria-hidden="True" class="hidden md:inline fas fa-rocket ml-2"></i>
-        </span>
-    </div>
-    </button>
+<!--MAIN CONTENT - BUTTONS-->
+    <div class="flex flex-wrap gap-[clamp(1rem,2vw,2rem)] mt-[clamp(0.5rem,1vw,1rem)]">
 
-    <button class="border-2 border-purple-600 text-white focus:bg-black focus:bg-opacity-30 hover:bg-black hover:bg-opacity-30 px-[clamp(1rem,2vw,2rem)] py-[clamp(0.75rem,1.5vw,1.25rem)] rounded-lg text-[clamp(1rem,2.5vw,1.25rem)] font-medium">
+    <div class="text-base leading-none">
+        <button class="relative inline-flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white px-[clamp(1rem,2vw,2rem)] py-[clamp(0.95rem,1.6vw,1.35rem)] rounded-lg font-bold orbitron pulse">
+        <span class="absolute inset-y-0 left-0 right-0 inset-0 mx-[0.25rem] my-[0.25rem] bg-black bg-opacity-40 rounded-lg" aria-hidden="true"></span>
+        <span class="text-[clamp(1rem,2.5vw,1.25rem)] relative z-10">
+            BOOK YOUR VOYAGE <i aria-hidden="true" class="hidden lg:inline fas fa-rocket ml-2"></i>
+        </span>
+        </button>
+    </div>
+
+    <button class="px-[clamp(1rem,2vw,2rem)] py-[clamp(0.75rem,1.5vw,1.25rem)] rounded-lg text-[clamp(1rem,2.5vw,1.25rem)] border-2 border-purple-600 text-white focus:bg-black focus:bg-opacity-30 hover:bg-black hover:bg-opacity-30">
         LEARN MORE
     </button>
-</div>
+
+    </div>
 </div>
 
 <!--IMAGE & CLOCK SECTION-->
@@ -148,18 +154,27 @@
     <img src="images/PIA15162.jpg" alt="" class="rounded-2xl shadow-2xl border-4 border-purple-300 transform rotate-6 w-full max-w-[clamp(18rem,40vw,32rem)]">
         <div class="absolute -bottom-[clamp(2rem,4vw,4rem)] right-0 bg-purple-900 p-[clamp(1rem,2vw,2rem)] rounded-xl shadow-lg text-center border border-white">
             <div class="text-yellow-300 orbitron text-[clamp(1rem,2vw,1.25rem)]">NEXT LAUNCH IN:</div>
-                <div class="flex justify-center space-x-0 mt-2">
-                    <div class="countdown-digit px-3 py-1 rounded orbitron text-white">14</div>
-                    <div class="countdown-digit px-3 py-1 rounded orbitron text-white">22</div>
-                    <div class="countdown-digit px-3 py-1 rounded orbitron text-white">08</div>
-                </div>
 
-<div class="flex justify-center space-x-0 mt-1 text-white">
-    <span aria-hidden="true">DAYS</span>
-    <span aria-hidden="true">HRS</span>
-    <span aria-hidden="true">MIN</span>
-    </div>
+<div class="flex justify-center gap-4 mt-2 text-center text-white">
+
+  <div class="flex flex-col items-center">
+    <div class="countdown-digit px-3 py-1 rounded orbitron text-white">14</div>
+    <span aria-hidden="true" class="mt-1">DAYS</span>
+  </div>
+
+  <div class="flex flex-col items-center">
+    <div class="countdown-digit px-3 py-1 rounded orbitron text-white">22</div>
+    <span aria-hidden="true" class="mt-1">HRS</span>
+  </div>
+
+  <div class="flex flex-col items-center">
+    <div class="countdown-digit px-3 py-1 rounded orbitron text-white">08</div>
+    <span aria-hidden="true" class="mt-1">MIN</span>
+  </div>
+
 </div>
+
+
 </div>
 </div>
 </div>
@@ -167,44 +182,39 @@
 
 <!--FUN FACTS SECTION-->
 <section class="bg-gray-900 py-16">
-    <div class="text-center mb-16">
-        <h2 id="facts" tabindex="-1" class="text-[clamp(1rem,7vw,3rem)] font-bold text-white orbitron mb-4">FACTS ABOUT MERCURY</h2>
-        <p class=" text-purple-100 max-w-3xl mx-auto">Learn some facts about our interstellar neighbor!</p>
-    </div>
+  <div class="text-center mb-16">
+    <h2 id="facts" tabindex="-1" class="text-[clamp(1rem,7vw,3rem)] font-bold text-white orbitron mb-4">FACTS ABOUT MERCURY</h2>
+    <p class="text-purple-100 max-w-3xl mx-auto">Learn some facts about our interstellar neighbor!</p>
+  </div>
 
-    <ul class="max-w-7xl mx-auto px-2 sm:px-2 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-                <div class="p-2 rounded-xl bg-gray-800 bg-opacity-50 backdrop-blur-sm">
-                <li>
-                    <p class="text-purple-400  font-bold orbitron">88</p>
-                    <p class="text-gray-300 mt-2">Earth Days in a Mercury Year</p>
-                </li>
-            </div>
-                <div class="p-6 md:p-4 rounded-xl bg-gray-800 bg-opacity-50 backdrop-blur-sm">
-                <li>
-                    <div class="text-purple-400  font-bold orbitron">430°C</div>
-                    <p class="text-gray-200 mt-2 hidden">Daytime Temperature</p>
-                    <p class="text-gray-200 mt-2 md:block">Daytime Temp.</p>
-                </div>
-                </li>
+  <ul class="max-w-7xl mx-auto px-2 sm:px-2 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+    
+    <!--FACT 1-->
+    <li class="p-2 rounded-xl bg-gray-800 bg-opacity-50 backdrop-blur-sm">
+      <p class="text-[clamp(1rem,7vw,2rem)] text-purple-400 font-bold orbitron">88</p>
+      <p class="text-gray-300 mt-2">Earth Days in a Mercury Year</p>
+    </li>
 
-                <div class="p-6 rounded-xl bg-gray-800 bg-opacity-50 backdrop-blur-sm">
-                <li>
-                    <div class="text-purple-400  font-bold orbitron">-180°C</div>
-                    <p class="text-gray-200 mt-2 hidden">Nighttime Temperature</p>
-                    <p class="text-gray-200 mt-2 md:block">Nighttime Temp.</p>
-                </div>
-                </li>
+    <!--FACT 2-->
+    <li class="p-2 rounded-xl bg-gray-800 bg-opacity-50 backdrop-blur-sm">
+      <div class="text-[clamp(1rem,7vw,2rem)] text-purple-400 font-bold orbitron">430°C</div>
+      <p class="text-gray-200 mt-2 break-words">Daytime Temperature</p>
+    </li>
 
-                <div class="p-6 rounded-xl bg-gray-800 bg-opacity-50 backdrop-blur-sm">
-                    <span class="sr-only">3.7 meters per second squared</span>
-                <li>
-                    <div aria-hidden="true" class="text-purple-400  font-bold orbitron">3.7m/s²</div>
-                    <div class="text-gray-300 mt-2">Surface Gravity</div>
-                </li>
-            </div>
-        </div>
-    </ul>
+    <!--FACT 3-->
+    <li class="p-2 rounded-xl bg-gray-800 bg-opacity-50 backdrop-blur-sm">
+      <div class="text-[clamp(1rem,7vw,2rem)] text-purple-400 font-bold orbitron">-180°C</div>
+      <p class="text-gray-200 mt-2 break-words">Nighttime Temperature</p>
+    </li>
+
+    <!--FACT 4-->
+    <li class="p-2 rounded-xl bg-gray-800 bg-opacity-50 backdrop-blur-sm">
+      <span class="sr-only">3.7 meters per second squared</span>
+      <div aria-hidden="true" class="text-[clamp(1rem,7vw,2rem)] text-purple-400 font-bold orbitron">3.7m/s²</div>
+      <div class="text-gray-300 mt-2">Surface Gravity</div>
+    </li>
+
+  </ul>
 </section>
 
 <!--PACKAGES SETTINGS-->
@@ -224,11 +234,11 @@
         <p class="text-center absolute top-4 right-4 bg-purple-600 text-white px-3 py-1 rounded-full font-bold orbitron">POPULAR</p>
     </div>
 
-<!-- Title & Duration -->
+<!--TITLE AND DURATION-->
 <div class="p-6">
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-        <h3 class="font-bold text-white orbitron">Mercury Flyby</h3>
-        <p class="bg-purple-900 text-white font-bold px-3 py-1 rounded-full orbitron text-center sm:text-right">7 DAYS</p>
+        <h3 class="text-[clamp(1.1rem,4vw,1.6rem)] font-bold text-white orbitron">Mercury Flyby</h3>
+        <p class="bg-purple-900 text-white font-bold px-4 py-1 rounded-full orbitron">7 DAYS</p>
     </div>
 
 <!--DESCRIPTION-->
@@ -247,7 +257,7 @@
         <p class="text-white ml-2">4.7 out of 5.0 stars (128 reviews)</p>
     </div>
 
-    <!-- Pricing -->
+<!--PRICING-->
     <div class="space-y-1">
         <div class="flex flex-wrap">
             <p class="text-gray-200 line-through">
@@ -259,14 +269,14 @@
         
         <p class="text-green-400 font-bold">Save $50,000</p>
         <div class="flex flex-wrap">
-            <p class="font-bold text-white">$249,999</p>
+            <p class="font-bold text-3xl text-white">$249,999</p>
             <p class="ml-2 text-gray-200">per person</p>
         </div>
     </div>
 
     <hr aria-hidden="true" class="my-4 border-gray-200">
 
-    <!--PACKAGE INCLUDES-->
+<!--PACKAGE INCLUDES-->
     <p class="text-white text-center font-bold">Package Includes</p>
     <ul class="mt-2  text-center items-center grid grid-cols-1 sm:grid-cols-2 gap-3 font-bold text-purple-200">
         <li class="flex flex-col items-center"><i aria-hidden="true" class="fas fa-space-shuttle mr-2"></i> 
@@ -283,7 +293,7 @@
             <hr class="sm:hidden">
     </ul>
     
-            <!--BOOK BUTTON-->
+<!--BOOK BUTTON-->
             <button class="w-full mt-3 bg-purple-600 hover:bg-purple-800 focus:bg-purple-800 text-white py-3 rounded-lg font-bold orbitron relative overflow-hidden">
                 <span aria-hidden="true" class="absolute inset-0 mx-1 my-1 bg-black bg-opacity-40 rounded"></span>
                 <span class="relative sm:inline flex flex-col z-10 items-center text-center justify-center leading-tight">
@@ -296,26 +306,26 @@
     </div>
 </div>
 
-<!-- Package 2 -->
+<!--PACKAGE 2-->
 <div class="bg-gray-900 bg-opacity-80 rounded-2xl overflow-hidden shadow-xl border-2 border-purple-600">
     <div class="relative">
         <img src="images/bubble.jpg" alt="" class="w-full h-64 object-cover">
         <p class="text-center absolute top-4 right-4 bg-yellow-600 text-white px-3 py-1 rounded-full font-bold orbitron">BEST VALUE</p>
     </div>
 
+<!--TITLE AND DURATION-->
     <div class="p-6">
-        <!-- Title & Duration -->
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-            <h3 class="font-bold text-white orbitron">Mercury Landing</h3>
-            <p class="bg-purple-900 text-white font-bold px-3 py-1 rounded-full orbitron text-center sm:text-right">14 DAYS</p>
+            <h3 class="text-[clamp(1.1rem,4vw,1.6rem)] font-bold text-white orbitron">Mercury Landing</h3>
+            <p class="bg-purple-900 text-white font-bold px-3 py-1 rounded-full orbitron">14 DAYS</p>
         </div>
 
-        <!-- Description -->
+<!--DESCRIPTION-->
         <p class="text-gray-100 mt-3">
             Walk on Mercury's surface in our state-of-the-art thermal suits and explore ancient craters.
         </p>
 
-        <!-- Rating -->
+<!--RATING-->
         <div class="mt-6">
             <div class="flex flex-wrap items-center text-yellow-400 mb-2">
                 <i aria-hidden="true" class="fas fa-star"></i>
@@ -326,7 +336,7 @@
                 <p class="text-white ml-2">5.0 out of 5.0 stars (64 reviews)</p>
             </div>
 
-            <!-- Pricing -->
+<!--PRICING-->
             <div class="space-y-1">
                 <div class="flex flex-wrap">
                     <p class="text-gray-200 line-through">
@@ -338,14 +348,14 @@
 
                 <p class="text-green-400 font-bold">Save $100,000</p>
                 <div class="flex flex-wrap">
-                    <p class="font-bold text-white">$499,999</p>
+                    <p class="font-bold text-3xl text-white">$499,999</p>
                     <p class="ml-2 text-gray-200">per person</p>
                 </div>
             </div>
 
             <hr aria-hidden="true" class="my-4 border-gray-200">
 
-            <!--PACKAGE INCLUDES-->
+<!--PACKAGE INCLUDES-->
             <p class="text-white text-center font-bold">Package Includes</p>
             <ul class="mt-2 text-center items-center grid grid-cols-1 sm:grid-cols-2 gap-3 font-bold text-purple-200">
                 <li class="flex flex-col items-center"><i aria-hidden="true" class="fas fa-space-shuttle mr-2"></i><span>Blue Origin</span></li>
@@ -358,7 +368,7 @@
                 <hr class="sm:hidden">
             </ul>
 
-            <!--BOOK BUTTON-->
+<!--BOOK BUTTON-->
             <button class="w-full mt-3 bg-purple-600 hover:bg-purple-800 focus:bg-purple-800 text-white py-3 rounded-lg font-bold orbitron relative overflow-hidden">
                 <span aria-hidden="true" class="absolute inset-0 mx-1 my-1 bg-black bg-opacity-40 rounded"></span>
                 <span class="relative sm:inline flex flex-col z-10 items-center text-center justify-center leading-tight">
@@ -371,26 +381,26 @@
     </div>
 </div>
 
-<!-- Package 3 -->
+<!--PACKAGE 3-->
 <div class="bg-gray-900 bg-opacity-80 rounded-2xl overflow-hidden shadow-xl border-2 border-purple-600">
     <div class="relative">
         <img src="images/extra-solar.jpg" alt="" class="w-full h-64 object-cover">
         <p class="text-center absolute top-4 right-4 bg-pink-600 text-white px-3 py-1 rounded-full font-bold orbitron">LUXURY</p>
     </div>
 
+<!--TITLE AND DURATION-->
     <div class="p-6">
-        <!-- Title & Duration -->
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-            <h3 class="font-bold text-white orbitron">Grand Mercury Tour</h3>
-            <p class="bg-purple-900 text-white font-bold px-3 py-1 rounded-full orbitron text-center sm:text-right">30 DAYS</p>
+            <h3 class="text-[clamp(1.1rem,4vw,1.6rem)] font-bold text-white orbitron">Grand Mercury Tour</h3>
+            <p class="bg-purple-900 text-white font-bold px-3 py-1 rounded-full orbitron">30 DAYS</p>
         </div>
 
-        <!-- Description -->
+<!--DESCRIPTION-->
         <p class="text-gray-100 mt-3">
             The ultimate Mercury experience with extended stays at multiple locations across the planet.
         </p>
 
-        <!-- Rating -->
+<!--RATING-->
         <div class="mt-6">
             <div class="flex flex-wrap items-center text-yellow-400 mb-2">
                 <i aria-hidden="true" class="fas fa-star"></i>
@@ -401,17 +411,17 @@
                 <p class="text-white ml-2">5.0 out of 5.0 stars (32 reviews)</p>
             </div>
 
-            <!-- Pricing -->
+<!--PRICING-->
             <div class="space-y-1">
-                <div class="flex flex-wrap">
-                    <p class="font-bold text-white">$999,999</p>
+                <div class="flex flex-wrap pb-12">
+                    <p class="font-bold text-3xl text-white">$999,999</p>
                     <p class="ml-2 text-gray-200">per 2 persons</p>
                 </div>
             </div>
 
-            <hr aria-hidden="true" class="my-4 border-gray-200">
+            <hr aria-hidden="true" class="my-5 border-gray-200">
 
-            <!--PACKAGE INCLUDES-->
+<!--PACKAGE INCLUDES-->
             <p class="text-white text-center font-bold">Package Includes</p>
             <ul class="mt-2 text-center items-center grid grid-cols-1 sm:grid-cols-2 gap-3 font-bold text-purple-200">
                 <li class="flex flex-col items-center"><i aria-hidden="true" class="fas fa-space-shuttle mr-2"></i><span>Virgin Galactic</span></li>
@@ -424,7 +434,7 @@
                 <hr class="sm:hidden">
             </ul>
 
-            <!--BOOK BUTTON-->
+<!--BOOK BUTTON-->
             <button class="w-full mt-3 bg-purple-600 hover:bg-purple-800 focus:bg-purple-800 text-white py-3 rounded-lg font-bold orbitron relative overflow-hidden">
                 <span aria-hidden="true" class="absolute inset-0 mx-1 my-1 bg-black bg-opacity-40 rounded"></span>
                 <span class="relative sm:inline flex flex-col z-10 items-center text-center justify-center leading-tight">
@@ -439,15 +449,15 @@
 </div>
 
 <!--VIEW ALL PACKAGES-->
-<div class="mt-16 px-4 w-full flex justify-center">
-<div class="inline-block bg-black bg-opacity-40 rounded-2xl p-4 shadow-lg max-w-full">
+<div class="mt-16 w-full flex justify-center">
+<div class="inline-block bg-black bg-opacity-40 rounded-2xl p-3 shadow-lg max-w-full">
     <button aria-expanded="false" data-expandable="more-packages"
-    class="w-full sm:w-auto border-2 border-purple-600 text-white hover:bg-black hover:bg-opacity-30 focus:bg-black focus:bg-opacity-30 px-4 py-3 rounded-lg font-bold orbitron text-sm sm:text-base leading-tight transition-colors duration-200 break-words text-center">
-    VIEW ALL PACKAGES <i aria-hidden="true" class="fas fa-chevron-down ml-2"></i>
+    class="toggle-button expandable-content w-full sm:w-auto border-2 border-purple-600 text-white hover:bg-black hover:bg-opacity-30 focus:bg-black focus:bg-opacity-30 px-10 py-3 rounded-lg font-bold orbitron text-sm sm:text-base leading-tight transition-colors duration-200 break-words text-center">
+    VIEW ALL PACKAGES <i aria-hidden="true" class="button-chevron fas fa-chevron-down ml-2"></i>
     </button>
 
     <div aria-hidden="true" class="more-packages hidden pt-4 text-gray-200 text-center">
-    <p class="orbitron font-bold">MORE PACKAGES LANDING SOON</p>
+        <p class="orbitron font-bold">MORE PACKAGES LANDING SOON</p>
     </div>
 </div>
 </div>
@@ -455,71 +465,71 @@
 </section>
 
 <!--EXPERIENCE SECTION-->
-<section id="experience" tabindex="-1" class="py-20 bg-gray-900 max-w-full overflow-hidden">
-    <div class="max-w-7xl mx-auto px-4 sm:px-4 lg:px-8">
+<section id="experience" tabindex="-1" class="py-20 bg-gray-900 max-w-full">
+    <div class="max-w-7xl mx-auto px-5 sm:px-5 lg:px-8">
         <div class="text-center mb-16">
             <h2 class="text-[clamp(1rem,7vw,3rem)] font-bold text-white orbitron mb-4">THE MERCURY EXPERIENCE</h2>
             <p class="text-purple-100 max-w-3xl mx-auto">What makes a journey to Mercury truly unforgettable</p>
         </div>
 
 <div class="w-full px-4 md:px-8 xl:px-12">
-<ul class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-center">
+<ul class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
     <li>
-        <div class="bg-gray-800 rounded-xl p-8 max-w-full overflow-hidden">
+        <div class="bg-gray-800 rounded-xl p-8 max-w-full overflow-hidden h-full flex flex-col justify-between">
             <div class="text-purple-400  mb-4">
-                <i aria-hidden="True" class="fas fa-sun"></i>
+                <i aria-hidden="True" class="text-[clamp(1.8rem,7vw,2rem)] block sm:inline fas fa-sun"></i>
             </div>
-            <h3 class="font-bold text-white mb-3">Double Sunrises</h3>
+            <h3 class="font-bold text-white text-[clamp(1rem,7vw,1.6rem)]">Double Sunrises</h3>
             <p class="text-gray-300">Witness the rare phenomenon where the sun appears to rise, set, and rise again due to Mercury's unique orbit.</p>
         </div>
     </li>
 
     <li>
-        <div class="bg-gray-800 rounded-xl p-8 max-w-full overflow-hidden">
+        <div class="bg-gray-800 rounded-xl p-8 max-w-full overflow-hidden h-full flex flex-col justify-between">
             <div class="text-purple-400  mb-4">
-                <i aria-hidden="True" class="fas fa-meteor"></i>
+                <i aria-hidden="True" class="text-[clamp(1.8rem,7vw,2rem)] block sm:inline fas fa-meteor"></i>
             </div>
-            <h3 class="font-bold text-white mb-3">Crater Exploration</h3>
+            <h3 class="font-bold text-white text-[clamp(1rem,7vw,1.6rem)]">Crater Exploration</h3>
             <p class="text-gray-300">Explore ancient impact craters with our guided tours, including the massive Caloris Basin.</p>
         </div>
     </li>
 
     <li>
-        <div class="bg-gray-800 rounded-xl p-8 max-w-full overflow-hidden">
+        <div class="bg-gray-800 rounded-xl p-8 max-w-full overflow-hidden h-full flex flex-col justify-between">
             <div class="text-purple-400  mb-4">
-                <i aria-hidden="True" class="fa-solid fa-user-astronaut"></i>
+                <i aria-hidden="True" class="text-[clamp(1.8rem,7vw,2rem)] block sm:inline fa-solid fa-user-astronaut"></i>
             </div>
-            <h3 class="font-bold text-white mb-3">Low-Gravity Activities</h3>
+            <h3 class="font-bold text-white text-[clamp(1rem,7vw,1.6rem)]">Low-Gravity Activities</h3>
             <p class="text-gray-300">Experience Mercury's 38% Earth gravity with our specially designed activities and sports.</p>
         </div>
     </li>
         
     <li>
-        <div class="bg-gray-800 rounded-xl p-8 max-w-full overflow-hidden">
+        <div class="bg-gray-800 rounded-xl p-8 max-w-full overflow-hidden h-full flex flex-col justify-between">
             <div class="text-purple-400  mb-4">
-                <i aria-hidden="True" class="fas fa-temperature-high"></i>
+                <i aria-hidden="True" class="text-[clamp(1.8rem,7vw,2rem)] block sm:inline fas fa-temperature-high"></i>
             </div>
-            <h3 class="font-bold text-white mb-3">Thermal Suit Experience</h3>
+            <h3 class="font-bold text-white text-[clamp(1rem,7vw,1.6rem)]">Thermal Suit Experience</h3>
             <p class="text-gray-300">Our state-of-the-art thermal suits allow you to safely experience Mercury's extreme temperatures.</p>
         </div>
     </li>
         
     <li>
-        <div class="bg-gray-800 rounded-xl p-8 max-w-full overflow-hidden">
+        <div class="bg-gray-800 rounded-xl p-8 max-w-full overflow-hidden h-full flex flex-col justify-between">
             <div class="text-purple-400  mb-4">
-                <i aria-hidden="True" class="fas fa-star"></i>
+                <i aria-hidden="True" class="text-[clamp(1.8rem,7vw,2rem)] block sm:inline fas fa-star"></i>
             </div>
-            <h3 class="font-bold text-white mb-3">Stellar Observations</h3>
+            <h3 class="font-bold text-white text-[clamp(1rem,7vw,1.6rem)]">Stellar Observations</h3>
             <p class="text-gray-300">With no atmosphere to speak of, enjoy the clearest views of the cosmos ever seen by human eyes.</p>
         </div>
     </li>
         
     <li>
-        <div class="bg-gray-800 rounded-xl p-8 max-w-full overflow-hidden">
+        <div class="bg-gray-800 rounded-xl p-8 max-w-full overflow-hidden h-full flex flex-col justify-between">
             <div class="text-purple-400  mb-4">
-                <i aria-hidden="True" class="fas fa-flag"></i>
+                <i aria-hidden="True" class="text-[clamp(1.8rem,7vw,2rem)] block sm:inline fas fa-flag"></i>
             </div>
-            <h3 class="font-bold text-white mb-3">Historic Landing Sites</h3>
+            <h3 class="font-bold text-white text-[clamp(1rem,7vw,1.6rem)]">Historic Landing Sites</h3>
             <p class="text-gray-300">Visit the landing sites of historic missions like MESSENGER and BepiColombo.</p>
         </div>
     </li>
@@ -538,13 +548,13 @@
             </div>
         </div>
             
-<div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 gap-8">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
     <div class="bg-gray-900 bg-opacity-85 rounded-xl p-8">
-        <div class="flex flex-col text-center items-center mb-4">
+        <div class="text-left items-left mb-4">
             <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sarah J. - Headshot" class="w-12 h-12 rounded-full border-2 border-purple-400">
-            <div class="ml-4">
-                <h3 class="text-white font-bold">Sarah J.</h3>
-                <div class="flex text-yellow-400 ">
+            <div>
+                <h3 class="flex text-white font-bold">Sarah J.</h3>
+                <div class="text-yellow-400 ">
                     <p class="sr-only">5.0 out of 5.0 stars</p>
                     <i aria-hidden="True" class="fas fa-star"></i>
                     <i aria-hidden="True" class="fas fa-star"></i>
@@ -558,11 +568,11 @@
     </div>
 
 <div class="bg-gray-900 bg-opacity-85 rounded-xl p-8">
-    <div class="flex flex-col text-center items-center mb-4">
+    <div class="text-left items-left mb-4">
         <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Michael T. - Headshot" class="w-12 h-12 rounded-full border-2 border-purple-400">
-        <div class="ml-4">
+        <div>
             <h3 class="text-white font-bold">Michael T.</h3>
-            <div class="flex text-yellow-400 ">
+            <div class="text-yellow-400 ">
                 <p class="sr-only">4.5 out of 5.0 stars</p>
                 <i aria-hidden="True" class="fas fa-star"></i>
                 <i aria-hidden="True" class="fas fa-star"></i>
@@ -576,9 +586,9 @@
 </div>
 
 <div class="bg-gray-900 bg-opacity-85 rounded-xl p-8">
-    <div class="flex flex-col text-center items-center mb-4">
+    <div class="text-left items-left mb-4">
         <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Priya K. - headshot" class="w-12 h-12 rounded-full border-2 border-purple-400">
-        <div class="ml-4">
+        <div>
             <h3 class="text-white font-bold">Priya K.</h3>
             <div class="flex text-yellow-400 ">
                 <i aria-hidden="True" class="fas fa-star"></i>
@@ -595,7 +605,7 @@
 </div>
 </section>
 
-<!-- FAQ Section -->
+<!--FAQ Section-->
 <section id="faq" class="py-20 bg-gray-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
@@ -606,9 +616,9 @@
 <div class="max-w-3xl mx-auto">
     <div class="space-y-4">
         <div class="bg-gray-800 rounded-xl">
-            <button aria-expanded="false" data-expandable="faq-1" class="expandable-content w-full flex justify-between items-center p-6 text-left focus:bg-gray-900 focus:bg-opacity-80 hover:bg-gray-900 hover:bg-opacity-80 border border-transparent hover:border-purple-400 rounded-lg active:border">
-                <span class=" font-medium text-white">Is it safe to travel to Mercury?</span>
-                <i aria-hidden="True" class="fas fa-chevron-down text-purple-400 transition-transform duration-300"></i>
+            <button aria-expanded="false" data-expandable="faq-1" class="toggle-button expandable-content w-full flex justify-between items-center p-6 text-left focus:bg-gray-900 focus:bg-opacity-80 hover:bg-gray-900 hover:bg-opacity-80 border border-transparent hover:border-purple-400 rounded-lg active:border">
+                <span class="text-[clamp(1rem,4vw,1.4rem)] text-white">Is it safe to travel to Mercury?</span>
+                <i aria-hidden="True" class="button-chevron fas fa-chevron-down text-purple-400 transition-transform duration-300"></i>
             </button>
             <div aria-hidden="false" class="faq-1 px-6 pb-6 text-gray-200 border border-purple-400 rounded-lg mt-1 hidden">
                 <p class="mt-4">Absolutely! Our spacecraft are equipped with the latest radiation shielding and thermal protection systems. All travelers undergo extensive training and are provided with advanced thermal suits that maintain comfortable temperatures regardless of Mercury's extreme surface conditions.</p>
@@ -616,9 +626,9 @@
         </div>
 
 <div class="bg-gray-800 rounded-xl">
-    <button aria-expanded="false" data-expandable="faq-2" class="w-full flex justify-between items-center p-6 text-left focus:bg-gray-900 focus:bg-opacity-80 hover:bg-gray-900 hover:bg-opacity-80 border border-transparent hover:border-purple-400 rounded-lg active:border">
-        <span class=" font-medium text-white">How long does the journey take?</span>
-        <i aria-hidden="true" class="fas fa-chevron-down text-purple-400 transition-transform duration-300"></i>
+    <button aria-expanded="false" data-expandable="faq-2" class="toggle-button expandable-content w-full flex justify-between items-center p-6 text-left focus:bg-gray-900 focus:bg-opacity-80 hover:bg-gray-900 hover:bg-opacity-80 border border-transparent hover:border-purple-400 rounded-lg active:border">
+        <span class="text-[clamp(1rem,4vw,1.4rem)] text-white">How long does the journey take?</span>
+        <i aria-hidden="true" class="button-chevron fas fa-chevron-down text-purple-400 transition-transform duration-300"></i>
     </button>
     <div aria-hidden="false" class="faq-2 px-6 pb-6 text-gray-300 border border-purple-400 rounded-lg mt-1 hidden">
         <p class="mt-4">The duration depends on planetary alignment, but typically our high-speed transports make the journey in about 3 months. We use gravity assists from Venus to optimize fuel efficiency and travel time. During transit, you'll enjoy luxury accommodations and various entertainment options.</p>
@@ -626,9 +636,9 @@
 </div>
 
 <div class="bg-gray-800 rounded-xl">
-    <button aria-expanded="false" data-expandable="faq-3" class="w-full flex justify-between items-center p-6 text-left focus:bg-gray-900 focus:bg-opacity-80 hover:bg-gray-900 hover:bg-opacity-80 border border-transparent hover:border-purple-400 rounded-lg active:border">
-        <span class=" font-medium text-white">What's the best time of year to visit?</span>
-        <i aria-hidden="true" class="fas fa-chevron-down text-purple-400 transition-transform duration-300"></i>
+    <button aria-expanded="false" data-expandable="faq-3" class="toggle-button expandable-content w-full flex justify-between items-center p-6 text-left focus:bg-gray-900 focus:bg-opacity-80 hover:bg-gray-900 hover:bg-opacity-80 border border-transparent hover:border-purple-400 rounded-lg active:border">
+        <span class="text-[clamp(1rem,4vw,1.4rem)] text-white">What's the best time of year to visit?</span>
+        <i aria-hidden="true" class="button-chevron fas fa-chevron-down text-purple-400 transition-transform duration-300"></i>
     </button>
     <div aria-hidden="true" class="faq-3 px-6 pb-6 text-gray-300 border border-purple-400 rounded-lg mt-1 hidden">
         <p class="mt-4">Mercury doesn't have seasons like Earth, but we schedule our tours during optimal orbital positions when surface temperatures are most manageable (relatively speaking) and solar activity is predictable. Our launch calendar is designed to maximize your experience.</p>
@@ -636,9 +646,9 @@
 </div>
 
 <div class="bg-gray-800 rounded-xl">
-    <button aria-expanded="false" data-expandable="faq-4" class="w-full flex justify-between items-center p-6 text-left focus:bg-gray-900 focus:bg-opacity-80 hover:bg-gray-900 hover:bg-opacity-80 border border-transparent hover:border-purple-400 rounded-lg active:border">
-        <span class=" font-medium text-white">What should I pack?</span>
-        <i aria-hidden="true" class="fas fa-chevron-down text-purple-400 transition-transform duration-300"></i>
+    <button aria-expanded="false" data-expandable="faq-4" class="toggle-button expandable-content w-full flex justify-between items-center p-6 text-left focus:bg-gray-900 focus:bg-opacity-80 hover:bg-gray-900 hover:bg-opacity-80 border border-transparent hover:border-purple-400 rounded-lg active:border">
+        <span class="text-[clamp(1rem,4vw,1.4rem)] text-white">What should I pack?</span>
+        <i aria-hidden="true" class="button-chevron fas fa-chevron-down text-purple-400 transition-transform duration-300"></i>
     </button>
     <div aria-hidden="true" class="faq-4 px-6 pb-6 text-gray-300 border border-purple-400 rounded-lg mt-1 hidden">
         <p class="mt-4">Very little! All necessary equipment including thermal suits, breathing apparatus, and safety gear is provided. You'll want to bring personal items like digital entertainment (we provide VR headsets), comfortable clothing for the spacecraft, and any personal medications. A full packing list is provided after booking.</p>
@@ -646,9 +656,9 @@
 </div>
 
     <div class="bg-gray-800 rounded-xl">
-        <button aria-expanded="false" data-expandable="faq-5" class="w-full flex justify-between items-center p-6 text-left focus:bg-gray-900 focus:bg-opacity-80 hover:bg-gray-900 hover:bg-opacity-80 border border-transparent hover:border-purple-400 rounded-lg active:border">
-            <span class=" font-medium text-white">Are there physical requirements?</span>
-            <i aria-hidden="true" class="fas fa-chevron-down text-purple-400 transition-transform duration-300"></i>
+        <button aria-expanded="false" data-expandable="faq-5" class="toggle-button expandable-content w-full flex justify-between items-center p-6 text-left focus:bg-gray-900 focus:bg-opacity-80 hover:bg-gray-900 hover:bg-opacity-80 border border-transparent hover:border-purple-400 rounded-lg active:border">
+            <span class="text-[clamp(1rem,4vw,1.4rem)] text-white">Are there physical requirements?</span>
+            <i aria-hidden="true" class="button-chevron fas fa-chevron-down text-purple-400 transition-transform duration-300"></i>
         </button>
         <div aria-hidden="true" class="faq-5 px-6 pb-6 text-gray-300 border border-purple-400 rounded-lg mt-1 hidden">
             <p class="mt-4">Travelers must pass a comprehensive medical examination to ensure they can handle the rigors of space travel. While Mercury's gravity is only 38% of Earth's, the journey requires good cardiovascular health. We accommodate a range of physical abilities - contact us to discuss any specific concerns.</p>
@@ -657,8 +667,8 @@
 </div>
 
 <div class="text-center mt-12">
-    <button aria-expanded="true" data-expandable="view-all-faq" class="border-2 border-purple-400 text-white hover:bg-purple-900 hover:bg-opacity-30 px-8 py-3 rounded-lg text-lg font-medium">
-        VIEW ALL FAQS <i aria-hidden="true" class="fas fa-chevron-down ml-2"></i>
+    <button aria-expanded="true" data-expandable="view-all-faq" class="toggle-button expandable-content border-2 border-purple-400 text-white hover:bg-purple-900 hover:bg-opacity-30 px-8 py-3 rounded-lg text-lg font-medium">
+        VIEW ALL FAQS <i aria-hidden="true" class="button-chevron fas fa-chevron-down ml-2"></i>
     </button>
 
         <div aria-hidden="false" class="view-all-faq bg-gray-600 py-5 mt-4 rounded-lg text-white hidden">
@@ -669,10 +679,10 @@
 </div>
 </section>
 
-<!--QUICK CONTACT SECTION-->
-<section class="py-20 hero-gradient">
+<!--READY FOR THE JOURNEY OF A LIFETIME?-->
+<section class="py-20 hero-gradient-travel">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-    <div class="bg-black bg-opacity-40 px-1 py-8">
+    <div class="bg-black bg-opacity-40 px-1 py-8 rounded-xl">
         <h2 class="text-[clamp(1rem,7vw,3rem)] font-bold text-white orbitron mb-6">READY FOR THE JOURNEY OF A LIFETIME?</h2>
         <p class=" text-purple-100 max-w-3xl mx-auto mb-10">Join the select few who have experienced the wonders of Mercury firsthand.</p>
             
@@ -685,9 +695,9 @@
         BOOK YOUR VOYAGE <i aria-hidden="true" class="hidden lg:inline fas fa-rocket ml-2 mt-1"></i>
     </button>
 
-    <button class="relative flex flex-col px-2 break-all border-2 border-purple-600 text-white hover:bg-gray-900 hover:bg-opacity-30 rounded-lg">
+    <button class="relative flex px-6 py-4 border-2 border-purple-600 text-white hover:bg-gray-900 hover:bg-opacity-30 rounded-lg">
         SPEAK TO A CONSULTANT
-        <i aria-hidden="true" class="relative flex hidden lg:block fas fa-headset"></i>
+        <i aria-hidden="true" class="ml-2 mt-1 relative flex hidden lg:block fas fa-headset"></i>
     </button>
 </div>
 </div>
@@ -695,31 +705,31 @@
 </section>
 
 <!--CONTACT INFORMATION-->
-<section id="contact" class="py-20 bg-gray-900 font-serif">
+<section id="contact" class="py-10 bg-gray-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
-                <h2 class="text-[clamp(1rem,7vw,3rem)] font-bold text-white mb-6">CONTACT US</h2>
+                <h2 class="text-[clamp(1rem,7vw,3rem)] font-bold text-white mb-6 orbitron">CONTACT US</h2>
                 <p class="text-purple-100 mb-8">Have questions about traveling to Mercury? Our interplanetary travel consultants are standing by.</p>
 
 <div class="space-y-6">
     <div class="flex items-start">
         <div class="text-purple-400  mr-4 mt-1">
-            <i aria-hidden="true" class="fas fa-map-marker-alt"></i>
+            <i aria-hidden="true" class="text-[clamp(1rem,7vw,2rem)] block sm:inline fas fa-map-marker-alt"></i>
         </div>
         <div>
-            <h3 class="text-white font-bold">Headquarters</h3>
+            <h3 class="text-white font-bold orbitron">Headquarters</h3>
             <p class="text-gray-300">Orbital Office Complex, Lagrange Point 1</p>
         </div>
     </div>
 
 <div class="flex items-start">
     <div class="text-purple-400  mr-4 mt-1">
-        <i aria-hidden="true" class="fas fa-phone-alt"></i>
+        <i aria-hidden="true" class="text-[clamp(1rem,7vw,2rem)] block sm:inline fas fa-phone-alt"></i>
     </div>
 
     <div class="flex flex-col">
-        <h3 class="text-white font-bold">Contact</h3>
+        <h3 class="text-white font-bold orbitron">By Phone</h3>
         
         <div class="flex flex-col">
             <p class="font-bold">NATIONAL NUMBER</p>
@@ -744,10 +754,10 @@
 
         <div class="flex items-start">
             <div class="text-purple-400  mr-4 mt-1">
-                <i aria-hidden="true" class="fas fa-envelope"></i>
+                <i aria-hidden="true" class="text-[clamp(1rem,7vw,2rem)] block sm:inline fas fa-envelope"></i>
             </div>
             <div>
-                <h3 class="text-white font-bold">Email</h3>
+                <h3 class="text-white font-bold orbitron">By Email</h3>
                 <a href="#" class="break-all focus:underline hover:underline text-gray-200">bookings@mercuryvoyages.space
                     <span class="sr-only">This link opens a new window.</span>
                 </a>
@@ -762,29 +772,29 @@
     <form id="contactForm" novalidate>
         <div>
             <label for="name" class="block flex justify-between text-white mb-2">Your Name: First and Last</label>
-            <input aria-autocomplete="name" autocomplete="name" type="text" id="name" name="name" required
+            <input aria-describedby="name-required" autocomplete="name" type="text" id="name" name="name" required
                 class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-purple-600">
             <p id="name-error" class="text-red-400 text-sm mt-1 hidden">Please enter your full name.</p>
         </div>
-            <p class="font-bold mb-6 text-white">(required)</p>
+            <p aria-hidden="true" id="name-required" class="font-bold mb-6 text-white">(required)</p>
 
 <div>
     <label for="email" class="block flex break-all justify-between text-white mb-2">Email Address: user@example.com</label>
-    <input aria-autocomplete="email" autocomplete="email" type="email" id="email" name="email" required
+    <input aria-describedby="email-required" aria-autocomplete="email" autocomplete="email" type="email" id="email" name="email" required
         class="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-purple-600">
     <p id="email-error" class="text-red-400 text-sm mt-1 hidden">Please enter a valid email address.</p>
 </div>
-    <p class="font-bold mb-6 text-white">(required)</p>
+    <p aria-hidden="true" id="email-required" class="font-bold mb-6 text-white">(required)</p>
 
 <div class="mb-6">
     <label for="interest" class="block flex justify-between text-white mb-2">
         Package Interest
     </label>
 
-<div class="relative w-full max-w-md">
+<div class="select-wrapper relative w-full max-w-md">
     <label for="interest" class="sr-only">Interest</label>
 
-<select id="interest" name="interest" required class="appearance-none w-full px-4 py-3 pr-10 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-purple-600">
+<select id="interest" aria-describedby="package-required" name="interest" required class="appearance-none w-full px-4 py-3 pr-10 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-purple-600">
     <option value="" disabled selected>Select one</option>
     <option>Mercury Flyby</option>
     <option>Mercury Landing</option>
@@ -793,11 +803,11 @@
 </select>
 
 <div class="pointer-events-none absolute inset-y-0 right-4 bottom-8 flex items-center text-white">
-    <i aria-hidden="true" class="fas fa-chevron-down text-base sm:text-lg md:text-xl"></i>
+    <i aria-hidden="true" class="select-chevron fas fa-chevron-down text-base sm:text-lg md:text-xl"></i>
 </div>
 
             <p id="interest-error" class="text-red-400 text-sm mt-1 hidden">Please select a package option.</p>
-        <p class="font-bold mt-2 text-white">(required)</p>
+        <p id="package-required" class="font-bold mt-2 text-white">(required)</p>
     </div>
 </div>
 
@@ -904,14 +914,57 @@ so sr-users know exactly what it is.-->
 <!--SOCIAL MEDIA-->
 <div>
     <h2 class="text-white font-bold mb-4">Social Media</h2>
-<ul>
-    <div class="flex space-x-1">
-        <li><a href="#" aria-label="Discover Mercury on Facebook" class="text-gray-100 focus:text-white focus:bg-gray-700 hover:bg-gray-700 hover:text-white  p-2 rounded-lg border hover:border-purple-400"><i aria-hidden="true" class="fab fa-facebook-f"></i></a></li>
-        <li><a href="#" aria-label="Discover Mercury on Twitter" class="text-gray-100 focus:text-white focus:bg-gray-700 hover:bg-gray-700 hover:text-white  p-2 rounded-lg border hover:border-purple-400"><i aria-hidden="true" class="fab fa-twitter"></i></a></li>
-        <li><a href="#" aria-label="Discover Mercury on Instagram" class="text-gray-100 focus:text-white focus:bg-gray-700 hover:bg-gray-700 hover:text-white  p-2 rounded-lg border hover:border-purple-400"><i aria-hidden="true" class="fab fa-instagram"></i></a></li>
-        <li><a href="#" aria-label="Discover Mercury on LinkedIn" class="text-gray-100 focus:text-white focus:bg-gray-700 hover:bg-gray-700 hover:text-white  p-2 rounded-lg border hover:border-purple-400"><i aria-hidden="true" class="fab fa-linkedin-in"></i></a></li>
-        <li><a href="#" aria-label="Discover Mercury on TikTok" class="text-gray-100 focus:text-white focus:bg-gray-700 hover:bg-gray-700 hover:text-white  p-2 rounded-lg border hover:border-purple-400"><i aria-hidden="true" class="fab fa-tiktok"></i></a></li>
+
+<ul class="flex flex-wrap gap-3">
+  <!-- Facebook -->
+  <li>
+    <div class="p-[2px] rounded-lg bg-gradient-to-r from-blue-600 via-blue-400 to-blue-600 hover:bg-gradient-to-r focus:from-purple-600 focus:via-purple-600 focus:to-purple-600 hover:bg-gradient-to-r hover:from-purple-600 hover:via-purple-600 hover:to-purple-600 transition-all duration-300">
+      <a href="#" aria-label="Discover Mercury on Facebook"
+         class="w-8 h-10 flex items-center justify-center block bg-gray-800 p-2 rounded-lg text-gray-100 hover:text-white focus:text-white focus:bg-gray-700 hover:bg-gray-700">
+        <i aria-hidden="true" class="fab fa-facebook-f"></i>
+      </a>
     </div>
+  </li>
+
+  <!-- Twitter -->
+  <li>
+    <div class="p-[2px] rounded-lg bg-gradient-to-r from-sky-400 via-blue-500 to-sky-400 hover:bg-gradient-to-r focus:from-purple-600 focus:via-purple-600 focus:to-purple-600 hover:bg-gradient-to-r hover:from-purple-600 hover:via-purple-600 hover:to-purple-600 transition-all duration-300">
+      <a href="#" aria-label="Discover Mercury on Twitter"
+         class="w-8 h-10 flex items-center justify-center block bg-gray-800 p-2 rounded-lg text-gray-100 hover:text-white focus:text-white focus:bg-gray-700 hover:bg-gray-700">
+        <i aria-hidden="true" class="fab fa-twitter"></i>
+      </a>
+    </div>
+  </li>
+
+  <!-- Instagram -->
+  <li>
+    <div class="p-[2px] rounded-lg bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 hover:bg-gradient-to-r focus:from-purple-600 focus:via-purple-600 focus:to-purple-600 hover:bg-gradient-to-r hover:from-purple-600 hover:via-purple-600 hover:to-purple-600 transition-all duration-300">
+      <a href="#" aria-label="Discover Mercury on Instagram"
+         class="w-8 h-10 flex items-center justify-center block bg-gray-800 p-2 rounded-lg text-gray-100 hover:text-white focus:text-white focus:bg-gray-700 hover:bg-gray-700">
+        <i aria-hidden="true" class="fab fa-instagram"></i>
+      </a>
+    </div>
+  </li>
+
+  <!-- LinkedIn -->
+  <li>
+    <div class="p-[2px] rounded-lg bg-gradient-to-r from-blue-900 via-sky-600 to-indigo-500 hover:bg-gradient-to-r focus:from-purple-600 focus:via-purple-600 focus:to-purple-600 hover:bg-gradient-to-r hover:from-purple-600 hover:via-purple-600 hover:to-purple-600 transition-all duration-300">
+      <a href="#" aria-label="Discover Mercury on LinkedIn"
+         class="w-8 h-10 flex items-center justify-center block bg-gray-800 p-2 rounded-lg text-gray-100 hover:text-white focus:text-white focus:bg-gray-700 hover:bg-gray-700">
+        <i aria-hidden="true" class="fab fa-linkedin-in"></i>
+      </a>
+    </div>
+  </li>
+
+  <!-- TikTok -->
+  <li>
+    <div class="p-[2px] rounded-lg bg-gradient-to-r from-red-500 to-blue-500 hover:bg-gradient-to-r focus:from-purple-600 focus:via-purple-600 focus:to-purple-600 hover:bg-gradient-to-r hover:from-purple-600 hover:via-purple-600 hover:to-purple-600 transition-all duration-300">
+      <a href="#" aria-label="Discover Mercury on TikTok"
+         class="w-8 h-10 flex items-center justify-center block bg-gray-800 p-2 rounded-lg text-gray-100 hover:text-white focus:text-white focus:bg-gray-700 hover:bg-gray-700">
+        <i aria-hidden="true" class="fab fa-tiktok"></i>
+      </a>
+    </div>
+  </li>
 </ul>
 
 <!--SUBSCIBE-->
@@ -920,13 +973,17 @@ so sr-users know exactly what it is.-->
             <label for="your email-0" class="block text-white">Enter Your Email:</label>
             <div class="flex">
                 <input id="your email-0" aria-autocomplete="e-mail" autocomplete="e-mail" type="email" class="border-dotted border-2 border-white focus:border-solid px-4 py-2 rounded-l-lg bg-gray-800 text-white w-full">
-                <button type="submit" class="relative bg-purple-600 focus:bg-purple-800 hover:bg-purple-800 text-white px-4 py-3 rounded-r-lg">
-                    <div class="relative flex items-center justify-center">
-                        <span class="absolute inset-0 -mx-3 -my-2 bg-black bg-opacity-40 rounded-r-lg" aria-hidden="true"></span>
-                        <span class="hidden md:flex relative flex z-10 orbitron">
+                    <button type="submit" class="relative px-[clamp(1.5rem,8vw,2rem)] bg-purple-600 focus:bg-purple-800 hover:bg-purple-800 text-white rounded-r-lg overflow-hidden">
+                    <!-- Overlay with padding inside and positioned absolutely -->
+                    <span aria-hidden="true" class="absolute inset-0 m-[4px] bg-black bg-opacity-40 rounded-r-lg z-0"></span>
+
+                    <!-- Container for icon and text, centered with flex -->
+                    <div class="flex items-center justify-center relative z-10">
+                        <span class="hidden lg:flex orbitron">
                         Subscribe
                         </span>
-                        <i aria-hidden="true" class="relative md:hidden fas fa-arrow-right"></i>
+                        <i aria-hidden="true" class="lg:hidden fas fa-arrow-right"></i>
+                            <span class="sr-only lg:hidden">Subscribe</span>
                     </div>
                 </button>
             </div>
@@ -999,7 +1056,7 @@ so sr-users know exactly what it is.-->
     </ul>
 </nav>
 
-<!-- Footer -->
+<!--LEGAL-->
         <div class="border-t border-gray-200 mt-2 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p class="text-gray-400">© 2042 Mercury Voyages. All rights reserved.</p>
             <p class="text-gray-400 mt-4 md:mt-0">A subsidiary of Galactic Travel Holdings LLC.</p>
@@ -1013,6 +1070,6 @@ so sr-users know exactly what it is.-->
 
 
 <!--JAVASCRIPT------------------------------------->
-    <script src="Accessible.js" defer></script>
+    <script src="accessible.js" defer></script>
 </body>
 </html>
