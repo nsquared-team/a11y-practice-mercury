@@ -11,8 +11,8 @@
                 // Update ARIA
                 el.setAttribute("aria-hidden", String(!isHidden));
             });
-            }
-
+        }
+            //hidden/data-expandable class control
             document.querySelectorAll("button[data-expandable]").forEach(button => {
             button.addEventListener("click", () => {
                 const expandableClass = button.dataset.expandable;
@@ -24,10 +24,11 @@
                 const isExpanded = button.getAttribute("aria-expanded") === "true";
                 button.setAttribute("aria-expanded", String(!isExpanded));
             });
-            });
-        
-//MOBILE MENU MODAL
+        });
 
+
+
+//MOBILE MENU MODAL
             const modal = document.getElementById("mobile-menu-modal");
             const openBtn = document.getElementById("open-menu");
             const closeBtn = document.getElementById("close-menu");
@@ -59,7 +60,6 @@
                 modal.addEventListener("keydown", focusHandler);
                 modal._trapHandler = focusHandler;
             }
-
 
             function removeTrap(modal) {
                 if (modal._trapHandler) {
@@ -120,7 +120,7 @@
                 closeMenu();
             });
             });
-        
+
             document.body.classList.add("overflow-hidden");
             document.getElementById("mobile-menu-modal").classList.remove("hidden");
 
@@ -128,8 +128,8 @@
             document.getElementById("mobile-menu-modal").classList.add("hidden");
 
 
-//CLOCK FUNCTIONALITY
 
+//CLOCK FUNCTIONALITY
         // Simple countdown timer (for demo purposes)
             const countdownElements = document.querySelectorAll('.countdown-digit');
             const [daysElement, hoursElement, minutesElement] = countdownElements;
@@ -177,42 +177,92 @@
             setInterval(updateCountdown, 60000);
 
 
-//REUDUCE MOTION CONTROLS
 
-            // Reduce Motion Toggle Handler
-            function setupReduceMotionToggle(buttonId, labelId) {
+//TOGGLE MOTION
+        function setupMotionToggle(buttonId, labelId) {
+            const button = document.getElementById(buttonId);
+            const label = document.getElementById(labelId);
+
+            if (!button || !label) return;
+
+            // Get current state
+            button.addEventListener("click", () => {
+                const currentState = document.documentElement.getAttribute("data-motion");
+                const newState = currentState === "on" ? "off" : "on";
+
+                // Set new state in HTML and localStorage
+                document.documentElement.setAttribute("data-motion", newState);
+                localStorage.setItem("motion", newState);
+
+                // Update all toggle labels
+                const labels = document.querySelectorAll("[id^='toggle-motion'][id$='label']");
+                labels.forEach(lbl => {
+                    lbl.textContent = `Toggle Motion: ${newState.charAt(0).toUpperCase() + newState.slice(1)}`;
+                });
+            });
+        }
+
+        // Default to 'off' for safety
+        function applyStoredMotionPreference() {
+            const stored = localStorage.getItem("motion") || "off";
+
+            document.documentElement.setAttribute("data-motion", stored);
+
+            // Update all labels
+            const labels = document.querySelectorAll("[id^='toggle-motion'][id$='label']");
+            labels.forEach(label => {
+                label.textContent = `Toggle Motion: ${stored.charAt(0).toUpperCase() + stored.slice(1)}`;
+            });
+        }
+
+        // Run setup
+        setupMotionToggle("toggle-motion", "toggle-motion-label");
+        setupMotionToggle("toggle-motion-modal", "toggle-motion-modal-label");
+        applyStoredMotionPreference();
+
+
+
+//TOGGLE MONOCHROME MODE
+            function setupMonochromeToggle(buttonId, labelId) {
                 const button = document.getElementById(buttonId);
                 const label = document.getElementById(labelId);
 
-                if (!button || !label) return;
+            if (!button || !label) return;
 
-                button.addEventListener("click", () => {
-                    const isReduced = label.textContent.includes("On");
-                    label.textContent = `Reduce Motion: ${isReduced ? "Off" : "On"}`;
-                    
-                    document.documentElement.classList.toggle("reduce-motion", !isReduced);
-                    localStorage.setItem("prefers-reduced-motion", !isReduced);
+            // Get current state
+            button.addEventListener("click", () => {
+                const currentState = document.documentElement.getAttribute("data-color");
+                const newState = currentState === "mono" ? "color" : "mono";
+
+                // Set new state in HTML and localStorage
+                document.documentElement.setAttribute("data-color", newState);
+                localStorage.setItem("color", newState);
+
+                // Update all toggle labels
+                const labels = document.querySelectorAll("[id^='toggle-monochrome'][id$='label']");
+                labels.forEach(lbl => {
+                    lbl.textContent = `Monochrome Mode: ${newState == "mono" ? "On" : "Off"}`;
                 });
-            }
+            });
+        }
 
-            // Initial Load Preference
-            function applyStoredMotionPreference() {
-                const storedPreference = localStorage.getItem("prefers-reduced-motion") === "true";
-                if (storedPreference) {
-                    document.documentElement.classList.add("reduce-motion");
+        // Default to 'color'
+        function applyStoredMonochromePreference() {
+            const stored = localStorage.getItem("color") || "color";
 
-                    // Update all labels that exist
-                    const labels = document.querySelectorAll("[id^='reduce-motion'][id$='label']");
-                    labels.forEach(label => {
-                        label.textContent = "Reduce Motion: On";
-                    });
-                }
-            }
+            document.documentElement.setAttribute("data-color", stored);
 
-            // Init both toggles with one function call each
-            setupReduceMotionToggle("reduce-motion-toggle", "reduce-motion-label");
-            setupReduceMotionToggle("reduce-motion-modal-toggle", "reduce-motion-modal-label");
-            applyStoredMotionPreference();
+            // Update all labels
+            const labels = document.querySelectorAll("[id^='toggle-monochrome'][id$='label']");
+            labels.forEach(label => {
+                label.textContent = `Monochrome Mode: ${stored == "mono" ? "On" : "Off"}`;
+            });
+        }
+
+        // Run setup
+        setupMonochromeToggle("toggle-monochrome", "toggle-monochrome-label");
+        setupMonochromeToggle("toggle-monochrome-modal", "toggle-monochrome-modal-label");
+        applyStoredMonochromePreference();
 
 
 
@@ -257,7 +307,7 @@
 
 //FLIP CHEVRONS
             const buttons = document.querySelectorAll('.toggle-button');
-            
+
             buttons.forEach(button => {
                 button.addEventListener('click', () => {
                     const buttonchevron = button.querySelector('.button-chevron');
@@ -272,7 +322,27 @@
                 const selectchevron = selectWrapper.querySelector('.select-chevron');
                 selectchevron.classList.toggle('flipped');
             });
-            });
+        });
 
 //TEST AREA ==================================================
+    document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById("contact-form");
 
+        if (form) {
+            form.addEventListener("submit",  (e) => {
+                console.log('Form submit triggered');
+                const input = document.getElementById("full-name");
+                const errorMessage = document.getElementById("full-name-error");
+
+                if (!input.checkValidity()) {
+                    e.preventDefault();
+                    input.setAttribute("aria-invalid", "true");
+                    errorMessage.hidden = false;
+                    input.focus();
+                } else {
+                    input.setAttribute("aria-invalid", "false");
+                    errorMessage.hidden = true;
+                }
+            });
+        }
+    });
