@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom base styles */
+@layer base {
+  body {
+    @apply bg-mercury-dark text-gray-100 font-sans antialiased;
+  }
+
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-mercury-dark-secondary;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-mercury-gray rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-mercury-amber;
+  }
+}
+
+/* Industrial/terminal aesthetic utilities */
+@layer components {
+  .glow-border {
+    @apply border border-mercury-amber shadow-glow-amber;
+  }
+
+  .glow-border-orange {
+    @apply border border-mercury-orange shadow-glow-orange;
+  }
+
+  .card {
+    @apply bg-mercury-dark-secondary border border-mercury-dark-tertiary rounded-lg p-4;
+  }
+
+  .card-hover {
+    @apply card transition-all duration-200 hover:border-mercury-amber hover:shadow-glow-amber;
+  }
+
+  .btn-primary {
+    @apply bg-mercury-amber text-mercury-dark font-medium px-4 py-2 rounded
+           hover:bg-amber-400 transition-colors duration-200;
+  }
+
+  .btn-secondary {
+    @apply bg-mercury-dark-tertiary text-gray-100 font-medium px-4 py-2 rounded
+           border border-mercury-gray hover:border-mercury-amber transition-colors duration-200;
+  }
+
+  .data-display {
+    @apply font-mono text-mercury-amber;
+  }
+
+  .status-badge {
+    @apply inline-flex items-center px-2 py-1 rounded text-xs font-medium;
+  }
+
+  .status-active {
+    @apply status-badge bg-status-active/20 text-status-active;
+  }
+
+  .status-idle {
+    @apply status-badge bg-status-idle/20 text-status-idle;
+  }
+
+  .status-warning {
+    @apply status-badge bg-status-warning/20 text-status-warning;
+  }
+
+  .status-error {
+    @apply status-badge bg-status-error/20 text-status-error;
+  }
+
+  /* Scan-line effect overlay */
+  .scan-lines {
+    position: relative;
+  }
+
+  .scan-lines::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.1) 2px,
+      rgba(0, 0, 0, 0.1) 4px
+    );
+    pointer-events: none;
+  }
+}
