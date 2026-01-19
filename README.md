@@ -4,7 +4,7 @@
 
 A fictional mining operations dashboard designed as part of the Discover Planets accessibility testing website series. This site simulates a real-time command center for a rare mineral extraction operation on the planet Mercury.
 
-![License](https://img.shields.io/badge/license-ISC-blue.svg)
+![License: CC0-1.0](https://img.shields.io/badge/License-CC0_1.0-lightgrey.svg)
 
 ## 🚀 Live Demo
 
@@ -110,9 +110,9 @@ This site is designed as a practice environment for accessibility testers. It co
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## � License
+## 📄 License
 
-This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
+This project is dedicated to the public domain under the [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) license - see the [LICENSE](LICENSE) file for details.
 
 ---
 
