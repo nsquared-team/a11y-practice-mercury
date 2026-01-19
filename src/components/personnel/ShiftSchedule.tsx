@@ -171,7 +171,7 @@ export default function ShiftSchedule() {
   })
 
   // Local state for schedule (simulating assignments)
-  const [scheduleOverrides, setScheduleOverrides] = useState<Map<string, { shift: Shift; dateKey: string }>>(
+  const [scheduleOverrides] = useState<Map<string, { shift: Shift; dateKey: string }>>(
     new Map()
   )
 

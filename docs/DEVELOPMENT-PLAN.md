@@ -174,18 +174,18 @@ a11y-practice-mercury/
 - [x] Build Batch Actions toolbar
 - [x] Add table pagination (configurable items per page)
 
-### Phase 4: Personnel Management
+### Phase 4: Personnel Management ✓
 **Estimated Components:** 10-12
 
-- [ ] Create Personnel page layout
-- [ ] Build Shift Schedule Calendar component
-- [ ] Implement drag-and-drop rescheduling
-- [ ] Build Personnel Directory (searchable list)
-- [ ] Build Add/Edit Personnel Form Wizard (multi-step)
-- [ ] Implement form validation
-- [ ] Build Certification Tracker component
-- [ ] Create progress indicators for certifications
-- [ ] Build Date Picker component
+- [x] Create Personnel page layout
+- [x] Build Shift Schedule Calendar component (weekly grid view)
+- [x] Implement drag-and-drop rescheduling (using @dnd-kit)
+- [x] Build Personnel Directory (searchable, filterable, with detail modal)
+- [x] Build Add/Edit Personnel Form Wizard (4-step wizard)
+- [x] Implement form validation (inline validation with error messages)
+- [x] Build Certification Tracker component (filterable table with status)
+- [x] Create progress indicators for certifications (progress bars showing time remaining)
+- [x] Build Date Picker component (using native HTML5 date inputs)
 
 ### Phase 5: Equipment Monitoring
 **Estimated Components:** 10-12
@@ -416,6 +416,8 @@ jobs:
 | 2026-01-18 | React Context over Zustand initially | Simpler for expected state complexity |
 | 2026-01-18 | GitHub Actions deployment | Automatic, no manual deployment steps |
 | 2026-01-18 | HashRouter for routing | Required for GitHub Pages SPA support |
+| 2026-01-18 | @dnd-kit for drag-and-drop | Modern, accessible drag-and-drop library |
+| 2026-01-18 | Native HTML5 date inputs | Simpler than custom date picker, adequate for demo |
 
 ---
 

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { Search, UserPlus, Calendar, Award, Filter, ChevronDown, X, Mail, Phone, Briefcase } from 'lucide-react'
 import ShiftSchedule from '../components/personnel/ShiftSchedule'
 import CertificationTracker from '../components/personnel/CertificationTracker'
+import PersonnelFormWizard from '../components/personnel/PersonnelFormWizard'
 import {
   personnelData,
   Personnel,
@@ -470,27 +471,18 @@ function PersonnelPage() {
         </div>
       )}
 
-      {/* Add Personnel Wizard Placeholder */}
+      {/* Add Personnel Wizard */}
       {showAddWizard && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-mercury-dark-secondary border border-mercury-dark-tertiary rounded-lg shadow-xl max-w-2xl w-full">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-100">Add New Personnel</h2>
-                <button
-                  onClick={() => setShowAddWizard(false)}
-                  className="p-2 hover:bg-mercury-dark-tertiary rounded-lg transition-colors"
-                  aria-label="Close"
-                >
-                  <X className="w-5 h-5 text-gray-400" />
-                </button>
-              </div>
-              <div className="h-64 flex items-center justify-center border border-dashed border-mercury-dark-tertiary rounded-lg">
-                <p className="text-gray-500">Form Wizard will be implemented next</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <PersonnelFormWizard
+          onClose={() => setShowAddWizard(false)}
+          onSubmit={(data) => {
+            // In a real app, this would save to a backend
+            console.log('New personnel data:', data)
+            // Show success feedback
+            alert(`Personnel "${data.personal.firstName} ${data.personal.lastName}" added successfully!`)
+            setShowAddWizard(false)
+          }}
+        />
       )}
     </div>
   )
