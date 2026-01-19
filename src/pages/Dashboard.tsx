@@ -1,4 +1,5 @@
 import { Activity, Pickaxe, Users, AlertTriangle } from 'lucide-react'
+import ExtractionChart from '../components/dashboard/ExtractionChart'
 
 function Dashboard() {
   // Placeholder data - will be replaced with real data fixtures
@@ -77,9 +78,7 @@ function Dashboard() {
         {/* Extraction Chart - Takes 2 columns */}
         <div className="lg:col-span-2 card">
           <h2 className="text-lg font-medium text-gray-100 mb-4">Extraction Rate (24h)</h2>
-          <div className="h-64 flex items-center justify-center border border-dashed border-mercury-dark-tertiary rounded-lg">
-            <p className="text-gray-500">Chart component will be implemented in Phase 2</p>
-          </div>
+          <ExtractionChart />
         </div>
 
         {/* Alert Feed - Takes 1 column */}

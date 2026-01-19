@@ -2,6 +2,7 @@ import { useState, ReactNode } from 'react'
 import Header from './Header'
 import Sidebar from './Sidebar'
 import Footer from './Footer'
+import MercuryCycleOverlay from './MercuryCycleOverlay'
 
 interface LayoutProps {
   children: ReactNode
@@ -25,6 +26,7 @@ function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-mercury-dark flex flex-col">
+      <MercuryCycleOverlay />
       <Header onMenuToggle={handleMenuToggle} />
 
       <Sidebar

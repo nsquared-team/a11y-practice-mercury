@@ -153,25 +153,26 @@ a11y-practice-mercury/
 
 - [x] Create Dashboard page layout
 - [x] Build Key Metrics Cards component
-- [ ] Build Real-Time Extraction Chart (24-hour line/area chart)
+- [x] Build Real-Time Extraction Chart (24-hour line/area chart)
 - [x] Build Equipment Status Grid component
 - [x] Build Alert Feed component (scrolling list)
 - [x] Build Commodity Prices Widget
-- [ ] Create chart data utilities
-- [ ] Implement Mercury day/night cycle overlay
+- [x] Create chart data utilities
+- [x] Implement Mercury day/night cycle overlay
 - [x] Style all components with industrial aesthetic
 
-### Phase 3: Operations View
+### Phase 3: Operations View ✓
 **Estimated Components:** 8-10
 
-- [ ] Create Operations page layout
-- [ ] Build Extraction Sites Table (sortable, selectable)
-- [ ] Build Filter Controls component
-- [ ] Build Site Detail Modal
-- [ ] Add historical performance charts to modal
-- [ ] Implement batch selection functionality
-- [ ] Build Batch Actions toolbar
-- [ ] Add table pagination or virtual scrolling
+- [x] Create Operations page layout
+- [x] Create mining sites data fixture (17 sites with full data)
+- [x] Build Extraction Sites Table (sortable, selectable)
+- [x] Build Filter Controls component (mineral type + status filters)
+- [x] Build Site Detail Modal
+- [x] Add historical performance charts to modal (7-day Recharts AreaChart)
+- [x] Implement batch selection functionality
+- [x] Build Batch Actions toolbar
+- [x] Add table pagination (configurable items per page)
 
 ### Phase 4: Personnel Management
 **Estimated Components:** 10-12
