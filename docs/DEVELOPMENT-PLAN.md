@@ -418,6 +418,8 @@ jobs:
 | 2026-01-18 | HashRouter for routing | Required for GitHub Pages SPA support |
 | 2026-01-18 | @dnd-kit for drag-and-drop | Modern, accessible drag-and-drop library |
 | 2026-01-18 | Native HTML5 date inputs | Simpler than custom date picker, adequate for demo |
+| 2026-01-18 | react-circular-progressbar for gauges | Visual diagnostic meters for equipment sensors |
+| 2026-01-18 | Vertical maintenance timeline | Better readability for grouped maintenance tasks |
 
 ---
 
