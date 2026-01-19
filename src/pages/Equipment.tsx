@@ -1,34 +1,95 @@
-import { useState } from 'react'
-import { Search, Plus, Wrench, Activity, AlertCircle } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Search, Plus, Wrench, Activity, AlertCircle, Filter, X } from 'lucide-react'
+import {
+  equipmentData,
+  scheduledMaintenance,
+  Equipment as EquipmentType,
+  EquipmentStatus,
+  EquipmentType as EquipType,
+  filterEquipment,
+  getEquipmentStats,
+  availableEquipmentTypes,
+  availableEquipmentStatuses,
+} from '../data/equipment'
+import EquipmentCard from '../components/equipment/EquipmentCard'
+import MaintenanceTimeline from '../components/equipment/MaintenanceTimeline'
+import DiagnosticPanel from '../components/equipment/DiagnosticPanel'
+import EquipmentDetailModal from '../components/equipment/EquipmentDetailModal'
+import MaintenanceRequestForm, { MaintenanceRequest } from '../components/equipment/MaintenanceRequestForm'
 
 function Equipment() {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeTab, setActiveTab] = useState<'inventory' | 'maintenance' | 'diagnostics'>('inventory')
+  const [selectedEquipment, setSelectedEquipment] = useState<EquipmentType | null>(null)
+  const [showMaintenanceForm, setShowMaintenanceForm] = useState(false)
+  const [maintenanceEquipment, setMaintenanceEquipment] = useState<EquipmentType | null>(null)
+  const [showFilters, setShowFilters] = useState(false)
+  const [selectedTypes, setSelectedTypes] = useState<EquipType[]>([])
+  const [selectedStatuses, setSelectedStatuses] = useState<EquipmentStatus[]>([])
 
-  // Placeholder data
-  const equipment = [
-    { id: 'TDU-007', name: 'Thermal Drill Unit 7', type: 'Thermal Drill Unit', status: 'operational', utilization: 87, site: 'Caloris Basin Alpha' },
-    { id: 'TDU-012', name: 'Thermal Drill Unit 12', type: 'Thermal Drill Unit', status: 'maintenance', utilization: 0, site: 'Caloris Basin Beta' },
-    { id: 'CH-003', name: 'Conveyor Hauler 3', type: 'Conveyor Hauler', status: 'operational', utilization: 92, site: 'Rachmaninoff Crater Deep' },
-    { id: 'PM-001', name: 'Processing Module 1', type: 'Processing Module', status: 'operational', utilization: 78, site: 'Raditladi Thermal Zone' },
-    { id: 'ES-005', name: 'Environmental Shield 5', type: 'Environmental Shield', status: 'idle', utilization: 0, site: 'Polar Shadow Mine' },
-    { id: 'SA-002', name: 'Sensor Array 2', type: 'Sensor Array', status: 'operational', utilization: 100, site: 'Caloris Basin Alpha' },
-  ]
+  // Get stats
+  const stats = useMemo(() => getEquipmentStats(), [])
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'operational':
-        return 'text-status-active border-status-active/30 bg-status-active/10'
-      case 'idle':
-        return 'text-status-idle border-status-idle/30 bg-status-idle/10'
-      case 'maintenance':
-        return 'text-status-warning border-status-warning/30 bg-status-warning/10'
-      case 'offline':
-        return 'text-status-error border-status-error/30 bg-status-error/10'
-      default:
-        return ''
-    }
+  // Filter equipment based on search and filters
+  const filteredEquipment = useMemo(() => {
+    return filterEquipment(equipmentData, {
+      search: searchQuery,
+      types: selectedTypes.length > 0 ? selectedTypes : undefined,
+      statuses: selectedStatuses.length > 0 ? selectedStatuses : undefined,
+    })
+  }, [searchQuery, selectedTypes, selectedStatuses])
+
+  const handleEquipmentClick = (equipment: EquipmentType) => {
+    setSelectedEquipment(equipment)
   }
+
+  const handleCloseDetailModal = () => {
+    setSelectedEquipment(null)
+  }
+
+  const handleRequestMaintenance = (equipment: EquipmentType) => {
+    setMaintenanceEquipment(equipment)
+    setShowMaintenanceForm(true)
+    setSelectedEquipment(null)
+  }
+
+  const handleOpenMaintenanceForm = () => {
+    // Open form with first equipment as default, or null
+    setMaintenanceEquipment(filteredEquipment[0] || null)
+    setShowMaintenanceForm(true)
+  }
+
+  const handleCloseMaintenanceForm = () => {
+    setShowMaintenanceForm(false)
+    setMaintenanceEquipment(null)
+  }
+
+  const handleSubmitMaintenance = (request: MaintenanceRequest) => {
+    // In a real app, this would submit to an API
+    console.log('Maintenance request submitted:', request)
+    alert(`Maintenance request submitted for ${request.equipmentName}`)
+    handleCloseMaintenanceForm()
+  }
+
+  const toggleTypeFilter = (type: EquipType) => {
+    setSelectedTypes(prev =>
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    )
+  }
+
+  const toggleStatusFilter = (status: EquipmentStatus) => {
+    setSelectedStatuses(prev =>
+      prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]
+    )
+  }
+
+  const clearFilters = () => {
+    setSelectedTypes([])
+    setSelectedStatuses([])
+    setSearchQuery('')
+  }
+
+  const hasActiveFilters = selectedTypes.length > 0 || selectedStatuses.length > 0 || searchQuery
 
   return (
     <div className="space-y-6">
@@ -36,19 +97,44 @@ function Equipment() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-gray-100">Equipment Monitoring</h1>
-          <p className="text-gray-500 mt-1">Track equipment status and maintenance schedules</p>
+          <p className="text-gray-500 mt-1">
+            {stats.total} units • {stats.byStatus.operational} operational • {stats.needingMaintenance} need maintenance
+          </p>
         </div>
-        <button className="btn-primary flex items-center gap-2 w-fit">
+        <button
+          onClick={handleOpenMaintenanceForm}
+          className="btn-primary flex items-center gap-2 w-fit"
+        >
           <Plus className="w-4 h-4" />
           Request Maintenance
         </button>
       </div>
 
+      {/* Stats Summary */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="card text-center">
+          <p className="text-2xl font-semibold text-status-active">{stats.byStatus.operational}</p>
+          <p className="text-xs text-gray-500">Operational</p>
+        </div>
+        <div className="card text-center">
+          <p className="text-2xl font-semibold text-status-idle">{stats.byStatus.idle}</p>
+          <p className="text-xs text-gray-500">Idle</p>
+        </div>
+        <div className="card text-center">
+          <p className="text-2xl font-semibold text-status-warning">{stats.byStatus.maintenance}</p>
+          <p className="text-xs text-gray-500">Maintenance</p>
+        </div>
+        <div className="card text-center">
+          <p className="text-2xl font-semibold text-status-error">{stats.byStatus.offline}</p>
+          <p className="text-xs text-gray-500">Offline</p>
+        </div>
+      </div>
+
       {/* Tabs */}
       <div className="flex gap-2 border-b border-mercury-dark-tertiary">
         {[
-          { id: 'inventory', label: 'Inventory', icon: Wrench },
-          { id: 'maintenance', label: 'Maintenance Schedule', icon: AlertCircle },
+          { id: 'inventory', label: 'Inventory', icon: Wrench, count: stats.total },
+          { id: 'maintenance', label: 'Maintenance Schedule', icon: AlertCircle, count: scheduledMaintenance.length },
           { id: 'diagnostics', label: 'Diagnostics', icon: Activity },
         ].map((tab) => (
           <button
@@ -62,6 +148,9 @@ function Equipment() {
           >
             <tab.icon className="w-4 h-4" />
             {tab.label}
+            {tab.count !== undefined && (
+              <span className="text-xs text-gray-500">({tab.count})</span>
+            )}
             {activeTab === tab.id && (
               <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-mercury-amber"></span>
             )}
@@ -72,78 +161,143 @@ function Equipment() {
       {/* Tab Content */}
       {activeTab === 'inventory' && (
         <div className="space-y-4">
-          {/* Search */}
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
-            <input
-              type="text"
-              placeholder="Search equipment..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-mercury-dark border border-mercury-dark-tertiary rounded-lg pl-10 pr-4 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-mercury-amber"
-            />
+          {/* Search and Filters */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Search equipment..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-mercury-dark border border-mercury-dark-tertiary rounded-lg pl-10 pr-4 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-mercury-amber"
+              />
+            </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`btn-secondary flex items-center gap-2 ${hasActiveFilters ? 'border-mercury-amber text-mercury-amber' : ''}`}
+            >
+              <Filter className="w-4 h-4" />
+              Filters
+              {hasActiveFilters && (
+                <span className="w-2 h-2 rounded-full bg-mercury-amber" />
+              )}
+            </button>
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="btn-secondary flex items-center gap-2 text-gray-400"
+              >
+                <X className="w-4 h-4" />
+                Clear
+              </button>
+            )}
           </div>
+
+          {/* Filter Panel */}
+          {showFilters && (
+            <div className="card">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Type Filters */}
+                <div>
+                  <p className="text-sm font-medium text-gray-300 mb-3">Equipment Type</p>
+                  <div className="flex flex-wrap gap-2">
+                    {availableEquipmentTypes.map(type => (
+                      <button
+                        key={type}
+                        onClick={() => toggleTypeFilter(type)}
+                        className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                          selectedTypes.includes(type)
+                            ? 'border-mercury-amber bg-mercury-amber/10 text-mercury-amber'
+                            : 'border-mercury-dark-tertiary text-gray-400 hover:border-gray-600'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Status Filters */}
+                <div>
+                  <p className="text-sm font-medium text-gray-300 mb-3">Status</p>
+                  <div className="flex flex-wrap gap-2">
+                    {availableEquipmentStatuses.map(status => (
+                      <button
+                        key={status}
+                        onClick={() => toggleStatusFilter(status)}
+                        className={`text-xs px-3 py-1.5 rounded-full border transition-colors capitalize ${
+                          selectedStatuses.includes(status)
+                            ? 'border-mercury-amber bg-mercury-amber/10 text-mercury-amber'
+                            : 'border-mercury-dark-tertiary text-gray-400 hover:border-gray-600'
+                        }`}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Results Count */}
+          <p className="text-sm text-gray-500">
+            Showing {filteredEquipment.length} of {stats.total} equipment units
+          </p>
 
           {/* Equipment Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {equipment.map((item) => (
-              <div key={item.id} className="card-hover">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="font-mono text-mercury-amber text-sm">{item.id}</p>
-                    <h3 className="font-medium text-gray-100 mt-1">{item.name}</h3>
-                    <p className="text-sm text-gray-500">{item.type}</p>
-                  </div>
-                  <span className={`text-xs px-2 py-1 rounded border ${getStatusColor(item.status)}`}>
-                    {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                  </span>
-                </div>
-
-                {/* Utilization Bar */}
-                <div className="mt-4">
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-gray-500">Utilization</span>
-                    <span className="text-gray-400">{item.utilization}%</span>
-                  </div>
-                  <div className="h-2 bg-mercury-dark rounded-full overflow-hidden">
-                    <div
-                      className={`h-full transition-all ${
-                        item.utilization > 80
-                          ? 'bg-status-active'
-                          : item.utilization > 50
-                            ? 'bg-status-warning'
-                            : item.utilization > 0
-                              ? 'bg-status-idle'
-                              : 'bg-mercury-dark-tertiary'
-                      }`}
-                      style={{ width: `${item.utilization}%` }}
-                    ></div>
-                  </div>
-                </div>
-
-                <p className="text-xs text-gray-500 mt-3">
-                  Assigned to: <span className="text-gray-400">{item.site}</span>
-                </p>
-              </div>
+            {filteredEquipment.map((item) => (
+              <EquipmentCard
+                key={item.id}
+                equipment={item}
+                onClick={handleEquipmentClick}
+              />
             ))}
           </div>
+
+          {filteredEquipment.length === 0 && (
+            <div className="card text-center py-12">
+              <Wrench className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+              <p className="text-gray-500">No equipment found matching your criteria</p>
+              <button
+                onClick={clearFilters}
+                className="text-mercury-amber hover:underline mt-2 text-sm"
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
         </div>
       )}
 
       {activeTab === 'maintenance' && (
         <div className="card">
-          <div className="h-96 flex items-center justify-center border border-dashed border-mercury-dark-tertiary rounded-lg">
-            <p className="text-gray-500">Maintenance Schedule Timeline will be implemented in Phase 5</p>
-          </div>
+          <MaintenanceTimeline maintenanceTasks={scheduledMaintenance} />
         </div>
       )}
 
       {activeTab === 'diagnostics' && (
-        <div className="card">
-          <div className="h-96 flex items-center justify-center border border-dashed border-mercury-dark-tertiary rounded-lg">
-            <p className="text-gray-500">Diagnostic Panel with Gauges will be implemented in Phase 5</p>
-          </div>
-        </div>
+        <DiagnosticPanel equipment={equipmentData} />
+      )}
+
+      {/* Equipment Detail Modal */}
+      {selectedEquipment && (
+        <EquipmentDetailModal
+          equipment={selectedEquipment}
+          onClose={handleCloseDetailModal}
+          onRequestMaintenance={handleRequestMaintenance}
+        />
+      )}
+
+      {/* Maintenance Request Form Modal */}
+      {showMaintenanceForm && maintenanceEquipment && (
+        <MaintenanceRequestForm
+          equipment={maintenanceEquipment}
+          onClose={handleCloseMaintenanceForm}
+          onSubmit={handleSubmitMaintenance}
+        />
       )}
     </div>
   )
