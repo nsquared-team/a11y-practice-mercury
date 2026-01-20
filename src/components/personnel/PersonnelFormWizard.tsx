@@ -419,6 +419,8 @@ export default function PersonnelFormWizard({ onClose, onSubmit }: PersonnelForm
     )
   }
 
+  // A11Y ISSUE: Modal missing role="dialog" and aria-modal
+  // A11Y ISSUE: No escape key handler
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-mercury-dark-secondary border border-mercury-dark-tertiary rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
@@ -426,9 +428,10 @@ export default function PersonnelFormWizard({ onClose, onSubmit }: PersonnelForm
         <div className="p-6 border-b border-mercury-dark-tertiary">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-100">Add New Personnel</h2>
+            {/* A11Y ISSUE: Close button lacks visible focus indicator */}
             <button
               onClick={onClose}
-              className="p-2 hover:bg-mercury-dark-tertiary rounded-lg transition-colors"
+              className="p-2 hover:bg-mercury-dark-tertiary rounded-lg transition-colors focus:outline-none"
               aria-label="Close"
             >
               <X className="w-5 h-5 text-gray-400" />
@@ -707,11 +710,14 @@ export default function PersonnelFormWizard({ onClose, onSubmit }: PersonnelForm
         </div>
 
         {/* Footer with Navigation */}
+        {/* A11Y ISSUE: Focus order disrupted by tabindex values */}
         <div className="p-6 border-t border-mercury-dark-tertiary flex items-center justify-between">
+          {/* A11Y ISSUE: tabindex="3" disrupts natural reading order */}
           <button
             onClick={handleBack}
             disabled={currentStep === 1}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+            tabIndex={3}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors focus:outline-none ${
               currentStep === 1
                 ? 'text-gray-600 cursor-not-allowed'
                 : 'text-gray-300 hover:bg-mercury-dark-tertiary'
@@ -722,19 +728,22 @@ export default function PersonnelFormWizard({ onClose, onSubmit }: PersonnelForm
           </button>
 
           <div className="flex items-center gap-3">
+            {/* A11Y ISSUE: tabindex="1" makes this focus first despite visual position */}
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-400 hover:text-gray-200 transition-colors"
+              tabIndex={1}
+              className="px-4 py-2 text-gray-400 hover:text-gray-200 transition-colors focus:outline-none"
             >
               Cancel
             </button>
             {currentStep < 4 ? (
-              <button onClick={handleNext} className="btn-primary flex items-center gap-2">
+              // A11Y ISSUE: tabindex="2" disrupts expected focus order
+              <button onClick={handleNext} tabIndex={2} className="btn-primary flex items-center gap-2 focus:outline-none">
                 Next
                 <ChevronRight className="w-4 h-4" />
               </button>
             ) : (
-              <button onClick={handleSubmit} className="btn-primary flex items-center gap-2">
+              <button onClick={handleSubmit} tabIndex={2} className="btn-primary flex items-center gap-2 focus:outline-none">
                 <Check className="w-4 h-4" />
                 Add Personnel
               </button>

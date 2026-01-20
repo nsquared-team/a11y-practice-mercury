@@ -58,13 +58,16 @@ function Header({ onMenuToggle }: HeaderProps) {
       {/* Right section - Mercury time, notifications, profile */}
       <div className="flex items-center gap-4">
         {/* Mercury Time Display */}
+        {/* A11Y ISSUE: Low contrast text - gray-600 on dark background fails WCAG 1.4.3 */}
         <div className="hidden sm:flex flex-col items-end">
-          <span className="text-xs text-gray-500">Mercury Time</span>
+          <span className="text-xs text-gray-600">Mercury Time</span>
           <span className="font-mono text-mercury-amber text-sm">{getMercuryTime()}</span>
         </div>
 
         {/* Notifications */}
-        <button className="relative p-2 hover:bg-mercury-dark-tertiary rounded-lg transition-colors">
+        {/* A11Y ISSUE: Missing accessible name - button has no aria-label */}
+        {/* A11Y ISSUE: Missing focus indicator - no visible focus ring */}
+        <button className="relative p-2 hover:bg-mercury-dark-tertiary rounded-lg transition-colors focus:outline-none">
           <Bell className="w-5 h-5 text-gray-400" />
           {notificationCount > 0 && (
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-mercury-orange text-white text-xs rounded-full flex items-center justify-center">
@@ -74,7 +77,9 @@ function Header({ onMenuToggle }: HeaderProps) {
         </button>
 
         {/* User Profile */}
-        <button className="flex items-center gap-2 p-2 hover:bg-mercury-dark-tertiary rounded-lg transition-colors">
+        {/* A11Y ISSUE: Missing accessible name - button lacks aria-label */}
+        {/* A11Y ISSUE: Missing focus indicator */}
+        <button className="flex items-center gap-2 p-2 hover:bg-mercury-dark-tertiary rounded-lg transition-colors focus:outline-none">
           <div className="w-8 h-8 bg-mercury-dark-tertiary rounded-full flex items-center justify-center">
             <User className="w-4 h-4 text-gray-400" />
           </div>

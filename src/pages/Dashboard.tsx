@@ -71,16 +71,19 @@ function Dashboard() {
       </div>
 
       {/* Key Metrics Cards */}
+      {/* A11Y ISSUE: Metric icons convey meaning but have no accessible text alternative */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {metricCards.map((metric) => (
           <div key={metric.label} className="card-hover">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-gray-500">{metric.label}</p>
+                {/* A11Y ISSUE: Low contrast - gray-600 on dark background fails WCAG 1.4.3 */}
+                <p className="text-sm text-gray-600">{metric.label}</p>
                 <div className="flex items-baseline gap-2 mt-1">
                   <span className="text-3xl font-bold data-display">{metric.value}</span>
-                  <span className="text-sm text-gray-500">{metric.unit}</span>
+                  <span className="text-sm text-gray-600">{metric.unit}</span>
                 </div>
+                {/* A11Y ISSUE: Color-only indicator - trend direction conveyed only by color */}
                 <p
                   className={`text-xs mt-2 ${
                     metric.trendUp ? 'text-status-active' : 'text-status-warning'
@@ -90,7 +93,8 @@ function Dashboard() {
                 </p>
               </div>
               <div className="p-2 bg-mercury-dark rounded-lg">
-                <metric.icon className="w-5 h-5 text-mercury-amber" />
+                {/* A11Y ISSUE: Icon has no accessible name */}
+                <metric.icon className="w-5 h-5 text-mercury-amber" aria-hidden="true" />
               </div>
             </div>
           </div>
@@ -106,6 +110,7 @@ function Dashboard() {
         </div>
 
         {/* Alert Feed - Takes 1 column */}
+        {/* A11Y ISSUE: Missing aria-live region for dynamic content */}
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-medium text-gray-100">Recent Alerts</h2>
@@ -117,6 +122,9 @@ function Dashboard() {
           </div>
           <div className="space-y-3">
             {recentAlerts.map((alert) => (
+              // A11Y ISSUE: Non-keyboard accessible - div with onClick but no keyboard support
+              // A11Y ISSUE: Missing focus indicator - no visible focus state
+              // A11Y ISSUE: Color-only - unread indicator is just a colored dot
               <div
                 key={alert.id}
                 onClick={() => simulation.markAlertRead(alert.id)}
@@ -127,11 +135,13 @@ function Dashboard() {
                 <div className="flex items-start justify-between">
                   <p className="text-sm text-gray-200 font-medium">{alert.title}</p>
                   {!alert.isRead && (
-                    <span className="w-2 h-2 bg-mercury-amber rounded-full flex-shrink-0 mt-1"></span>
+                    // A11Y ISSUE: Color-only indicator with no text alternative
+                    <span className="w-2 h-2 bg-mercury-amber rounded-full flex-shrink-0 mt-1" aria-hidden="true"></span>
                   )}
                 </div>
                 <p className="text-sm text-gray-400 mt-1">{alert.message}</p>
-                <p className="text-xs text-gray-500 mt-2">{formatAlertTime(alert.timestamp)}</p>
+                {/* A11Y ISSUE: Low contrast timestamp text */}
+                <p className="text-xs text-gray-600 mt-2">{formatAlertTime(alert.timestamp)}</p>
               </div>
             ))}
             {recentAlerts.length === 0 && (
@@ -142,10 +152,13 @@ function Dashboard() {
       </div>
 
       {/* Equipment Status Grid */}
+      {/* A11Y ISSUE: Color-only status - equipment status conveyed entirely through color */}
       <div className="card">
         <h2 className="text-lg font-medium text-gray-100 mb-4">Equipment Status Overview</h2>
         <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-2">
           {simulation.equipment.slice(0, 35).map((equip) => (
+            // A11Y ISSUE: Not keyboard accessible - status info only in title attribute
+            // A11Y ISSUE: Color-only status indication
             <div
               key={equip.id}
               title={`${equip.name} - ${equip.status}`}
@@ -163,7 +176,9 @@ function Dashboard() {
             </div>
           ))}
         </div>
-        <div className="flex flex-wrap gap-4 mt-4 text-xs">
+        {/* A11Y ISSUE: Legend uses color-only indicators without text patterns */}
+        {/* A11Y ISSUE: Low contrast text in legend - gray-600 */}
+        <div className="flex flex-wrap gap-4 mt-4 text-xs text-gray-600">
           <span className="flex items-center gap-1">
             <span className="w-3 h-3 rounded bg-status-active/20 border border-status-active/30"></span>
             Operational ({metrics.equipmentStatusCounts.operational})
@@ -191,9 +206,11 @@ function Dashboard() {
             <div key={commodity.symbol} className="p-4 bg-mercury-dark rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">{commodity.name}</p>
-                  <p className="text-xs text-mercury-gray font-mono">{commodity.symbol}</p>
+                  {/* A11Y ISSUE: Low contrast text */}
+                  <p className="text-sm text-gray-600">{commodity.name}</p>
+                  <p className="text-xs text-gray-700 font-mono">{commodity.symbol}</p>
                 </div>
+                {/* A11Y ISSUE: Color-only indicator - price change shown only in color (green/red) */}
                 <span
                   className={`text-xs px-2 py-1 rounded ${
                     commodity.change24h >= 0
@@ -207,7 +224,7 @@ function Dashboard() {
               </div>
               <p className="text-2xl font-bold data-display mt-2">
                 {commodity.price.toLocaleString()}
-                <span className="text-sm text-gray-500 font-normal ml-1">cr/kg</span>
+                <span className="text-sm text-gray-600 font-normal ml-1">cr/kg</span>
               </p>
             </div>
           ))}

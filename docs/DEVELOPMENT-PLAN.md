@@ -235,20 +235,20 @@ a11y-practice-mercury/
 - [x] Add simulation toggle to Settings - Already existed in SettingsContext
 - [x] Test all data flows - Dashboard connected to simulation hook
 
-### Phase 9: Accessibility Issues & Documentation
+### Phase 9: Accessibility Issues & Documentation ✓
 **Deliverables:** Testing guide, documented issues
 
-- [ ] Insert color contrast failures strategically
-- [ ] Add missing alt text on select images/icons
-- [ ] Create color-only status indicators (some locations)
-- [ ] Implement keyboard traps (specific components)
-- [ ] Add focus indicator issues
-- [ ] Create non-keyboard-accessible elements
-- [ ] Add missing/incorrect form labels
-- [ ] Insert ARIA issues (roles, states, properties)
-- [ ] Create focus order mismatches
-- [ ] Document all issues in Testing Guide
-- [ ] Create hidden admin page listing all issues
+- [x] Insert color contrast failures strategically
+- [x] Add missing alt text on select images/icons
+- [x] Create color-only status indicators (some locations)
+- [x] Implement keyboard traps (specific components)
+- [x] Add focus indicator issues
+- [x] Create non-keyboard-accessible elements
+- [x] Add missing/incorrect form labels
+- [x] Insert ARIA issues (roles, states, properties)
+- [x] Create focus order mismatches
+- [x] Document all issues in Testing Guide
+- [x] Create hidden admin page listing all issues
 
 ---
 

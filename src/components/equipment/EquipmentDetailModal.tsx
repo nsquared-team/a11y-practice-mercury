@@ -89,6 +89,8 @@ export default function EquipmentDetailModal({
   const warningCount = equipment.sensors.filter(s => s.status === 'warning').length
   const criticalCount = equipment.sensors.filter(s => s.status === 'critical').length
 
+  // A11Y ISSUE: No keyboard trap escape - missing Escape key handler
+  // A11Y ISSUE: Focus not managed when modal opens
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div className="bg-mercury-dark-secondary border border-mercury-dark-tertiary rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
@@ -116,23 +118,28 @@ export default function EquipmentDetailModal({
         </div>
 
         {/* Tabs */}
+        {/* A11Y ISSUE: Missing role="tablist" on container */}
+        {/* A11Y ISSUE: Tabs missing role="tab", aria-selected, aria-controls */}
+        {/* A11Y ISSUE: No keyboard navigation (arrow keys) between tabs */}
         <div className="flex gap-1 px-6 pt-4 border-b border-mercury-dark-tertiary">
           {[
             { id: 'overview', label: 'Overview', icon: Info },
             { id: 'sensors', label: 'Sensors', icon: Activity },
             { id: 'history', label: 'Maintenance History', icon: History },
           ].map(tab => (
+            // A11Y ISSUE: Missing focus indicator on tabs
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors relative ${
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors relative focus:outline-none ${
                 activeTab === tab.id ? 'text-mercury-amber' : 'text-gray-400 hover:text-gray-200'
               }`}
             >
               <tab.icon className="w-4 h-4" />
               {tab.label}
               {tab.id === 'sensors' && (warningCount > 0 || criticalCount > 0) && (
-                <span className="w-2 h-2 rounded-full bg-status-warning" />
+                // A11Y ISSUE: Color-only indicator for sensor warnings
+                <span className="w-2 h-2 rounded-full bg-status-warning" aria-hidden="true" />
               )}
               {activeTab === tab.id && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-mercury-amber" />
@@ -142,6 +149,7 @@ export default function EquipmentDetailModal({
         </div>
 
         {/* Content */}
+        {/* A11Y ISSUE: Tab panels missing role="tabpanel", aria-labelledby */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
           {activeTab === 'overview' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -422,11 +430,13 @@ export default function EquipmentDetailModal({
         </div>
 
         {/* Footer */}
+        {/* A11Y ISSUE: Focus order - buttons in visual order but may confuse users */}
         <div className="flex items-center justify-end gap-3 p-6 border-t border-mercury-dark-tertiary">
-          <button onClick={onClose} className="btn-secondary">
+          {/* A11Y ISSUE: tabindex disrupts natural focus order */}
+          <button onClick={onClose} className="btn-secondary" tabIndex={2}>
             Close
           </button>
-          <button onClick={() => onRequestMaintenance(equipment)} className="btn-primary">
+          <button onClick={() => onRequestMaintenance(equipment)} className="btn-primary" tabIndex={1}>
             <Wrench className="w-4 h-4 mr-2" />
             Request Maintenance
           </button>

@@ -73,6 +73,9 @@ export default function ExportModal({ config, reportName, onClose }: ExportModal
     }, 500)
   }
 
+  // A11Y ISSUE: No escape key handler - keyboard trap
+  // A11Y ISSUE: Modal lacks aria-modal="true" and role="dialog"
+  // A11Y ISSUE: Focus not trapped or managed
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div className="bg-mercury-dark-secondary border border-mercury-dark-tertiary rounded-lg w-full max-w-md">
@@ -124,12 +127,14 @@ export default function ExportModal({ config, reportName, onClose }: ExportModal
               </div>
 
               {/* Metrics Selection */}
+              {/* A11Y ISSUE: Label not programmatically associated with checkbox group */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <span className="block text-sm font-medium text-gray-300 mb-2">
                   Include Metrics
-                </label>
+                </span>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {metricsInfo.map(metric => (
+                    // A11Y ISSUE: Checkbox wrapped in label but input lacks id
                     <label
                       key={metric.id}
                       className="flex items-center gap-3 p-2 rounded hover:bg-mercury-dark-tertiary/50 cursor-pointer"
@@ -138,11 +143,12 @@ export default function ExportModal({ config, reportName, onClose }: ExportModal
                         type="checkbox"
                         checked={selectedMetrics.includes(metric.id)}
                         onChange={() => toggleMetric(metric.id)}
-                        className="w-4 h-4 rounded border-gray-600 text-mercury-amber focus:ring-mercury-amber focus:ring-offset-0 bg-mercury-dark"
+                        className="w-4 h-4 rounded border-gray-600 text-mercury-amber focus:ring-mercury-amber focus:ring-offset-0 bg-mercury-dark focus:outline-none"
                       />
-                      <span className="text-sm text-gray-300">{metric.name}</span>
+                      {/* A11Y ISSUE: Low contrast text */}
+                      <span className="text-sm text-gray-500">{metric.name}</span>
                       {metric.unit && (
-                        <span className="text-xs text-gray-500 ml-auto">({metric.unit})</span>
+                        <span className="text-xs text-gray-700 ml-auto">({metric.unit})</span>
                       )}
                     </label>
                   ))}
@@ -151,14 +157,15 @@ export default function ExportModal({ config, reportName, onClose }: ExportModal
 
               {/* Options */}
               <div className="border-t border-mercury-dark-tertiary pt-4">
+                {/* A11Y ISSUE: Checkbox lacks explicit id for label association */}
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={includeHeaders}
                     onChange={e => setIncludeHeaders(e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-600 text-mercury-amber focus:ring-mercury-amber focus:ring-offset-0 bg-mercury-dark"
+                    className="w-4 h-4 rounded border-gray-600 text-mercury-amber focus:ring-mercury-amber focus:ring-offset-0 bg-mercury-dark focus:outline-none"
                   />
-                  <span className="text-sm text-gray-300">Include column headers</span>
+                  <span className="text-sm text-gray-500">Include column headers</span>
                 </label>
               </div>
             </>

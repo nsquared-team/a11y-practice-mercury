@@ -33,16 +33,17 @@ function Footer() {
   return (
     <footer className="h-10 bg-mercury-dark-secondary border-t border-mercury-dark-tertiary flex items-center justify-between px-4 text-xs">
       {/* System Status */}
+      {/* A11Y ISSUE: Low contrast text - gray-700 on dark background fails WCAG 1.4.3 */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <Activity className="w-3 h-3 text-status-active" />
-          <span className="text-gray-500">System Status:</span>
+          <span className="text-gray-700">System Status:</span>
           <span className="text-status-active font-medium">Operational</span>
         </div>
 
         <div className="hidden sm:flex items-center gap-2">
-          <span className="text-gray-600">|</span>
-          <span className="text-gray-500">Active Sites:</span>
+          <span className="text-gray-700">|</span>
+          <span className="text-gray-700">Active Sites:</span>
           <span className="text-mercury-amber font-mono">17</span>
         </div>
       </div>
@@ -65,10 +66,11 @@ function Footer() {
         </div>
 
         {/* Last Sync */}
+        {/* A11Y ISSUE: Low contrast text - gray-700 fails WCAG 1.4.3 */}
         <div className="hidden sm:flex items-center gap-2">
-          <RefreshCw className="w-3 h-3 text-gray-500" />
-          <span className="text-gray-500">Last sync:</span>
-          <span className="text-gray-400 font-mono">{formatLastSync(lastSync)}</span>
+          <RefreshCw className="w-3 h-3 text-gray-700" />
+          <span className="text-gray-700">Last sync:</span>
+          <span className="text-gray-600 font-mono">{formatLastSync(lastSync)}</span>
         </div>
       </div>
     </footer>
