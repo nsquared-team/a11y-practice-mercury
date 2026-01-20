@@ -1,16 +1,19 @@
 import { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Bell, Search, User, Menu } from 'lucide-react'
 import mercuryLogo from '../../assets/mercury.svg'
 import SearchResults from './SearchResults'
+import { getUnreadAlerts } from '../../data/alerts'
 
 interface HeaderProps {
   onMenuToggle: () => void
 }
 
 function Header({ onMenuToggle }: HeaderProps) {
+  const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchFocused, setIsSearchFocused] = useState(false)
-  const [notificationCount] = useState(3)
+  const notificationCount = getUnreadAlerts().length
   const searchContainerRef = useRef<HTMLDivElement>(null)
 
   // Handle click outside to close search results
@@ -99,7 +102,10 @@ function Header({ onMenuToggle }: HeaderProps) {
         {/* Notifications */}
         {/* A11Y ISSUE: Missing accessible name - button has no aria-label */}
         {/* A11Y ISSUE: Missing focus indicator - no visible focus ring */}
-        <button className="relative p-2 hover:bg-mercury-dark-tertiary rounded-lg transition-colors focus:outline-none">
+        <button
+          onClick={() => navigate('/notifications')}
+          className="relative p-2 hover:bg-mercury-dark-tertiary rounded-lg transition-colors focus:outline-none"
+        >
           <Bell className="w-5 h-5 text-gray-400" />
           {notificationCount > 0 && (
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-mercury-orange text-white text-xs rounded-full flex items-center justify-center">

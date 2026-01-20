@@ -9,6 +9,7 @@ import Equipment from './pages/Equipment'
 import Reports from './pages/Reports'
 import Settings from './pages/Settings'
 import Admin from './pages/Admin'
+import Notifications from './pages/Notifications'
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
                   <Route path="/equipment" element={<Equipment />} />
                   <Route path="/reports" element={<Reports />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="/notifications" element={<Notifications />} />
                   {/* Hidden admin page - not linked in navigation */}
                   <Route path="/admin" element={<Admin />} />
                 </Routes>

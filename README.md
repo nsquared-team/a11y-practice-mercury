@@ -69,21 +69,19 @@ npm run dev
 
 ```
 src/
+├── assets/              # Static assets (images, SVGs)
 ├── components/
-│   ├── common/          # Shared UI components
-│   ├── layout/          # Header, Sidebar, Footer, Layout
 │   ├── dashboard/       # Dashboard-specific components
-│   ├── operations/      # Operations view components
-│   ├── personnel/       # Personnel management components
 │   ├── equipment/       # Equipment monitoring components
+│   ├── layout/          # Header, Sidebar, Footer, Layout, SearchResults
+│   ├── personnel/       # Personnel management components
 │   ├── reports/         # Reports & analytics components
 │   └── settings/        # Settings components
-├── context/             # React Context providers
-├── data/                # Fixture data
-├── hooks/               # Custom hooks
-├── pages/               # Page components
-├── types/               # TypeScript types
-└── utils/               # Helper functions
+├── context/             # React Context providers (SettingsContext)
+├── data/                # Fixture data (sites, personnel, equipment, alerts, reports)
+├── hooks/               # Custom hooks (useSimulation)
+├── pages/               # Page components (Home, Dashboard, Operations, etc.)
+└── utils/               # Helper functions (chartData, mercuryCycle)
 ```
 
 ## ♿ Accessibility Testing

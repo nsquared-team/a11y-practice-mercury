@@ -69,65 +69,79 @@ a11y-practice-mercury/
 │   └── workflows/
 │       └── deploy.yml          # GitHub Actions deployment
 ├── docs/
+│   ├── DEVELOPMENT-PLAN.md     # This document
 │   ├── project-requirements.md # Full requirements document
-│   └── DEVELOPMENT-PLAN.md     # This document
-├── public/
-│   └── favicon.ico
+│   └── TESTING-GUIDE.md        # Accessibility testing guide
 ├── src/
 │   ├── assets/
-│   │   └── images/             # Logos, backgrounds, placeholders
+│   │   └── mercury.svg         # Mercury planet logo
 │   ├── components/
-│   │   ├── common/             # Shared UI components
-│   │   │   ├── Button.tsx
-│   │   │   ├── Card.tsx
-│   │   │   ├── Modal.tsx
-│   │   │   ├── Table.tsx
-│   │   │   └── ...
-│   │   ├── layout/
-│   │   │   ├── Header.tsx
-│   │   │   ├── Sidebar.tsx
-│   │   │   ├── Footer.tsx
-│   │   │   └── Layout.tsx
 │   │   ├── dashboard/          # Dashboard-specific components
-│   │   ├── operations/         # Operations view components
-│   │   ├── personnel/          # Personnel management components
+│   │   │   └── ExtractionChart.tsx
 │   │   ├── equipment/          # Equipment monitoring components
+│   │   │   ├── DiagnosticPanel.tsx
+│   │   │   ├── EquipmentCard.tsx
+│   │   │   ├── EquipmentDetailModal.tsx
+│   │   │   ├── MaintenanceRequestForm.tsx
+│   │   │   └── MaintenanceTimeline.tsx
+│   │   ├── layout/
+│   │   │   ├── Footer.tsx
+│   │   │   ├── Header.tsx
+│   │   │   ├── Layout.tsx
+│   │   │   ├── MercuryCycleOverlay.tsx
+│   │   │   ├── SearchResults.tsx
+│   │   │   └── Sidebar.tsx
+│   │   ├── personnel/          # Personnel management components
+│   │   │   ├── CertificationTracker.tsx
+│   │   │   ├── PersonnelFormWizard.tsx
+│   │   │   └── ShiftSchedule.tsx
 │   │   ├── reports/            # Reports & analytics components
+│   │   │   ├── Accordion.tsx
+│   │   │   ├── ComparisonChart.tsx
+│   │   │   ├── ExportModal.tsx
+│   │   │   ├── ReportBuilder.tsx
+│   │   │   ├── ReportPreview.tsx
+│   │   │   └── SavedReportsLibrary.tsx
 │   │   └── settings/           # Settings components
+│   │       ├── DashboardWidgetList.tsx
+│   │       ├── RangeSlider.tsx
+│   │       └── ToggleSwitch.tsx
 │   ├── context/
-│   │   ├── AppContext.tsx      # Global application state
 │   │   └── SettingsContext.tsx # User preferences
 │   ├── data/
-│   │   ├── sites.ts            # Mining sites fixture data
-│   │   ├── personnel.ts        # Personnel fixture data
-│   │   ├── equipment.ts        # Equipment fixture data
 │   │   ├── alerts.ts           # Alert/notification data
-│   │   └── commodities.ts      # Mineral prices data
+│   │   ├── equipment.ts        # Equipment fixture data
+│   │   ├── personnel.ts        # Personnel fixture data
+│   │   ├── reports.ts          # Saved reports data
+│   │   └── sites.ts            # Mining sites fixture data
 │   ├── hooks/
-│   │   ├── useSimulation.ts    # Real-time update simulation
-│   │   └── ...
+│   │   └── useSimulation.ts    # Real-time update simulation
 │   ├── pages/
+│   │   ├── Admin.tsx           # Hidden admin page with a11y issues
 │   │   ├── Dashboard.tsx
+│   │   ├── Equipment.tsx
+│   │   ├── Home.tsx            # Landing page
+│   │   ├── Notifications.tsx   # Notifications center
 │   │   ├── Operations.tsx
 │   │   ├── Personnel.tsx
-│   │   ├── Equipment.tsx
 │   │   ├── Reports.tsx
 │   │   └── Settings.tsx
-│   ├── types/
-│   │   └── index.ts            # TypeScript type definitions
 │   ├── utils/
-│   │   └── ...                 # Helper functions
+│   │   ├── chartData.ts        # Chart data utilities
+│   │   └── mercuryCycle.ts     # Mercury day/night cycle
 │   ├── App.tsx
+│   ├── index.css               # Tailwind imports & global styles
 │   ├── main.tsx
-│   └── index.css               # Tailwind imports & global styles
-├── DEVELOPMENT-PLAN.md         # This document
-├── README.md                   # Project readme
+│   └── vite-env.d.ts
 ├── index.html
+├── LICENSE
 ├── package.json
+├── postcss.config.js
+├── README.md                   # Project readme
 ├── tailwind.config.js
 ├── tsconfig.json
-├── vite.config.ts
-└── .gitignore
+├── tsconfig.node.json
+└── vite.config.ts
 ```
 
 ---
@@ -146,7 +160,7 @@ a11y-practice-mercury/
 - [x] Build Footer component (system status, connection, sync timestamp)
 - [x] Implement React Router with HashRouter
 - [x] Create responsive navigation (sidebar desktop, bottom nav mobile)
-- [ ] Set up basic Context providers
+- [x] Set up basic Context providers (SettingsContext)
 
 ### Phase 2: Dashboard Home Page
 **Estimated Components:** 10-12
