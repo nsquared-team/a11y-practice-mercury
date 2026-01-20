@@ -1,15 +1,53 @@
 import { useState } from 'react'
-import { FileText, Plus, Download, Calendar, BarChart3 } from 'lucide-react'
+import { FileText, Calendar, BarChart3, Plus } from 'lucide-react'
+import ReportBuilder from '../components/reports/ReportBuilder'
+import ReportPreview from '../components/reports/ReportPreview'
+import ExportModal from '../components/reports/ExportModal'
+import SavedReportsLibrary from '../components/reports/SavedReportsLibrary'
+import ComparisonChart from '../components/reports/ComparisonChart'
+import { ReportConfig, SavedReport } from '../data/reports'
 
 function Reports() {
   const [activeTab, setActiveTab] = useState<'builder' | 'saved' | 'analytics'>('builder')
+  const [showExportModal, setShowExportModal] = useState(false)
 
-  // Placeholder saved reports
-  const savedReports = [
-    { id: 'R001', name: 'Weekly Extraction Summary', type: 'Extraction', created: '2026-01-15', lastRun: '2026-01-18' },
-    { id: 'R002', name: 'Equipment Utilization Q4', type: 'Equipment', created: '2026-01-10', lastRun: '2026-01-17' },
-    { id: 'R003', name: 'Personnel Shift Analysis', type: 'Personnel', created: '2026-01-05', lastRun: '2026-01-16' },
-  ]
+  // Report builder state
+  const [reportConfig, setReportConfig] = useState<ReportConfig>({
+    type: 'extraction',
+    dateRange: '7days',
+    visualization: 'line',
+    metrics: ['totalOutput', 'efficiency'],
+    filters: {},
+  })
+
+  const handleConfigChange = (newConfig: ReportConfig) => {
+    setReportConfig(newConfig)
+  }
+
+  const handleGenerateReport = () => {
+    // Config is already updated via onConfigChange, just trigger re-render if needed
+    // The ReportPreview component generates its own data based on config
+  }
+
+  const handleRunReport = (report: SavedReport) => {
+    setReportConfig(report.config)
+    setActiveTab('builder')
+  }
+
+  const handleEditReport = (report: SavedReport) => {
+    setReportConfig(report.config)
+    setActiveTab('builder')
+  }
+
+  const handleDeleteReport = (report: SavedReport) => {
+    // In a real app, this would call an API to delete the report
+    console.log('Delete report:', report.id)
+  }
+
+  const handleExportReport = (report: SavedReport) => {
+    setReportConfig(report.config)
+    setShowExportModal(true)
+  }
 
   return (
     <div className="space-y-6">
@@ -19,7 +57,19 @@ function Reports() {
           <h1 className="text-2xl font-semibold text-gray-100">Reports & Analytics</h1>
           <p className="text-gray-500 mt-1">Generate and analyze operational reports</p>
         </div>
-        <button className="btn-primary flex items-center gap-2 w-fit">
+        <button
+          onClick={() => {
+            setReportConfig({
+              type: 'extraction',
+              dateRange: '7days',
+              visualization: 'line',
+              metrics: ['totalOutput', 'efficiency'],
+              filters: {},
+            })
+            setActiveTab('builder')
+          }}
+          className="btn-primary flex items-center gap-2 w-fit"
+        >
           <Plus className="w-4 h-4" />
           New Report
         </button>
@@ -54,102 +104,43 @@ function Reports() {
       {activeTab === 'builder' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Report Configuration */}
-          <div className="lg:col-span-1 card">
-            <h2 className="text-lg font-medium text-gray-100 mb-4">Configure Report</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Report Type</label>
-                <select className="w-full bg-mercury-dark border border-mercury-dark-tertiary rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-mercury-amber">
-                  <option>Extraction Summary</option>
-                  <option>Equipment Status</option>
-                  <option>Personnel Analysis</option>
-                  <option>Commodity Trends</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Date Range</label>
-                <select className="w-full bg-mercury-dark border border-mercury-dark-tertiary rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-mercury-amber">
-                  <option>Last 7 Days</option>
-                  <option>Last 30 Days</option>
-                  <option>Last Quarter</option>
-                  <option>Custom Range</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Visualization</label>
-                <select className="w-full bg-mercury-dark border border-mercury-dark-tertiary rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-mercury-amber">
-                  <option>Line Chart</option>
-                  <option>Bar Chart</option>
-                  <option>Area Chart</option>
-                  <option>Table</option>
-                </select>
-              </div>
-              <button className="btn-primary w-full mt-4">Generate Report</button>
-            </div>
+          <div className="lg:col-span-1">
+            <ReportBuilder
+              initialConfig={reportConfig}
+              onConfigChange={handleConfigChange}
+              onGenerate={handleGenerateReport}
+            />
           </div>
 
           {/* Report Preview */}
-          <div className="lg:col-span-2 card">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium text-gray-100">Preview</h2>
-              <button className="btn-secondary flex items-center gap-2 text-sm">
-                <Download className="w-4 h-4" />
-                Export
-              </button>
-            </div>
-            <div className="h-80 flex items-center justify-center border border-dashed border-mercury-dark-tertiary rounded-lg">
-              <p className="text-gray-500">Report preview will be implemented in Phase 6</p>
-            </div>
+          <div className="lg:col-span-2">
+            <ReportPreview
+              config={reportConfig}
+              onExport={() => setShowExportModal(true)}
+            />
           </div>
         </div>
       )}
 
       {activeTab === 'saved' && (
-        <div className="card">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-mercury-dark-tertiary">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Report ID</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Name</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Type</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Created</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Last Run</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-400">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {savedReports.map((report) => (
-                  <tr
-                    key={report.id}
-                    className="border-b border-mercury-dark-tertiary hover:bg-mercury-dark-tertiary/50 transition-colors"
-                  >
-                    <td className="py-3 px-4 font-mono text-mercury-amber">{report.id}</td>
-                    <td className="py-3 px-4 text-gray-200">{report.name}</td>
-                    <td className="py-3 px-4 text-gray-400">{report.type}</td>
-                    <td className="py-3 px-4 text-gray-400">{report.created}</td>
-                    <td className="py-3 px-4 text-gray-400">{report.lastRun}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex gap-2">
-                        <button className="text-sm text-mercury-amber hover:underline">Run</button>
-                        <button className="text-sm text-gray-400 hover:text-gray-200">Edit</button>
-                        <button className="text-sm text-status-error hover:underline">Delete</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <SavedReportsLibrary
+          onRunReport={handleRunReport}
+          onEditReport={handleEditReport}
+          onDeleteReport={handleDeleteReport}
+          onExportReport={handleExportReport}
+        />
       )}
 
       {activeTab === 'analytics' && (
-        <div className="card">
-          <div className="h-96 flex items-center justify-center border border-dashed border-mercury-dark-tertiary rounded-lg">
-            <p className="text-gray-500">Comparison Charts will be implemented in Phase 6</p>
-          </div>
-        </div>
+        <ComparisonChart />
+      )}
+
+      {/* Export Modal */}
+      {showExportModal && (
+        <ExportModal
+          config={reportConfig}
+          onClose={() => setShowExportModal(false)}
+        />
       )}
     </div>
   )

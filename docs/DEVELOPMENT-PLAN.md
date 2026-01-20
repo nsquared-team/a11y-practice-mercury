@@ -199,17 +199,17 @@ a11y-practice-mercury/
 - [x] Build MaintenanceRequestForm modal (type, priority, technician assignment)
 - [x] Implement search and filter functionality
 
-### Phase 6: Reports & Analytics
+### Phase 6: Reports & Analytics ✓
 **Estimated Components:** 8-10
 
-- [ ] Create Reports page layout
-- [ ] Build Report Builder interface
-- [ ] Build metric/date range selectors
-- [ ] Build visualization type picker
-- [ ] Build Saved Reports Library
-- [ ] Implement Export Options (simulated downloads)
-- [ ] Build Comparison Charts component
-- [ ] Create Accordion components for report sections
+- [x] Create Reports page layout
+- [x] Build Report Builder interface
+- [x] Build metric/date range selectors
+- [x] Build visualization type picker
+- [x] Build Saved Reports Library
+- [x] Implement Export Options (simulated downloads)
+- [x] Build Comparison Charts component
+- [x] Create Accordion components for report sections
 
 ### Phase 7: Settings & Preferences
 **Estimated Components:** 8-10
