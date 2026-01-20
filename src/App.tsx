@@ -1,4 +1,5 @@
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
+import { SettingsProvider } from './context/SettingsContext'
 import Layout from './components/layout/Layout'
 import Dashboard from './pages/Dashboard'
 import Operations from './pages/Operations'
@@ -9,18 +10,20 @@ import Settings from './pages/Settings'
 
 function App() {
   return (
-    <Router>
-      <Layout>
-        <Routes>
+    <SettingsProvider>
+      <Router>
+        <Layout>
+          <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/operations" element={<Operations />} />
           <Route path="/personnel" element={<Personnel />} />
           <Route path="/equipment" element={<Equipment />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
-        </Routes>
-      </Layout>
-    </Router>
+          </Routes>
+        </Layout>
+      </Router>
+    </SettingsProvider>
   )
 }
 

@@ -50,20 +50,29 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   return null;
 }
 
-function ExtractionChart() {
-  const [data, setData] = useState<ExtractionDataPoint[]>([]);
+interface ExtractionChartProps {
+  data?: ExtractionDataPoint[];
+}
+
+function ExtractionChart({ data: externalData }: ExtractionChartProps) {
+  const [internalData, setInternalData] = useState<ExtractionDataPoint[]>([]);
 
   useEffect(() => {
-    // Generate initial data
-    setData(generateExtractionData());
+    // Only generate internal data if no external data is provided
+    if (!externalData) {
+      setInternalData(generateExtractionData());
 
-    // Optional: Update data periodically for "real-time" feel
-    const interval = setInterval(() => {
-      setData(generateExtractionData());
-    }, 60000); // Update every minute
+      // Optional: Update data periodically for "real-time" feel
+      const interval = setInterval(() => {
+        setInternalData(generateExtractionData());
+      }, 60000); // Update every minute
 
-    return () => clearInterval(interval);
-  }, []);
+      return () => clearInterval(interval);
+    }
+  }, [externalData]);
+
+  // Use external data if provided, otherwise use internal data
+  const data = externalData || internalData;
 
   return (
     <div className="w-full h-64">

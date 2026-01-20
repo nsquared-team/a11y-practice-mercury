@@ -9,6 +9,29 @@ export interface ExtractionDataPoint {
   total: number;
 }
 
+export interface DailyExtractionDataPoint {
+  date: string;
+  day: string;
+  mercurium: number;
+  solarPlatinum: number;
+  thermalCrystals: number;
+  total: number;
+}
+
+export interface CommodityPricePoint {
+  date: string;
+  price: number;
+}
+
+export interface HistoricalData {
+  extraction: DailyExtractionDataPoint[];
+  commodityPrices: {
+    mercurium: CommodityPricePoint[];
+    solarPlatinum: CommodityPricePoint[];
+    thermalCrystals: CommodityPricePoint[];
+  };
+}
+
 /**
  * Generates 24-hour extraction rate data with realistic variations
  * Simulates day/night production cycles and random fluctuations
@@ -145,4 +168,185 @@ export function calculateExtractionStats(data: ExtractionDataPoint[]) {
     peakHour,
     lowHour,
   };
+}
+
+/**
+ * Generates 30 days of historical extraction data
+ * Includes realistic variations, weekly patterns, and trend simulation
+ */
+export function generate30DayHistoricalData(): DailyExtractionDataPoint[] {
+  const data: DailyExtractionDataPoint[] = [];
+  const now = new Date();
+
+  // Base daily extraction rates (kg per day)
+  const baseMercurium = 2400;
+  const baseSolarPlatinum = 1600;
+  const baseThermalCrystals = 1200;
+
+  // Slight upward trend over 30 days (2% improvement)
+  const trendFactor = 0.02 / 30;
+
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+
+    const dateStr = date.toISOString().split('T')[0];
+    const dayLabel = date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    });
+
+    // Day of week affects production (weekends slightly lower)
+    const dayOfWeek = date.getDay();
+    const weekendFactor = dayOfWeek === 0 || dayOfWeek === 6 ? 0.85 : 1.0;
+
+    // Random daily variation (±15%)
+    const dailyVariation = () => 0.85 + Math.random() * 0.30;
+
+    // Trend improvement over time
+    const dayTrend = 1 + trendFactor * (30 - i);
+
+    const mercurium = Math.round(
+      baseMercurium * weekendFactor * dailyVariation() * dayTrend
+    );
+    const solarPlatinum = Math.round(
+      baseSolarPlatinum * weekendFactor * dailyVariation() * dayTrend
+    );
+    const thermalCrystals = Math.round(
+      baseThermalCrystals * weekendFactor * dailyVariation() * dayTrend
+    );
+
+    data.push({
+      date: dateStr,
+      day: dayLabel,
+      mercurium,
+      solarPlatinum,
+      thermalCrystals,
+      total: mercurium + solarPlatinum + thermalCrystals,
+    });
+  }
+
+  return data;
+}
+
+/**
+ * Generates 30 days of commodity price history
+ * Simulates realistic market fluctuations with trends
+ */
+export function generate30DayCommodityPrices(): HistoricalData['commodityPrices'] {
+  const now = new Date();
+
+  // Starting prices (30 days ago)
+  let mercuriumPrice = 11500;
+  let solarPlatinumPrice = 9100;
+  let thermalCrystalsPrice = 2900;
+
+  const mercuriumHistory: CommodityPricePoint[] = [];
+  const solarPlatinumHistory: CommodityPricePoint[] = [];
+  const thermalCrystalsHistory: CommodityPricePoint[] = [];
+
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+
+    // Daily price changes (random walk with slight trends)
+    // Mercurium: slight upward trend
+    mercuriumPrice = Math.round(
+      mercuriumPrice * (1 + (Math.random() - 0.45) * 0.03)
+    );
+    // Solar Platinum: slight downward trend
+    solarPlatinumPrice = Math.round(
+      solarPlatinumPrice * (1 + (Math.random() - 0.55) * 0.025)
+    );
+    // Thermal Crystals: volatile with upward trend
+    thermalCrystalsPrice = Math.round(
+      thermalCrystalsPrice * (1 + (Math.random() - 0.4) * 0.04)
+    );
+
+    mercuriumHistory.push({ date: dateStr, price: mercuriumPrice });
+    solarPlatinumHistory.push({ date: dateStr, price: solarPlatinumPrice });
+    thermalCrystalsHistory.push({ date: dateStr, price: thermalCrystalsPrice });
+  }
+
+  return {
+    mercurium: mercuriumHistory,
+    solarPlatinum: solarPlatinumHistory,
+    thermalCrystals: thermalCrystalsHistory,
+  };
+}
+
+/**
+ * Generates complete 30-day historical data package
+ */
+export function generateHistoricalData(): HistoricalData {
+  return {
+    extraction: generate30DayHistoricalData(),
+    commodityPrices: generate30DayCommodityPrices(),
+  };
+}
+
+/**
+ * Calculates period-over-period comparison
+ */
+export function calculatePeriodComparison(data: DailyExtractionDataPoint[]) {
+  const midpoint = Math.floor(data.length / 2);
+  const firstHalf = data.slice(0, midpoint);
+  const secondHalf = data.slice(midpoint);
+
+  const sumFirst = firstHalf.reduce((sum, d) => sum + d.total, 0);
+  const sumSecond = secondHalf.reduce((sum, d) => sum + d.total, 0);
+
+  const avgFirst = sumFirst / firstHalf.length;
+  const avgSecond = sumSecond / secondHalf.length;
+
+  const percentChange = ((avgSecond - avgFirst) / avgFirst) * 100;
+
+  return {
+    firstPeriodTotal: sumFirst,
+    secondPeriodTotal: sumSecond,
+    firstPeriodAverage: Math.round(avgFirst),
+    secondPeriodAverage: Math.round(avgSecond),
+    percentChange: Math.round(percentChange * 10) / 10,
+    trend: percentChange > 0 ? 'up' : percentChange < 0 ? 'down' : 'stable',
+  };
+}
+
+/**
+ * Site-specific 30-day historical data
+ */
+export interface SiteMonthlyDataPoint {
+  date: string;
+  extraction: number;
+  target: number;
+  efficiency: number;
+}
+
+export function generateSiteMonthlyData(
+  baseRate: number,
+  dailyTarget: number
+): SiteMonthlyDataPoint[] {
+  const data: SiteMonthlyDataPoint[] = [];
+  const now = new Date();
+
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+
+    // Random daily variation (±25%)
+    const variation = 0.75 + Math.random() * 0.5;
+    const dailyExtraction = Math.round(baseRate * 24 * variation);
+    const efficiency = Math.round((dailyExtraction / dailyTarget) * 100);
+
+    data.push({
+      date: dateStr,
+      extraction: dailyExtraction,
+      target: dailyTarget,
+      efficiency: Math.min(efficiency, 150), // Cap at 150% for display
+    });
+  }
+
+  return data;
 }

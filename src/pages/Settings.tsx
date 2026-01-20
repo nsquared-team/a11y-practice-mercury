@@ -1,28 +1,13 @@
 import { useState } from 'react'
 import { Monitor, Bell, Layout, User } from 'lucide-react'
+import { useSettings } from '../context/SettingsContext'
+import ToggleSwitch from '../components/settings/ToggleSwitch'
+import RangeSlider from '../components/settings/RangeSlider'
+import DashboardWidgetList from '../components/settings/DashboardWidgetList'
 
 function Settings() {
   const [activeTab, setActiveTab] = useState<'display' | 'notifications' | 'dashboard' | 'account'>('display')
-
-  // Settings state
-  const [settings, setSettings] = useState({
-    units: 'metric',
-    timeFormat: '24h',
-    temperatureScale: 'celsius',
-    refreshRate: 30,
-    simulationEnabled: true,
-    alertsEnabled: true,
-    alertCategories: {
-      equipment: true,
-      safety: true,
-      production: true,
-      personnel: false,
-    },
-  })
-
-  const updateSetting = (key: string, value: unknown) => {
-    setSettings((prev) => ({ ...prev, [key]: value }))
-  }
+  const { settings, updateSetting, updateAlertCategory, updateWidgetOrder, toggleWidget, resetSettings } = useSettings()
 
   return (
     <div className="space-y-6">
@@ -72,7 +57,7 @@ function Settings() {
                 </div>
                 <select
                   value={settings.units}
-                  onChange={(e) => updateSetting('units', e.target.value)}
+                  onChange={(e) => updateSetting('units', e.target.value as 'metric' | 'imperial')}
                   className="bg-mercury-dark border border-mercury-dark-tertiary rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-mercury-amber"
                 >
                   <option value="metric">Metric</option>
@@ -88,7 +73,7 @@ function Settings() {
                 </div>
                 <select
                   value={settings.timeFormat}
-                  onChange={(e) => updateSetting('timeFormat', e.target.value)}
+                  onChange={(e) => updateSetting('timeFormat', e.target.value as '24h' | '12h')}
                   className="bg-mercury-dark border border-mercury-dark-tertiary rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-mercury-amber"
                 >
                   <option value="24h">24-hour</option>
@@ -104,7 +89,7 @@ function Settings() {
                 </div>
                 <select
                   value={settings.temperatureScale}
-                  onChange={(e) => updateSetting('temperatureScale', e.target.value)}
+                  onChange={(e) => updateSetting('temperatureScale', e.target.value as 'celsius' | 'fahrenheit')}
                   className="bg-mercury-dark border border-mercury-dark-tertiary rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-mercury-amber"
                 >
                   <option value="celsius">Celsius (°C)</option>
@@ -135,24 +120,12 @@ function Settings() {
           {/* Simulation Toggle */}
           <div className="card">
             <h2 className="text-lg font-medium text-gray-100 mb-4">Simulation</h2>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-200">Enable Real-Time Simulation</p>
-                <p className="text-sm text-gray-500">Simulates live data updates for demo purposes</p>
-              </div>
-              <button
-                onClick={() => updateSetting('simulationEnabled', !settings.simulationEnabled)}
-                className={`relative w-12 h-6 rounded-full transition-colors ${
-                  settings.simulationEnabled ? 'bg-mercury-amber' : 'bg-mercury-dark-tertiary'
-                }`}
-              >
-                <span
-                  className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
-                    settings.simulationEnabled ? 'left-7' : 'left-1'
-                  }`}
-                ></span>
-              </button>
-            </div>
+            <ToggleSwitch
+              enabled={settings.simulationEnabled}
+              onChange={(enabled) => updateSetting('simulationEnabled', enabled)}
+              label="Enable Real-Time Simulation"
+              description="Simulates live data updates for demo purposes"
+            />
           </div>
         </div>
       )}
@@ -163,51 +136,53 @@ function Settings() {
             <h2 className="text-lg font-medium text-gray-100 mb-4">Notification Settings</h2>
             <div className="space-y-4">
               {/* Master Toggle */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-200">Enable Alerts</p>
-                  <p className="text-sm text-gray-500">Receive system notifications</p>
-                </div>
-                <button
-                  onClick={() => updateSetting('alertsEnabled', !settings.alertsEnabled)}
-                  className={`relative w-12 h-6 rounded-full transition-colors ${
-                    settings.alertsEnabled ? 'bg-mercury-amber' : 'bg-mercury-dark-tertiary'
-                  }`}
-                >
-                  <span
-                    className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
-                      settings.alertsEnabled ? 'left-7' : 'left-1'
-                    }`}
-                  ></span>
-                </button>
+              <ToggleSwitch
+                enabled={settings.alertsEnabled}
+                onChange={(enabled) => updateSetting('alertsEnabled', enabled)}
+                label="Enable Alerts"
+                description="Receive system notifications"
+              />
+
+              {/* Alert Volume Slider */}
+              <div className="border-t border-mercury-dark-tertiary pt-4">
+                <RangeSlider
+                  value={settings.alertVolume}
+                  onChange={(value) => updateSetting('alertVolume', value)}
+                  min={0}
+                  max={100}
+                  disabled={!settings.alertsEnabled}
+                  label="Alert Sound Volume"
+                  description="Adjust the volume for alert notifications"
+                  valueFormatter={(v) => `${v}%`}
+                />
+              </div>
+
+              {/* Alert Threshold Slider */}
+              <div className="border-t border-mercury-dark-tertiary pt-4">
+                <RangeSlider
+                  value={settings.alertThreshold}
+                  onChange={(value) => updateSetting('alertThreshold', value)}
+                  min={50}
+                  max={100}
+                  disabled={!settings.alertsEnabled}
+                  label="Equipment Warning Threshold"
+                  description="Trigger alerts when equipment utilization exceeds this level"
+                  valueFormatter={(v) => `${v}%`}
+                />
               </div>
 
               {/* Category Toggles */}
               <div className="border-t border-mercury-dark-tertiary pt-4 space-y-3">
                 <p className="text-sm text-gray-400 mb-2">Alert Categories</p>
-                {Object.entries(settings.alertCategories).map(([key, value]) => (
+                {(Object.entries(settings.alertCategories) as [keyof typeof settings.alertCategories, boolean][]).map(([key, value]) => (
                   <div key={key} className="flex items-center justify-between">
                     <p className="text-gray-300 capitalize">{key} Alerts</p>
-                    <button
-                      onClick={() =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          alertCategories: { ...prev.alertCategories, [key]: !value },
-                        }))
-                      }
+                    <ToggleSwitch
+                      enabled={value && settings.alertsEnabled}
+                      onChange={(enabled) => updateAlertCategory(key, enabled)}
                       disabled={!settings.alertsEnabled}
-                      className={`relative w-10 h-5 rounded-full transition-colors ${
-                        value && settings.alertsEnabled
-                          ? 'bg-mercury-amber'
-                          : 'bg-mercury-dark-tertiary'
-                      } ${!settings.alertsEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      <span
-                        className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-                          value && settings.alertsEnabled ? 'left-5' : 'left-0.5'
-                        }`}
-                      ></span>
-                    </button>
+                      size="sm"
+                    />
                   </div>
                 ))}
               </div>
@@ -219,9 +194,15 @@ function Settings() {
       {activeTab === 'dashboard' && (
         <div className="card max-w-2xl">
           <h2 className="text-lg font-medium text-gray-100 mb-4">Dashboard Customization</h2>
-          <div className="h-64 flex items-center justify-center border border-dashed border-mercury-dark-tertiary rounded-lg">
-            <p className="text-gray-500">Drag-and-drop widget customization will be implemented in Phase 7</p>
-          </div>
+          <p className="text-sm text-gray-400 mb-4">
+            Customize which widgets appear on your dashboard and their order.
+          </p>
+          <DashboardWidgetList
+            widgets={settings.dashboardWidgets}
+            onReorder={updateWidgetOrder}
+            onToggle={toggleWidget}
+            onReset={resetSettings}
+          />
         </div>
       )}
 
@@ -235,15 +216,16 @@ function Settings() {
                   <User className="w-8 h-8 text-mercury-amber" />
                 </div>
                 <div>
-                  <p className="text-gray-200 font-medium">Operations Supervisor</p>
-                  <p className="text-sm text-gray-500">supervisor@heliosmining.corp</p>
+                  <p className="text-gray-200 font-medium">{settings.displayName}</p>
+                  <p className="text-sm text-gray-500">{settings.email}</p>
                 </div>
               </div>
               <div className="border-t border-mercury-dark-tertiary pt-4">
                 <label className="block text-sm text-gray-400 mb-1">Display Name</label>
                 <input
                   type="text"
-                  defaultValue="Operations Supervisor"
+                  value={settings.displayName}
+                  onChange={(e) => updateSetting('displayName', e.target.value)}
                   className="w-full bg-mercury-dark border border-mercury-dark-tertiary rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-mercury-amber"
                 />
               </div>
@@ -251,7 +233,8 @@ function Settings() {
                 <label className="block text-sm text-gray-400 mb-1">Email</label>
                 <input
                   type="email"
-                  defaultValue="supervisor@heliosmining.corp"
+                  value={settings.email}
+                  onChange={(e) => updateSetting('email', e.target.value)}
                   className="w-full bg-mercury-dark border border-mercury-dark-tertiary rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-mercury-amber"
                 />
               </div>
