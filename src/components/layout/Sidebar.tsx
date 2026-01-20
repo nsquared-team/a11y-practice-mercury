@@ -18,7 +18,7 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/operations', icon: Pickaxe, label: 'Operations' },
   { path: '/personnel', icon: Users, label: 'Personnel' },
   { path: '/equipment', icon: Wrench, label: 'Equipment' },

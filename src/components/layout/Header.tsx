@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Bell, Search, User, Menu } from 'lucide-react'
+import mercuryLogo from '../../assets/mercury.svg'
+import SearchResults from './SearchResults'
 
 interface HeaderProps {
   onMenuToggle: () => void
@@ -7,7 +9,28 @@ interface HeaderProps {
 
 function Header({ onMenuToggle }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchFocused, setIsSearchFocused] = useState(false)
   const [notificationCount] = useState(3)
+  const searchContainerRef = useRef<HTMLDivElement>(null)
+
+  // Handle click outside to close search results
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchFocused(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  const handleSearchClose = () => {
+    setIsSearchFocused(false)
+    setSearchQuery('')
+  }
 
   // Simulated Mercury time (Mercury's day is 176 Earth days)
   const getMercuryTime = () => {
@@ -31,9 +54,11 @@ function Header({ onMenuToggle }: HeaderProps) {
         </button>
 
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-mercury-amber rounded-lg flex items-center justify-center">
-            <span className="text-mercury-dark font-bold text-sm">HM</span>
-          </div>
+          <img
+            src={mercuryLogo}
+            alt="Mercury logo"
+            className="w-8 h-8"
+          />
           <div className="hidden sm:block">
             <h1 className="text-lg font-semibold text-gray-100">Helios Mining</h1>
             <p className="text-xs text-mercury-amber font-mono">MERCURY OPERATIONS</p>
@@ -42,7 +67,7 @@ function Header({ onMenuToggle }: HeaderProps) {
       </div>
 
       {/* Center section - Search */}
-      <div className="flex-1 max-w-xl mx-4 hidden md:block">
+      <div className="flex-1 max-w-xl mx-4 hidden md:block" ref={searchContainerRef}>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
           <input
@@ -50,8 +75,15 @@ function Header({ onMenuToggle }: HeaderProps) {
             placeholder="Search operations, personnel, equipment..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setIsSearchFocused(true)}
             className="w-full bg-mercury-dark border border-mercury-dark-tertiary rounded-lg pl-10 pr-4 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-mercury-amber transition-colors"
+            aria-label="Search operations, personnel, and equipment"
+            aria-expanded={isSearchFocused && searchQuery.length >= 2}
+            aria-haspopup="listbox"
           />
+          {isSearchFocused && (
+            <SearchResults query={searchQuery} onClose={handleSearchClose} />
+          )}
         </div>
       </div>
 
