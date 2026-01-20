@@ -104,6 +104,10 @@ This site is designed as a practice environment for accessibility testers. It co
 - [Development Plan](./docs/DEVELOPMENT-PLAN.md) - Detailed implementation plan
 - [Requirements](./docs/project-requirements.md) - Full project requirements
 
+## 🙏 Acknowledgments
+
+- Mercury icon by [supalerk laipawat](https://thenounproject.com/icon/mercury-2414024/) from the Noun Project
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.

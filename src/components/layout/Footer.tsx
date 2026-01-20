@@ -46,6 +46,22 @@ function Footer() {
           <span className="text-gray-700">Active Sites:</span>
           <span className="text-mercury-amber font-mono">17</span>
         </div>
+
+        <div className="hidden md:flex items-center gap-2">
+          <span className="text-gray-700">|</span>
+          <span className="text-gray-700">
+            Mercury icon by{' '}
+            <a
+              href="https://thenounproject.com/icon/mercury-2414024/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-600 hover:text-mercury-amber underline"
+            >
+              supalerk laipawat
+            </a>{' '}
+            from the Noun Project
+          </span>
+        </div>
       </div>
 
       {/* Connection Status and Sync */}
