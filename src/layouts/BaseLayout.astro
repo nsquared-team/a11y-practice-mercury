@@ -1,0 +1,56 @@
+---
+/**
+ * BaseLayout — shared document shell for BOTH trees (a11y-NEUTRAL chrome only).
+ *
+ * It wires up the toolkit integration exactly as the contract requires, on every
+ * page of both trees:
+ *   theme.css  →  base.css (toolkit, AFTER theme)  →  switcher.css  →
+ *   [root only] inaccessible-overrides.css (AFTER base.css)  →  switcher.js
+ *
+ * The version switcher auto-mounts from window.location.pathname, so no markup
+ * or config is needed here.
+ *
+ * It deliberately does NOT emit landmarks, skip links, headings, or nav — those
+ * are a11y-relevant and are authored explicitly inside each tree's pages /
+ * chrome component, never shared.
+ *
+ * Props:
+ *   title       <title> text
+ *   description  meta description
+ *   variant      'root' | 'accessible'  (controls whether the override CSS loads)
+ *   bodyClass    optional extra class on <body>
+ */
+const TOOLKIT = 'https://cdn.jsdelivr.net/gh/nsquared-team/a11y-planet-sites-toolkit@v1';
+const { title, description = 'Mercury Mining Operations dashboard', variant, bodyClass = '' } = Astro.props;
+const isRoot = variant === 'root';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+
+    <!-- 1. Site theme (a11y-neutral chrome). -->
+    <link rel="stylesheet" href="/styles/theme.css" />
+
+    <!-- 2. Toolkit base.css — imported AFTER the theme so its focus / sr-only /
+            reduced-motion rules win (CONVENTIONS.md §4). -->
+    <link rel="stylesheet" href={`${TOOLKIT}/css/base.css`} />
+
+    <!-- 3. Version switcher styles. -->
+    <link rel="stylesheet" href={`${TOOLKIT}/switcher/switcher.css`} />
+
+    {/* 4. ROOT tree only: override stylesheet that breaks the base.css behaviour
+           on purpose. Loaded AFTER base.css so it actually overrides it. The
+           /accessible/ tree omits this entirely and keeps base.css intact. */}
+    {isRoot && <link rel="stylesheet" href="/styles/inaccessible-overrides.css" />}
+
+    <!-- 5. Version switcher — path-driven, auto-mounts, docks bottom-right. -->
+    <script src={`${TOOLKIT}/switcher/switcher.js`} defer></script>
+  </head>
+  <body class={bodyClass}>
+    <slot />
+  </body>
+</html>

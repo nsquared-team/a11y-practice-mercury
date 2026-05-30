@@ -1,0 +1,98 @@
+---
+/**
+ * Alerts & notifications — ROOT (inaccessible) tree.  Pattern focus: STATUS / FEED.
+ *
+ * Deliberate WCAG failures on this page:
+ *  - The feed container is NOT a live region, so alerts injected by the script
+ *    (Simulate incoming alert) are never announced to AT (4.1.3 Status Messages).
+ *  - Severity is conveyed by the coloured left border ONLY — there is no text or
+ *    label naming the level (Critical / Warning / Info) (1.4.1 Use of Colour).
+ *  - Dismiss is a non-focusable <span> wired by click only — not keyboard
+ *    operable and has no accessible name (2.1.1 Keyboard, 4.1.2 Name/Role/Value).
+ *  - "Simulate incoming alert" is a clickable <div>, not a <button>
+ *    (2.1.1 Keyboard, 4.1.2 Name/Role/Value).
+ *  - The feed is a stack of <div>s, not a list — no programmatic grouping
+ *    (1.3.1 Info & Relationships).
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ChromeRoot from '@components/ChromeRoot.astro';
+import { SITE, ALERTS } from '@data/ops.js';
+
+const icon = { critical: '⛔', warning: '⚠', info: 'ℹ' };
+---
+<BaseLayout title="Alerts — Mercury Mining Operations" variant="root">
+  <div class="app">
+    <ChromeRoot active="alerts">
+      <div class="pagehead">
+        <h1>Alerts &amp; Notifications</h1>
+        <p>Live operational alerts across the {SITE.colony}.</p>
+      </div>
+
+      <!-- Toolbar: "Simulate incoming alert" is a clickable div, not a button. -->
+      <div class="toolbar">
+        <div class="btn btn--primary" id="simulate">Simulate incoming alert</div>
+        <span class="muted" id="alert-count">{ALERTS.length} active alerts</span>
+      </div>
+
+      <!-- FAIL: plain div stack, no list semantics, no live region. -->
+      <div class="alertlist" id="feed">
+        {ALERTS.map((a) => (
+          <div class={`alert alert--${a.level}`} data-alert>
+            <span class="alert__icon" aria-hidden="true">{icon[a.level]}</span>
+            <div class="alert__body">
+              <h3>{a.title}</h3>
+              <p class="alert__detail">{a.detail}</p>
+              <div class="alert__meta">{a.rig} · {a.id}</div>
+            </div>
+            <span class="alert__time">{a.time}</span>
+            <span class="alert__dismiss" data-dismiss>×</span>
+          </div>
+        ))}
+      </div>
+    </ChromeRoot>
+  </div>
+</BaseLayout>
+
+<script>
+  const feed = document.getElementById('feed');
+  const simulate = document.getElementById('simulate');
+  const countEl = document.getElementById('alert-count');
+
+  function updateCount() {
+    const n = feed.querySelectorAll('[data-alert]').length;
+    countEl.textContent = n + ' active alerts';
+  }
+
+  function wireDismiss(node) {
+    const btn = node.querySelector('[data-dismiss]');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      node.remove();
+      updateCount();
+    });
+  }
+
+  feed.querySelectorAll('[data-alert]').forEach(wireDismiss);
+
+  let seq = 0;
+  simulate.addEventListener('click', () => {
+    seq += 1;
+    const id = 'AL-90' + (10 + seq);
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const node = document.createElement('div');
+    node.className = 'alert alert--warning';
+    node.setAttribute('data-alert', '');
+    node.innerHTML =
+      '<span class="alert__icon" aria-hidden="true">⚠</span>' +
+      '<div class="alert__body">' +
+        '<h3>Dust storm front detected — Sector S</h3>' +
+        '<p class="alert__detail">Particulate density rising fast. Secure exposed rigs and reduce array exposure.</p>' +
+        '<div class="alert__meta">Sector S · ' + id + '</div>' +
+      '</div>' +
+      '<span class="alert__time">' + time + '</span>' +
+      '<span class="alert__dismiss" data-dismiss>×</span>';
+    feed.prepend(node);
+    wireDismiss(node);
+    updateCount();
+  });
+</script>

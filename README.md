@@ -1,39 +1,71 @@
-# Discover Mercury – A11y Practice Site
+# Discover Mercury — A11y Practice Site
 
-Welcome to the **Discover Mercury** fake travel site! This project is designed as a realistic, imperfect website to help you practice and refine your accessibility (a11y) testing skills.
+**Mercury Mining Operations** is a deliberately imperfect web app for practising
+accessibility (a11y) testing. It presents as a real-time mining-operations
+dashboard for a fictional colony on Mercury.
 
-> 🚀 This is *not* a real travel agency. It’s a deliberately flawed project created by NSquared for accessibility training and testing purposes.
+> 🚀 Not a real product. A deliberately flawed dashboard built by NSquared for
+> accessibility training, part of a solar-system series of a11y-practice sites.
 
-## 🔎 About This Site
+**Live site:** <https://discovermercury.site>
 
-**Discover Mercury** is part of a solar-system-themed series of accessibility practice sites. Each site presents a unique set of accessibility challenges—ranging from common WCAG violations to subtle usability traps. It's ideal for:
+## Two mirrored trees
 
-- New accessibility testers honing their skills
-- Teams conducting hands-on workshops
-- Auditors practicing manual testing
-- Anyone preparing for CPACC, WAS, or other certifications
+This site ships the same dashboard twice, following the shared
+[planet-sites toolkit](https://github.com/nsquared-team/a11y-planet-sites-toolkit)
+contract:
 
-**Live site:** [https://discovermercury.site](https://discovermercury.site)
+| Version | Lives at | Purpose |
+| --- | --- | --- |
+| **Inaccessible** (default) | `/`, `/alerts/`, `/reports/`, `/settings/` | Real WCAG failures to find |
+| **Accessible** | `/accessible/`, `/accessible/alerts/`, … | The corrected mirror |
 
-## 🧪 What You Can Practice
+The two trees are **parallel page sets** (not one source with conditionals), so
+the intentional flaws stay legible. The version switcher (bottom-right, from the
+toolkit) jumps between the equivalent page in each tree.
 
-This site intentionally contains accessibility issues, including (but not limited to):
+## UI-pattern coverage
 
-- Keyboard traps and focus issues
-- Poor heading structures
-- Missing or incorrect ARIA
-- Low contrast color schemes
-- Unlabeled or misused form elements
-- Broken skip links or focus indicators
+Each route demonstrates failures and fixes for an assigned set of patterns:
 
-Use this project to test with:
-- Automated tools
-- Manual techniques
-- Assistive technology
+| Route | Patterns |
+| --- | --- |
+| `/` Dashboard | Charts (line + bar), status banner |
+| `/alerts/` | Alerts & notifications (live regions, dismissible feed) |
+| `/reports/` | Data tables (sortable, semantic) |
+| `/settings/` | Forms + Tabs & panels |
 
-## 🛠️ Tech Stack
+## Tech stack
 
-- HTML, CSS (Tailwind), JavaScript
-- Static site
-- Repo includes all code needed to run and edit locally
+- **Astro**, statically pre-rendered (default output). Every route emits real
+  static HTML into both trees; interactivity is small vanilla-JS islands. A
+  scanner can crawl and deep-link any page — there is no blank SPA shell.
+- Shared, a11y-neutral chrome (theme, layout shell) lives in components; the
+  a11y-relevant markup is authored explicitly per tree.
 
+## Local development
+
+```sh
+npm install
+npm run dev            # http://localhost:4321
+npm run build          # static output to ./dist
+```
+
+The switcher and base CSS are pulled from the toolkit CDN at runtime, so the
+toolkit is **not** a build dependency. Sitemaps are generated in CI (see
+Deployment): `sitemap.xml` lists the inaccessible (root) tree and is linked from
+`robots.txt`; `sitemap-accessible.xml` lists the `/accessible/` tree and is fed
+to a scanner manually when you want to scan the accessible version.
+
+## Deployment
+
+Pushes to `main` build and deploy to <https://discovermercury.site> via GitHub
+Actions. [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) is a thin
+caller to the toolkit's reusable workflow
+(`a11y-planet-sites-toolkit/.github/workflows/deploy-pages.yml@v1`), which checks
+out the toolkit, runs `npm install` + the build, generates the sitemaps +
+`robots.txt` over `dist/`, and publishes to Pages.
+
+One-time setup: **Settings → Pages → Source = GitHub Actions** and **Custom
+domain = `discovermercury.site`** (keep `public/CNAME` with the same value so
+Astro copies it into `dist/`).

@@ -1,0 +1,12 @@
+name: Deploy
+on:
+  push: { branches: [main] }
+  workflow_dispatch:
+jobs:
+  deploy:
+    permissions: { contents: read, pages: write, id-token: write }
+    uses: nsquared-team/a11y-planet-sites-toolkit/.github/workflows/deploy-pages.yml@v1
+    with:
+      base_url: https://discovermercury.site
+      build_command: npm run build
+      publish_dir: dist

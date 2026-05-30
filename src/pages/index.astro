@@ -1,0 +1,92 @@
+---
+/**
+ * Dashboard — ROOT (inaccessible) tree.  Pattern focus: CHARTS.
+ *
+ * Deliberate WCAG failures on this page:
+ *  - Charts are <svg> with NO accessible name, NO role, NO text alternative and
+ *    NO data table. A screen reader gets nothing (1.1.1 Non-text Content).
+ *  - The line series and the stream bars encode meaning by COLOUR ONLY — the
+ *    legend pairs a colour swatch with a name but the chart marks carry no
+ *    text/pattern, so colour is the only channel (1.4.1 Use of Colour).
+ *  - KPI deltas use ▲/▼ glyphs + colour with no text saying up/down/good/bad.
+ *  - The critical-incident banner is a styled <div>, not a role="alert" / status
+ *    region, so it is never announced (4.1.3 Status Messages).
+ *  - Heading order skips from <h1> straight to <h3> (1.3.1 Info & Relationships).
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ChromeRoot from '@components/ChromeRoot.astro';
+import { SITE, KPIS, PRODUCTION_SERIES, STREAM_MIX } from '@data/ops.js';
+import { linePlot, barPlot } from '@lib/chart.js';
+
+const plot = linePlot(PRODUCTION_SERIES.points);
+const bars = barPlot(STREAM_MIX.bars);
+const barClass = { IL: 'bar--il', AN: 'bar--an', PX: 'bar--px', WI: 'bar--wi' };
+---
+<BaseLayout title="Dashboard — Mercury Mining Operations" variant="root">
+  <div class="app">
+    <ChromeRoot active="dashboard">
+      <div class="pagehead">
+        <h1>Operations Dashboard</h1>
+        <p>Live extraction telemetry for the {SITE.colony}.</p>
+      </div>
+
+      <!-- FAIL: styled div, not a live/alert region — never announced. -->
+      <div class="banner banner--critical">
+        <span class="live-dot"></span>
+        Rig 07 auto-halted — drill head over-torque. Inspection crew dispatched.
+      </div>
+
+      <!-- KPI cards: deltas carry meaning via arrow glyph + colour only. -->
+      <div class="grid grid--kpi" style="margin-bottom:1rem">
+        {KPIS.map((k) => (
+          <div class="card">
+            <div class="kpi__label">{k.label}</div>
+            <div class="kpi__value">{k.value} <span class="kpi__unit">{k.unit}</span></div>
+            <div class={`kpi__delta ${k.delta > 0 ? 'kpi__delta--up' : k.delta < 0 ? 'kpi__delta--down' : 'kpi__delta--flat'}`}>
+              {k.delta > 0 ? '▲' : k.delta < 0 ? '▼' : '■'} {Math.abs(k.delta)}%
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="grid grid--2">
+        <!-- Line chart: no name, no role, no alt, no data table. -->
+        <div class="card">
+          <div class="card__title"><h3>{PRODUCTION_SERIES.label}</h3></div>
+          <svg class="chart" viewBox={`0 0 ${plot.width} ${plot.height}`}>
+            <defs>
+              <linearGradient id="area-grad" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#ff9e3d" stop-opacity="0.35" />
+                <stop offset="100%" stop-color="#ff9e3d" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <line class="chart__axis" x1={plot.pad} y1={plot.height - plot.pad} x2={plot.width - plot.pad} y2={plot.height - plot.pad} />
+            <path class="chart__area" d={plot.area} />
+            <path class="chart__line" d={plot.line} />
+            {plot.xy.map((p) => <circle class="chart__dot" cx={p.x} cy={p.y} r="3" />)}
+            {plot.xy.filter((_, i) => i % 2 === 0).map((p) => (
+              <text class="chart__label" x={p.x} y={plot.height - plot.pad + 14} text-anchor="middle">{p.t}</text>
+            ))}
+          </svg>
+        </div>
+
+        <!-- Stream-mix bars: meaning by colour only (legend below). -->
+        <div class="card">
+          <div class="card__title"><h3>{STREAM_MIX.label}</h3></div>
+          <svg class="chart" viewBox={`0 0 ${bars.width} ${bars.height}`}>
+            <line class="chart__axis" x1={bars.pad} y1={bars.baseline} x2={bars.width - bars.pad} y2={bars.baseline} />
+            {bars.rects.map((r) => <rect class={barClass[r.code]} x={r.x} y={r.y} width={r.w} height={r.h} rx="3" />)}
+          </svg>
+          <div class="legend">
+            {STREAM_MIX.bars.map((b) => (
+              <span class="legend__item">
+                <span class={`legend__swatch ${barClass[b.code]}`} style={`background:${b.code === 'IL' ? '#ff9e3d' : b.code === 'AN' ? '#38e0c8' : b.code === 'PX' ? '#5aa6ff' : '#ffc371'}`}></span>
+                {b.stream}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </ChromeRoot>
+  </div>
+</BaseLayout>

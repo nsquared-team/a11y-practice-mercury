@@ -1,0 +1,152 @@
+---
+/**
+ * Settings — ROOT (inaccessible) tree.  Pattern focus: FORMS + TABS & PANELS.
+ *
+ * Deliberate WCAG failures on this page:
+ *  TABS:
+ *   - Tabs are clickable <div>s with NO role="tab"/"tablist"/"tabpanel", no
+ *     aria-selected, no aria-controls, no ids tying tab→panel (4.1.2 Name,
+ *     Role, Value).
+ *   - No keyboard support at all: not focusable, no arrow-key roving, click only
+ *     (2.1.1 Keyboard).
+ *   - The selected tab is shown by COLOUR ONLY via .is-active — no text/aria
+ *     state (1.4.1 Use of Colour).
+ *   - Panels are shown/hidden with [hidden] toggled on click only.
+ *  FORMS:
+ *   - Inputs have NO associated <label> — placeholder text is the only "label"
+ *     (1.3.1 Info & Relationships / 3.3.2 Labels or Instructions / 4.1.2).
+ *   - The required "Shift supervisor" field is NOT programmatically required, and
+ *     on submit its error is a loose red <div> not associated with the field and
+ *     not announced (3.3.1 Error Identification / 4.1.3 Status Messages).
+ *   - Checkboxes are custom clickable <div>s, not real inputs (2.1.1 / 4.1.2).
+ *   - "Save" is a clickable <div>, not a button (4.1.2).
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ChromeRoot from '@components/ChromeRoot.astro';
+import { RIGS, SETTINGS_TABS } from '@data/ops.js';
+---
+<BaseLayout title="Settings — Mercury Mining Operations" variant="root">
+  <div class="app">
+    <ChromeRoot active="settings">
+      <div class="pagehead">
+        <h1>Settings</h1>
+        <p>Configure rig targets, alert thresholds, and crew assignments for the extraction complex.</p>
+      </div>
+
+      <div class="tabs">
+        <!-- FAIL: clickable divs, no tab semantics, no keyboard, colour-only state. -->
+        <div class="tablist">
+          {SETTINGS_TABS.map((t, i) => (
+            <div class={`tab${i === 0 ? ' is-active' : ''}`} data-tab={t.key}>{t.label}</div>
+          ))}
+        </div>
+
+        <!-- General -->
+        <div class="tabpanel" data-panel="general">
+          <form id="rig-form" class="stack">
+            <!-- FAIL: placeholder-only, no <label>. -->
+            <div class="field">
+              <select class="select" name="rig">
+                <option value="" disabled selected>Active rig…</option>
+                {RIGS.map((r) => <option value={r.id}>{r.label}</option>)}
+              </select>
+            </div>
+
+            <div class="field">
+              <input class="input" type="number" name="target" placeholder="Target output (t/sol)" />
+            </div>
+
+            <div class="field">
+              <!-- FAIL: required field not marked required, no label. -->
+              <input class="input" type="text" name="supervisor" id="sup" placeholder="Shift supervisor" />
+              <!-- FAIL: loose error div, not associated, not announced. -->
+              <div class="field__error" id="sup-err" hidden>Shift supervisor is required.</div>
+            </div>
+
+            <div class="field">
+              <div class="field__label">Options</div>
+              <!-- FAIL: custom clickable div "checkboxes". -->
+              <div class="checkrow">
+                <div class="fakecheck" data-check="autohalt"></div>
+                <span>Auto-halt on over-torque</span>
+              </div>
+              <div class="checkrow">
+                <div class="fakecheck" data-check="email"></div>
+                <span>Email me critical alerts</span>
+              </div>
+            </div>
+
+            <!-- FAIL: clickable div, not a button. -->
+            <div class="btn btn--primary" id="save-btn" data-save>Save changes</div>
+          </form>
+        </div>
+
+        <!-- Alert Thresholds -->
+        <div class="tabpanel" data-panel="thresholds" hidden>
+          <div class="stack">
+            <div class="field">
+              <input class="input" type="number" name="coreFloor" placeholder="Core temp margin floor (°C)" value="25" />
+            </div>
+            <div class="field">
+              <input class="input" type="number" name="solarFloor" placeholder="Solar output floor (MW)" value="80" />
+            </div>
+            <div class="field">
+              <input class="input" type="number" name="torqueCeil" placeholder="Drill torque ceiling (kN·m)" value="240" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Crew & Shifts -->
+        <div class="tabpanel" data-panel="crew" hidden>
+          <dl>
+            <dt>Shift A supervisor</dt>
+            <dd>K. Okonkwo</dd>
+            <dt>Shift B supervisor</dt>
+            <dd>R. Vasquez</dd>
+            <dt>Crew on shift</dt>
+            <dd>18 of 24</dd>
+            <dt>Next handover</dt>
+            <dd>Sol 4,182 · 22:00</dd>
+          </dl>
+        </div>
+      </div>
+    </ChromeRoot>
+  </div>
+</BaseLayout>
+
+<script>
+  // Tabs: click-only switching, selection by .is-active class (colour) only.
+  const tabs = Array.from(document.querySelectorAll('.tab'));
+  const panels = Array.from(document.querySelectorAll('.tabpanel'));
+
+  function selectTab(key) {
+    tabs.forEach((t) => t.classList.toggle('is-active', t.getAttribute('data-tab') === key));
+    panels.forEach((p) => {
+      if (p.getAttribute('data-panel') === key) p.removeAttribute('hidden');
+      else p.setAttribute('hidden', '');
+    });
+  }
+
+  tabs.forEach((t) => {
+    t.addEventListener('click', () => selectTab(t.getAttribute('data-tab')));
+  });
+
+  // Fake checkboxes: toggle a class on click (no real state, no keyboard).
+  document.querySelectorAll('.fakecheck').forEach((c) => {
+    c.addEventListener('click', () => c.classList.toggle('is-checked'));
+  });
+
+  // Save: validates supervisor, but error is a loose div, not associated/announced.
+  const form = document.getElementById('rig-form');
+  const sup = document.getElementById('sup');
+  const err = document.getElementById('sup-err');
+  document.querySelector('[data-save]').addEventListener('click', () => {
+    if (!sup.value.trim()) {
+      err.hidden = false;
+    } else {
+      err.hidden = true;
+      // pretend-save
+    }
+  });
+  form.addEventListener('submit', (e) => e.preventDefault());
+</script>

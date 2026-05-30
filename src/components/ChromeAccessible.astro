@@ -1,0 +1,52 @@
+---
+/**
+ * ChromeAccessible — the navigation/header/footer frame for the /accessible/
+ * tree. Authored explicitly (NOT shared with the root tree): skip link, proper
+ * landmarks, a real <nav> with list semantics and aria-current, discernible
+ * link text, and a focusable <main>.
+ *
+ * Props: active (nav key for the current page).
+ */
+import { SITE, NAV } from '../data/ops.js';
+const BASE = '/accessible/';
+const { active } = Astro.props;
+---
+<a class="skiplink pt-sr-only-focusable" href="#main">Skip to main content</a>
+
+<nav class="sidebar" aria-label="Primary">
+  <a class="brand" href={BASE} aria-label={`${SITE.name} — dashboard home`}>
+    <span class="brand__mark" aria-hidden="true">M</span>
+    <span>
+      <span class="brand__name">{SITE.short}</span>
+      <span class="brand__sub">Mining Operations</span>
+    </span>
+  </a>
+  <ul class="navlist">
+    {NAV.map((item) => (
+      <li>
+        <a
+          class="navlink"
+          href={BASE + item.path}
+          aria-current={active === item.key ? 'page' : undefined}
+        >
+          {item.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<header class="topbar">
+  <p class="topbar__sol" style="margin:0">{SITE.colony}</p>
+  <div class="topbar__meta">
+    <span class="topbar__sol">{SITE.sol}</span>
+    <span class="badge badge--ok"><span class="badge__dot" aria-hidden="true"></span>Systems nominal</span>
+  </div>
+</header>
+
+<main class="main" id="main" tabindex="-1">
+  <slot />
+  <footer class="footer">
+    <p>{SITE.name} · {SITE.colony} · Accessible reference build. Telemetry is simulated.</p>
+  </footer>
+</main>

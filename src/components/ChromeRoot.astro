@@ -1,0 +1,50 @@
+---
+/**
+ * ChromeRoot — the navigation/header/footer frame for the ROOT (inaccessible)
+ * tree. Authored explicitly (NOT shared): it bakes in the frame-level WCAG
+ * failures so the inaccessible tree is genuinely broken:
+ *
+ *   - No skip link (WCAG 2.4.1 Bypass Blocks — fail).
+ *   - No landmarks: the nav, header, and main region are plain <div>s, and the
+ *     nav has no list semantics (WCAG 1.3.1 / 4.1.2 — fail).
+ *   - The current page is shown by colour only, with no aria-current
+ *     (WCAG 1.4.1 Use of Colour — fail).
+ *   - Main content has no programmatic identity / focus target.
+ *
+ * Props: active (nav key for the current page).
+ */
+import { SITE, NAV } from '../data/ops.js';
+const BASE = '/';
+const { active } = Astro.props;
+---
+<div class="sidebar">
+  <div class="brand">
+    <div class="brand__mark">M</div>
+    <div>
+      <div class="brand__name">{SITE.short}</div>
+      <div class="brand__sub">Mining Operations</div>
+    </div>
+  </div>
+  <div class="navlist">
+    {NAV.map((item) => (
+      <a class={`navlink${active === item.key ? ' is-active' : ''}`} href={BASE + item.path}>
+        {item.label}
+      </a>
+    ))}
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="topbar__sol">{SITE.colony}</div>
+  <div class="topbar__meta">
+    <span class="topbar__sol">{SITE.sol}</span>
+    <span class="badge badge--ok"><span class="badge__dot"></span>Systems nominal</span>
+  </div>
+</div>
+
+<div class="main">
+  <slot />
+  <div class="footer">
+    {SITE.name} · {SITE.colony} · Telemetry is simulated.
+  </div>
+</div>

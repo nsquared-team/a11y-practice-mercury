@@ -1,0 +1,142 @@
+---
+/**
+ * Reports — ACCESSIBLE tree.  Pattern focus: SORTABLE DATA TABLE (corrected).
+ *
+ * Fixes mirrored against the root reports page:
+ *  - Proper <table class="data"> with a <caption>, a <thead> of <th scope="col">
+ *    (class="num" for numeric columns), and a <th scope="row"> for each row's Rig
+ *    cell, so rows/columns are programmatically associated and the table is named
+ *    (1.3.1 Info & Relationships).
+ *  - Each sortable column uses a real <button class="sortbtn"> inside the <th>, so
+ *    it is focusable and keyboard-operable with a proper role/name (2.1.1, 4.1.2).
+ *  - The <th> carries aria-sort ("ascending" / "descending" / "none"), kept in
+ *    sync by the script, so the sorted column and direction are exposed to AT; the
+ *    ▲/▼ glyph is aria-hidden (4.1.2 / 1.4.1).
+ *  - Status is rendered as a text badge (badge--ok / badge--warn / badge--crit),
+ *    so meaning is not carried by colour alone (1.4.1).
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ChromeAccessible from '@components/ChromeAccessible.astro';
+import { SITE, SHIFT_REPORT } from '@data/ops.js';
+
+// Initial sensible sort: by Output (tonnes) descending, in the static HTML.
+const rows = [...SHIFT_REPORT.rows].sort((a, b) => b.tonnes - a.tonnes);
+
+const badgeClass = (s) =>
+  s === 'Nominal' ? 'badge--ok' : s === 'Degraded' ? 'badge--warn' : 'badge--crit';
+---
+<BaseLayout title="Reports — Mercury Mining Operations" variant="accessible">
+  <div class="app">
+    <ChromeAccessible active="reports">
+      <div class="pagehead">
+        <h1>Shift Reports</h1>
+        <p>Per-rig extraction output for the {SITE.colony}, {SITE.sol}.</p>
+      </div>
+
+      <p>
+        Output, uptime and ore grade for every rig logged this sol across both
+        shifts. Activate a column heading to sort the table; activate it again to
+        reverse the order. The table opens sorted by output, highest first.
+      </p>
+
+      <div class="card">
+        <table class="data" id="report-table">
+          <caption>{SHIFT_REPORT.caption}</caption>
+          <thead>
+            <tr>
+              {SHIFT_REPORT.columns.map((col, i) => (
+                <th
+                  scope="col"
+                  class={col.numeric ? 'num' : undefined}
+                  data-key={col.key}
+                  data-numeric={col.numeric ? 'true' : 'false'}
+                  aria-sort={col.key === 'tonnes' ? 'descending' : 'none'}
+                >
+                  <button type="button" class="sortbtn" data-sort>
+                    {col.label}
+                    <span class="sortbtn__arrow" aria-hidden="true">{col.key === 'tonnes' ? '▼' : ''}</span>
+                  </button>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr>
+                <th scope="row" data-key="rig">{r.rig}</th>
+                <td data-key="sector">{r.sector}</td>
+                <td class="num" data-key="tonnes" data-value={r.tonnes}>{r.tonnes}</td>
+                <td class="num" data-key="uptime" data-value={r.uptime}>{r.uptime.toFixed(1)}</td>
+                <td class="num" data-key="grade" data-value={r.grade}>{r.grade.toFixed(1)}</td>
+                <td data-key="status"><span class={`badge ${badgeClass(r.status)}`}>{r.status}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </ChromeAccessible>
+  </div>
+</BaseLayout>
+
+<script>
+  const table = document.getElementById('report-table');
+  if (table) {
+    const tbody = table.querySelector('tbody');
+    const headRow = table.querySelector('thead tr');
+    const headers = Array.from(headRow.children);
+    // initial state mirrors the static render: tonnes, descending.
+    let activeKey = 'tonnes';
+    let dir = 'desc';
+
+    function render() {
+      headers.forEach((cell) => {
+        const key = cell.getAttribute('data-key');
+        const arrow = cell.querySelector('.sortbtn__arrow');
+        if (key === activeKey) {
+          cell.setAttribute('aria-sort', dir === 'asc' ? 'ascending' : 'descending');
+          if (arrow) arrow.textContent = dir === 'asc' ? '▲' : '▼';
+        } else {
+          cell.setAttribute('aria-sort', 'none');
+          if (arrow) arrow.textContent = '';
+        }
+      });
+
+      const numeric = headers.find((c) => c.getAttribute('data-key') === activeKey)
+        .getAttribute('data-numeric') === 'true';
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort((a, b) => {
+        const ca = a.querySelector(`[data-key="${activeKey}"]`);
+        const cb = b.querySelector(`[data-key="${activeKey}"]`);
+        let va, vb;
+        if (numeric) {
+          va = parseFloat(ca.getAttribute('data-value'));
+          vb = parseFloat(cb.getAttribute('data-value'));
+        } else {
+          va = ca.textContent.trim().toLowerCase();
+          vb = cb.textContent.trim().toLowerCase();
+        }
+        if (va < vb) return dir === 'asc' ? -1 : 1;
+        if (va > vb) return dir === 'asc' ? 1 : -1;
+        return 0;
+      });
+      rows.forEach((r) => tbody.appendChild(r));
+    }
+
+    headers.forEach((cell) => {
+      const btn = cell.querySelector('[data-sort]');
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        const key = cell.getAttribute('data-key');
+        if (key === activeKey) {
+          dir = dir === 'asc' ? 'desc' : 'asc';
+        } else {
+          activeKey = key;
+          dir = 'asc';
+        }
+        render();
+      });
+    });
+
+    render();
+  }
+</script>

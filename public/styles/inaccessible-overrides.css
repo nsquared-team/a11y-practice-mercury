@@ -1,0 +1,50 @@
+/* ==========================================================================
+   ROOT (inaccessible) tree ONLY — loaded AFTER toolkit base.css.
+   Its whole job is to UNDO the accessibility behaviours base.css provides, so
+   the root tree demonstrates real WCAG failures. The /accessible/ tree never
+   loads this file and therefore keeps base.css intact.
+
+   These are deliberate, global failures layered on top of the per-page,
+   per-pattern failures authored in the root pages themselves.
+   ========================================================================== */
+
+/* WCAG 2.4.7 Focus Visible (FAIL): remove the visible keyboard focus ring that
+   base.css installs. Keyboard users now get no indication of focus position. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible,
+:where(a, button, input, select, textarea, [tabindex]):focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* WCAG 2.3.3 / 2.2.2 (FAIL): defeat base.css's prefers-reduced-motion handling
+   so animations keep running even for users who asked the OS to reduce motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: revert !important;
+    animation-iteration-count: revert !important;
+    transition-duration: revert !important;
+    scroll-behavior: revert !important;
+  }
+}
+
+/* .sr-only is sabotaged: instead of being available to assistive tech, any
+   visually-hidden helper text is fully removed from the accessibility tree.
+   (Root pages mostly just omit such text; this guarantees it's gone even if a
+   shared component emits it.) */
+.sr-only,
+.pt-sr-only {
+  display: none !important;
+}
+
+/* WCAG 1.4.3 Contrast (FAIL): wash out secondary/muted text so it drops below
+   the 4.5:1 minimum against the dark panels. */
+:root {
+  --text-dim: #6f7d8a;
+  --text-muted: #59636e;
+}
+
+/* WCAG 1.4.1 Use of Colour (reinforced): status badges lose their text/border
+   contrast cues so meaning is carried by the faint background colour alone. */
+.badge { border-color: transparent !important; opacity: 0.85; }

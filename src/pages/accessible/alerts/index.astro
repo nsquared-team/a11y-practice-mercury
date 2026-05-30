@@ -1,0 +1,101 @@
+---
+/**
+ * Alerts & notifications — ACCESSIBLE tree.  Pattern focus: STATUS / FEED (corrected).
+ *
+ * Fixes mirrored against the root alerts page:
+ *  - The feed is a polite live region (role="log" aria-live="polite"
+ *    aria-label="Alerts feed"), so script-inserted alerts are announced (4.1.3).
+ *  - Each alert names its level as TEXT via a badge ("Critical" / "Warning" /
+ *    "Info") alongside an aria-hidden icon — never colour alone (1.4.1).
+ *  - Dismiss is a real <button> with an aria-label naming the alert it removes
+ *    (2.1.1 Keyboard, 4.1.2 Name/Role/Value).
+ *  - "Simulate incoming alert" is a real <button class="btn btn--primary">
+ *    (2.1.1 Keyboard, 4.1.2 Name/Role/Value).
+ *  - The feed is a <ul class="alertlist"> of <li> items, with titles as <h3>
+ *    under the page <h1> (1.3.1 Info & Relationships).
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ChromeAccessible from '@components/ChromeAccessible.astro';
+import { SITE, ALERTS } from '@data/ops.js';
+
+const icon = { critical: '⛔', warning: '⚠', info: 'ℹ' };
+const levelText = { critical: 'Critical', warning: 'Warning', info: 'Info' };
+const levelBadge = { critical: 'badge--crit', warning: 'badge--warn', info: 'badge--muted' };
+---
+<BaseLayout title="Alerts — Mercury Mining Operations" variant="accessible">
+  <div class="app">
+    <ChromeAccessible active="alerts">
+      <div class="pagehead">
+        <h1>Alerts &amp; Notifications</h1>
+        <p>Live operational alerts across the {SITE.colony}.</p>
+      </div>
+
+      <div class="toolbar">
+        <button type="button" class="btn btn--primary" id="simulate">Simulate incoming alert</button>
+        <span class="muted" id="alert-count">{ALERTS.length} active alerts</span>
+      </div>
+
+      <ul class="alertlist" id="feed" role="log" aria-live="polite" aria-label="Alerts feed">
+        {ALERTS.map((a) => (
+          <li class={`alert alert--${a.level}`} data-alert>
+            <span class="alert__icon" aria-hidden="true">{icon[a.level]}</span>
+            <div class="alert__body">
+              <span class={`badge ${levelBadge[a.level]}`}>{levelText[a.level]}</span>
+              <h3>{a.title}</h3>
+              <p class="alert__detail">{a.detail}</p>
+              <div class="alert__meta">{a.rig} · {a.id}</div>
+            </div>
+            <span class="alert__time">{a.time}</span>
+            <button type="button" class="alert__dismiss" data-dismiss aria-label={`Dismiss alert: ${a.title}`}>×</button>
+          </li>
+        ))}
+      </ul>
+    </ChromeAccessible>
+  </div>
+</BaseLayout>
+
+<script>
+  const feed = document.getElementById('feed');
+  const simulate = document.getElementById('simulate');
+  const countEl = document.getElementById('alert-count');
+
+  function updateCount() {
+    const n = feed.querySelectorAll('[data-alert]').length;
+    countEl.textContent = n + ' active alerts';
+  }
+
+  function wireDismiss(node) {
+    const btn = node.querySelector('[data-dismiss]');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      node.remove();
+      updateCount();
+    });
+  }
+
+  feed.querySelectorAll('[data-alert]').forEach(wireDismiss);
+
+  let seq = 0;
+  simulate.addEventListener('click', () => {
+    seq += 1;
+    const id = 'AL-90' + (10 + seq);
+    const title = 'Dust storm front detected — Sector S';
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const node = document.createElement('li');
+    node.className = 'alert alert--warning';
+    node.setAttribute('data-alert', '');
+    node.innerHTML =
+      '<span class="alert__icon" aria-hidden="true">⚠</span>' +
+      '<div class="alert__body">' +
+        '<span class="badge badge--warn">Warning</span>' +
+        '<h3>' + title + '</h3>' +
+        '<p class="alert__detail">Particulate density rising fast. Secure exposed rigs and reduce array exposure.</p>' +
+        '<div class="alert__meta">Sector S · ' + id + '</div>' +
+      '</div>' +
+      '<span class="alert__time">' + time + '</span>' +
+      '<button type="button" class="alert__dismiss" data-dismiss aria-label="Dismiss alert: ' + title + '">×</button>';
+    feed.prepend(node);
+    wireDismiss(node);
+    updateCount();
+  });
+</script>
