@@ -1,134 +1,235 @@
 ---
 /**
- * Reports — ROOT (inaccessible) tree.  Pattern focus: SORTABLE DATA TABLE.
+ * Reports — ROOT (inaccessible) tree.  Patterns: TABS + ACCORDION + CHARTS +
+ * data TABLE + export MODAL.
  *
- * Deliberate WCAG failures on this page:
- *  - The data uses a real <table> but the column header cells are <td> (no <th>,
- *    no scope) and there is NO <caption>, so rows/columns have no programmatic
- *    associations and the table has no name (1.3.1 Info & Relationships).
- *  - The sort affordance is a clickable <span class="sortbtn"> inside the header
- *    cell: it is not focusable and responds to click only, so keyboard users
- *    cannot sort (2.1.1 Keyboard) and it exposes no button role/name (4.1.2).
- *  - Sort direction is conveyed by a coloured ▲/▼ glyph only, and the sorted
- *    state is NOT exposed programmatically — there is no aria-sort, so AT users
- *    cannot tell which column/direction is active (4.1.2 / 1.4.1).
- *  - The Status column is coloured text only (red "Offline" etc.); the word is
- *    still present, so this is a minor secondary colour-reliance demo (1.4.1).
+ * Deliberate WCAG failures:
+ *  - Page tabs are clickable <div>s (no roles/keyboard, colour-only).
+ *  - Builder accordion headers are clickable <div>s: no button, no
+ *    aria-expanded/controls; open state by colour/icon only (4.1.2, 2.1.1).
+ *  - Preview + analytics charts have no name/role/alt and no data table (1.1.1).
+ *  - Analytics line/bar toggle is colour-only with no pressed state (1.4.1, 4.1.2).
+ *  - Saved-reports action buttons are icon-only with no accessible name (4.1.2).
+ *  - Export modal: checkbox group "label" is a <span> not associated; checkboxes
+ *    have no id/label; no role="dialog"/aria-modal; no Escape/focus management;
+ *    metric labels low-contrast (1.3.1, 4.1.2, 2.1.2, 1.4.3).
  */
 import BaseLayout from '@layouts/BaseLayout.astro';
 import ChromeRoot from '@components/ChromeRoot.astro';
-import { SITE, SHIFT_REPORT } from '@data/ops.js';
+import { reportMetrics, savedReports, getReportTypeLabel, getVisualizationLabel } from '@data/reports.js';
+import { EXTRACTION_SERIES } from '@data/ops.js';
 
-// Initial sensible sort: by Output (tonnes) descending, in the static HTML.
-const rows = [...SHIFT_REPORT.rows].sort((a, b) => b.tonnes - a.tonnes);
-
-// FAIL (1.4.1): Status conveyed by coloured text only — no badge/icon/cue.
-const statusColor = (s) =>
-  s === 'Nominal' ? 'var(--ok-text)' : s === 'Degraded' ? 'var(--warn-text)' : 'var(--crit-text)';
+const types = Object.keys(reportMetrics);
+const ranges = [['7days', 'Last 7 days'], ['30days', 'Last 30 days'], ['90days', 'Last quarter']];
+const vizzes = [['line', 'Line'], ['bar', 'Bar'], ['area', 'Area']];
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const fmt = (iso) => { const d = new Date(iso); return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`; };
+const PREV = { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], values: [3200, 3450, 3380, 3610, 3720, 3290, 3510] };
+const metricsByType = reportMetrics;
 ---
 <BaseLayout title="Reports — Discover Mercury Mining Operations" variant="root">
   <div class="app">
     <ChromeRoot active="reports">
       <div class="pagehead">
-        <h1>Shift Reports</h1>
-        <p>Per-rig extraction output for the {SITE.colony}, {SITE.sol}.</p>
+        <h1>Reports &amp; Analytics</h1>
+        <p>Build custom reports, manage saved reports, and compare performance.</p>
       </div>
 
-      <p>
-        Output, uptime and ore grade for every rig logged this sol across both
-        shifts. Click a column heading to sort the table; click again to reverse
-        the order. The table opens sorted by output, highest first.
-      </p>
+      <div class="tabs">
+        <div class="tablist" id="ptabs">
+          <span class="tab is-active" data-panel="builder">Report Builder</span>
+          <span class="tab" data-panel="saved">Saved Reports</span>
+          <span class="tab" data-panel="analytics">Analytics</span>
+        </div>
 
-      <div class="card">
-        <table class="data" id="report-table">
-          <thead>
-            <tr>
-              {SHIFT_REPORT.columns.map((col) => (
-                <td class={col.numeric ? 'num' : undefined} data-key={col.key} data-numeric={col.numeric ? 'true' : 'false'}>
-                  <span class="sortbtn" data-sort>
-                    {col.label}
-                    <span class="sortbtn__arrow"></span>
-                  </span>
-                </td>
+        <div class="tabpanel" data-panel="builder">
+          <div class="builder">
+            <div>
+              <div class="acc is-open" data-acc>
+                <div class="acc__head" data-accbtn>Report type <span class="acc__arrow">▸</span></div>
+                <div class="acc__panel">
+                  <select class="select" id="b-type">{types.map((t) => <option value={t}>{getReportTypeLabel(t)}</option>)}</select>
+                </div>
+              </div>
+              <div class="acc" data-acc>
+                <div class="acc__head" data-accbtn>Date range <span class="acc__arrow">▸</span></div>
+                <div class="acc__panel" hidden>
+                  <select class="select" id="b-range">{ranges.map(([v, l]) => <option value={v}>{l}</option>)}</select>
+                </div>
+              </div>
+              <div class="acc" data-acc>
+                <div class="acc__head" data-accbtn>Metrics <span class="acc__arrow">▸</span></div>
+                <div class="acc__panel" hidden id="b-metrics"></div>
+              </div>
+              <div class="acc" data-acc>
+                <div class="acc__head" data-accbtn>Visualization <span class="acc__arrow">▸</span></div>
+                <div class="acc__panel" hidden>
+                  <select class="select" id="b-viz">{vizzes.map(([v, l]) => <option value={v} selected={v === 'area'}>{l}</option>)}</select>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card__title"><h3 id="prev-title">Extraction · Last 7 days</h3></div>
+              <div class="previewstats" id="prev-stats"></div>
+              <div id="prev-chart"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabpanel" data-panel="saved" hidden>
+          <div class="tablewrap">
+            <table class="data">
+              <thead><tr><th>Report</th><th>Type</th><th>Schedule</th><th>Last run</th><th>Actions</th></tr></thead>
+              <tbody>
+                {savedReports.map((r) => (
+                  <tr>
+                    <td>{r.name}</td>
+                    <td>{getReportTypeLabel(r.type)}</td>
+                    <td>{r.schedule}</td>
+                    <td>{r.lastRun ? fmt(r.lastRun) : '—'}</td>
+                    <td>
+                      <span class="savedactions">
+                        <span class="pagebtn run-report" data-id={r.id}>▶</span>
+                        <span class="pagebtn export-report" data-id={r.id}>⭳</span>
+                        <span class="pagebtn">✕</span>
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="tabpanel" data-panel="analytics" hidden>
+          <div class="toolbar">
+            <span class="togglegroup">
+              <span class="pagebtn is-current" data-viz="line">Line</span>
+              <span class="pagebtn" data-viz="bar">Bar</span>
+            </span>
+          </div>
+          <div class="card">
+            <div class="card__title"><h3>Output by commodity</h3></div>
+            <div id="cmp-chart"></div>
+            <div class="legend">
+              {EXTRACTION_SERIES.series.map((s) => (
+                <span class="legend__item"><span class="legend__swatch" style={`background:${s.color}`}></span>{s.label}</span>
               ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr>
-                <td data-key="rig">{r.rig}</td>
-                <td data-key="sector">{r.sector}</td>
-                <td class="num" data-key="tonnes" data-value={r.tonnes}>{r.tonnes}</td>
-                <td class="num" data-key="uptime" data-value={r.uptime}>{r.uptime.toFixed(1)}</td>
-                <td class="num" data-key="grade" data-value={r.grade}>{r.grade.toFixed(1)}</td>
-                <td data-key="status"><span style={`color:${statusColor(r.status)};font-weight:650`}>{r.status}</span></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </div>
+          </div>
+        </div>
       </div>
     </ChromeRoot>
   </div>
+
+  {/* Export modal: no dialog semantics, unassociated checkbox group, no labels. */}
+  <div class="modal-backdrop" id="xbackdrop" hidden>
+    <div class="modal">
+      <div class="modal__head">
+        <h2 class="modal__title">Export report</h2>
+        <span class="modal__close" id="xclose">✕</span>
+      </div>
+      <div class="modal__body">
+        <span class="field__label" style="display:block;margin-bottom:.5rem">Columns to export</span>
+        <div id="x-metrics"></div>
+      </div>
+      <div class="modal__foot">
+        <button class="btn btn--ghost" type="button" id="xcancel">Cancel</button>
+        <button class="btn btn--primary" type="button" id="xgo">Export CSV</button>
+      </div>
+    </div>
+  </div>
 </BaseLayout>
 
-<script>
-  const table = document.getElementById('report-table');
-  if (table) {
-    const tbody = table.querySelector('tbody');
-    const headRow = table.querySelector('thead tr');
-    const headers = Array.from(headRow.children);
-    // initial state mirrors the static render: tonnes, descending.
-    let activeKey = 'tonnes';
-    let dir = 'desc';
+<script define:vars={{ metricsByType, EXTRACTION_SERIES, PREV, vizLabels: { line: 'Line Chart', bar: 'Bar Chart', area: 'Area Chart' }, typeLabels: Object.fromEntries(types.map((t) => [t, getReportTypeLabel(t)])) }}>
+  // page tabs
+  const ptabs = document.getElementById('ptabs');
+  ptabs.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => {
+    ptabs.querySelectorAll('.tab').forEach((x) => x.classList.remove('is-active'));
+    t.classList.add('is-active');
+    document.querySelectorAll('.tabpanel[data-panel]').forEach((pn) => (pn.hidden = pn.dataset.panel !== t.dataset.panel));
+  }));
 
-    function render() {
-      headers.forEach((cell) => {
-        const arrow = cell.querySelector('.sortbtn__arrow');
-        if (!arrow) return;
-        if (cell.getAttribute('data-key') === activeKey) {
-          arrow.textContent = dir === 'asc' ? '▲' : '▼';
-        } else {
-          arrow.textContent = '';
-        }
-      });
-
-      const numeric = headers.find((c) => c.getAttribute('data-key') === activeKey)
-        .getAttribute('data-numeric') === 'true';
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      rows.sort((a, b) => {
-        const ca = a.querySelector(`[data-key="${activeKey}"]`);
-        const cb = b.querySelector(`[data-key="${activeKey}"]`);
-        let va, vb;
-        if (numeric) {
-          va = parseFloat(ca.getAttribute('data-value'));
-          vb = parseFloat(cb.getAttribute('data-value'));
-        } else {
-          va = ca.textContent.trim().toLowerCase();
-          vb = cb.textContent.trim().toLowerCase();
-        }
-        if (va < vb) return dir === 'asc' ? -1 : 1;
-        if (va > vb) return dir === 'asc' ? 1 : -1;
-        return 0;
-      });
-      rows.forEach((r) => tbody.appendChild(r));
-    }
-
-    headers.forEach((cell) => {
-      const btn = cell.querySelector('[data-sort]');
-      if (!btn) return;
-      btn.addEventListener('click', () => {
-        const key = cell.getAttribute('data-key');
-        if (key === activeKey) {
-          dir = dir === 'asc' ? 'desc' : 'asc';
-        } else {
-          activeKey = key;
-          dir = 'asc';
-        }
-        render();
-      });
+  // accordion
+  document.querySelectorAll('[data-acc]').forEach((acc) => {
+    acc.querySelector('[data-accbtn]').addEventListener('click', () => {
+      const open = acc.classList.toggle('is-open');
+      acc.querySelector('.acc__panel').hidden = !open;
     });
+  });
 
-    render();
+  // chart builder
+  function chartSVG(values, labels, viz) {
+    const W = 560, H = 220, pad = 34, innerW = W - pad * 2, innerH = H - pad * 2;
+    const max = Math.max(...values), min = Math.min(...values, 0), span = (max - min) || 1;
+    const x = (i) => pad + (i / (values.length - 1)) * innerW, y = (v) => pad + (1 - (v - min) / span) * innerH;
+    let body = '';
+    if (viz === 'bar') {
+      const gap = innerW / values.length, bw = gap * 0.6;
+      values.forEach((v, i) => { const h = (v - min) / span * innerH; body += `<rect x="${(pad + i * gap + gap * 0.2).toFixed(1)}" y="${(pad + innerH - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#ff9e3d"/>`; });
+    } else {
+      const line = values.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+      if (viz === 'area') body += `<path d="${line} L${x(values.length - 1).toFixed(1)},${pad + innerH} L${x(0).toFixed(1)},${pad + innerH} Z" fill="#ff9e3d" fill-opacity="0.15"/>`;
+      body += `<path d="${line}" fill="none" stroke="#ff9e3d" stroke-width="2.5"/>`;
+    }
+    const lab = labels.map((l, i) => `<text class="chart__label" x="${x(i).toFixed(1)}" y="${H - pad + 14}" text-anchor="middle">${l}</text>`).join('');
+    return `<svg viewBox="0 0 ${W} ${H}" class="chart"><line class="chart__axis" x1="${pad}" y1="${pad + innerH}" x2="${W - pad}" y2="${pad + innerH}"/>${body}${lab}</svg>`;
   }
+  function renderBuilder() {
+    const type = document.getElementById('b-type').value, viz = document.getElementById('b-viz').value;
+    const range = document.getElementById('b-range');
+    document.getElementById('prev-title').textContent = `${typeLabels[type]} · ${range.options[range.selectedIndex].text}`;
+    const total = PREV.values.reduce((a, b) => a + b, 0), avg = Math.round(total / PREV.values.length), peak = Math.max(...PREV.values);
+    document.getElementById('prev-stats').innerHTML = [['Total', total.toLocaleString()], ['Average', avg.toLocaleString()], ['Peak', peak.toLocaleString()]]
+      .map(([l, v]) => `<div class="previewstat"><div class="previewstat__label">${l}</div><div class="previewstat__value">${v}</div></div>`).join('');
+    document.getElementById('prev-chart').innerHTML = chartSVG(PREV.values, PREV.labels, viz);
+  }
+  function renderMetrics(containerId, type, withIds) {
+    const list = metricsByType[type] || [];
+    document.getElementById(containerId).innerHTML = list.map((m, i) =>
+      `<div class="checkrow"><span class="chk"><input type="checkbox" ${withIds ? `id="m-${containerId}-${i}"` : ''} value="${m.id}" checked>${m.name} <span class="muted" style="font-size:.78rem">(${m.unit})</span></span></div>`).join('');
+  }
+  document.getElementById('b-type').addEventListener('change', () => { renderMetrics('b-metrics', document.getElementById('b-type').value, false); renderBuilder(); });
+  document.getElementById('b-viz').addEventListener('change', renderBuilder);
+  document.getElementById('b-range').addEventListener('change', renderBuilder);
+  renderMetrics('b-metrics', types_default(), false);
+  function types_default() { return document.getElementById('b-type').value; }
+  renderBuilder();
+
+  // analytics comparison toggle
+  function renderCmp(viz) {
+    const S = EXTRACTION_SERIES.series, labels = EXTRACTION_SERIES.labels;
+    const W = 640, H = 240, pad = 34, innerW = W - pad * 2, innerH = H - pad * 2;
+    const max = Math.max(...S.flatMap((s) => s.values)) || 1;
+    let body = '';
+    if (viz === 'bar') {
+      const totals = S.map((s) => s.values.reduce((a, b) => a + b, 0)); const tmax = Math.max(...totals);
+      const gap = innerW / totals.length, bw = gap * 0.5;
+      totals.forEach((v, i) => { const h = v / tmax * innerH; body += `<rect x="${(pad + i * gap + gap * 0.25).toFixed(1)}" y="${(pad + innerH - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${S[i].color}"/>`; });
+    } else {
+      S.forEach((s) => {
+        const line = s.values.map((v, i) => `${i ? 'L' : 'M'}${(pad + i / (labels.length - 1) * innerW).toFixed(1)},${(pad + (1 - v / max) * innerH).toFixed(1)}`).join(' ');
+        body += `<path d="${line}" fill="none" stroke="${s.color}" stroke-width="2.5"/>`;
+      });
+    }
+    document.getElementById('cmp-chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="chart"><line class="chart__axis" x1="${pad}" y1="${pad + innerH}" x2="${W - pad}" y2="${pad + innerH}"/>${body}</svg>`;
+  }
+  document.querySelectorAll('[data-viz]').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-viz]').forEach((x) => x.classList.remove('is-current'));
+    b.classList.add('is-current');
+    renderCmp(b.dataset.viz);
+  }));
+  renderCmp('line');
+
+  // export modal
+  const xback = document.getElementById('xbackdrop');
+  function openExport(type) {
+    const list = metricsByType[type] || metricsByType[Object.keys(metricsByType)[0]];
+    document.getElementById('x-metrics').innerHTML = list.map((m) => `<div class="checkrow"><span class="chk"><input type="checkbox" checked><span class="muted">${m.name}</span></span></div>`).join('');
+    xback.hidden = false;
+  }
+  document.querySelectorAll('.export-report').forEach((b) => b.addEventListener('click', () => openExport('extraction')));
+  document.getElementById('xclose').addEventListener('click', () => (xback.hidden = true));
+  document.getElementById('xcancel').addEventListener('click', () => (xback.hidden = true));
+  document.getElementById('xgo').addEventListener('click', () => (xback.hidden = true));
 </script>

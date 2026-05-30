@@ -330,6 +330,22 @@ button.eqcard { font: inherit; color: inherit; cursor: pointer; }
 .step.is-done .step__num { background: var(--amber); border-color: var(--amber); color: #1a0f02; }
 .step__line { width: 18px; height: 2px; background: var(--line); }
 
+/* --- Accordion + report builder ----------------------------------------- */
+.acc { border: 1px solid var(--line); border-radius: var(--radius-sm); margin-bottom: 0.6rem; overflow: hidden; }
+.acc__head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.7rem 0.9rem; background: var(--bg-panel-2); border: 0; font: inherit; font-weight: 600; color: var(--text); text-align: left; cursor: pointer; }
+.acc__head:hover { background: var(--bg-elev); }
+.acc__arrow { transition: transform 0.15s; color: var(--text-muted); }
+.acc.is-open .acc__arrow, .acc__head[aria-expanded="true"] .acc__arrow { transform: rotate(90deg); }
+.acc__panel { padding: 0.9rem; }
+.acc__panel[hidden] { display: none; }
+.builder { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 1.2rem; align-items: start; }
+@media (max-width: 860px) { .builder { grid-template-columns: 1fr; } }
+.previewstats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0.8rem; margin-bottom: 1rem; }
+.previewstat__label { color: var(--text-muted); font-size: 0.78rem; }
+.previewstat__value { font-family: var(--mono); font-weight: 700; font-size: 1.25rem; }
+.savedactions { display: inline-flex; gap: 0.3rem; }
+.togglegroup { display: inline-flex; gap: 0.25rem; }
+
 /* --- Misc ---------------------------------------------------------------- */
 .stack > * + * { margin-top: 1rem; }
 .muted { color: var(--text-muted); }
