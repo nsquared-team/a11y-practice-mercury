@@ -1,0 +1,263 @@
+---
+/**
+ * Equipment — ACCESSIBLE tree.  Patterns: TABS + CARDS + GAUGES + TIMELINE +
+ * tabbed MODAL (all corrected, one-to-one with the root Equipment page).
+ *
+ * Fixes:
+ *  - Page + modal tabs use role="tablist"/"tab"/"tabpanel" with aria-selected,
+ *    roving tabindex, and arrow-key navigation (4.1.2, 2.1.1).
+ *  - Inventory search has a <label>; cards are real <button>s (1.3.1, 2.1.1).
+ *  - Gauges are role="img" with a value+status name, and status is shown as text
+ *    not colour alone (1.1.1, 1.4.1).
+ *  - Timeline items show their priority as text (1.4.1).
+ *  - Detail modal is role="dialog" aria-modal with focus move-in, trap, Escape,
+ *    and focus return; no positive tabindex (4.1.2, 2.1.2, 2.4.3).
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ChromeAccessible from '@components/ChromeAccessible.astro';
+import Gauge from '@components/Gauge.astro';
+import { equipmentData, scheduledMaintenance, getEquipmentStats } from '@data/equipment.js';
+
+const stats = getEquipmentStats();
+const types = [...new Set(equipmentData.map((e) => e.type))];
+const statuses = ['operational', 'idle', 'maintenance', 'offline'];
+const STATUS = { operational: 'Operational', idle: 'Idle', maintenance: 'Maintenance', offline: 'Offline' };
+const BADGE = { operational: 'ok', idle: 'muted', maintenance: 'warn', offline: 'crit' };
+const PRIO = { critical: 'crit', high: 'crit', medium: 'warn', low: 'ok' };
+const SENS = { normal: 'ok', warning: 'warn', critical: 'crit' };
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const fmt = (iso) => { const d = new Date(iso); return `${months[d.getMonth()]} ${d.getDate()}`; };
+
+const now = new Date();
+const groups = { Overdue: [], 'This week': [], Upcoming: [] };
+[...scheduledMaintenance].sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate)).forEach((m) => {
+  const days = (new Date(m.scheduledDate) - now) / 86400000;
+  (days < 0 ? groups.Overdue : days < 7 ? groups['This week'] : groups.Upcoming).push(m);
+});
+const featured = [...equipmentData].sort((a, b) => b.utilization - a.utilization).slice(0, 3);
+const tabs = [['inventory', 'Inventory'], ['maintenance', 'Maintenance'], ['diagnostics', 'Diagnostics']];
+
+const detail = equipmentData.map((e) => ({
+  id: e.id, name: e.name, type: e.type, status: e.status, util: e.utilization, location: e.location,
+  manuf: e.specifications.manufacturer, model: e.specifications.model,
+  power: e.specifications.powerConsumption, weight: e.specifications.weight,
+  sensors: e.sensors.map((s) => ({ name: s.name, value: Math.round(s.value), unit: s.unit, min: s.min, max: s.max, status: s.status })),
+  history: (e.maintenanceHistory || []).slice(0, 3).map((h) => ({ date: fmt(h.date), type: h.type, desc: h.description, tech: h.technician })),
+}));
+---
+<BaseLayout title="Equipment — Discover Mercury Mining Operations" variant="accessible">
+  <div class="app">
+    <ChromeAccessible active="equipment">
+      <div class="pagehead">
+        <h1>Equipment Monitoring</h1>
+        <p>{stats.total} units across {types.length} classes — inventory, maintenance, and live diagnostics.</p>
+      </div>
+
+      <section aria-labelledby="stats-h">
+        <h2 id="stats-h" class="sr-only">Fleet status counts</h2>
+        <div class="grid grid--kpi" style="margin-bottom:1.2rem">
+          {statuses.map((s) => (
+            <div class="card">
+              <div class="kpi__label">{STATUS[s]}</div>
+              <div class="kpi__value">{stats.byStatus[s] || 0}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div class="tabs">
+        <div class="tablist" role="tablist" aria-label="Equipment views" id="ptabs">
+          {tabs.map(([k, l], i) => (
+            <button role="tab" id={`pt-${k}`} aria-controls={`pp-${k}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? '0' : '-1'} class={`tab${i === 0 ? ' is-active' : ''}`} data-panel={k}>{l}</button>
+          ))}
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="pp-inventory" aria-labelledby="pt-inventory" tabindex="0" data-panel="inventory">
+          <div class="filterbar">
+            <span class="topsearch" style="max-width:280px">
+              <label for="eqsearch" class="sr-only">Search equipment by name</label>
+              <span class="topsearch__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+              <input class="topsearch__input" id="eqsearch" type="search" placeholder="Search equipment…" />
+            </span>
+            <fieldset class="filtergroup"><legend class="filtergroup__label">Type</legend>
+              {types.map((t) => <label class="chk"><input type="checkbox" class="f-type" value={t} />{t}</label>)}
+            </fieldset>
+          </div>
+          <div class="eqcards" id="cards">
+            {equipmentData.map((e) => (
+              <button type="button" class="eqcard" data-id={e.id} data-name={e.name.toLowerCase()} data-type={e.type}>
+                <span class="eqcard__head">
+                  <span><span class="eqcard__name">{e.name}</span><span class="eqcard__type"> · {e.type}</span></span>
+                  <span class={`badge badge--${BADGE[e.status]}`}>{STATUS[e.status]}</span>
+                </span>
+                <span class="eqcard__util muted" style="font-size:.8rem;display:block">Utilization {e.utilization}%</span>
+                <span class="meter" style="display:block"><span class="meter__fill" style={`width:${e.utilization}%;display:block`}></span></span>
+                <span class="eqcard__meta"><span>{e.location}</span><span>Next: {fmt(e.nextMaintenance)}</span></span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="pp-maintenance" aria-labelledby="pt-maintenance" tabindex="0" data-panel="maintenance" hidden>
+          {Object.entries(groups).map(([label, items]) => items.length > 0 && (
+            <div class="tgroup">
+              <h3 class="tgroup__title">{label} ({items.length})</h3>
+              <ul class="tlist">
+                {items.map((m) => (
+                  <li class="titem">
+                    <span class={`titem__dot titem__dot--${m.priority}`} aria-hidden="true"></span>
+                    <div class="titem__title">{m.equipmentName} — {m.type} <span class={`badge badge--${PRIO[m.priority]}`}>{m.priority}</span></div>
+                    <div class="titem__meta">{fmt(m.scheduledDate)} · {m.assignedTechnician} · {m.estimatedDuration}h</div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="pp-diagnostics" aria-labelledby="pt-diagnostics" tabindex="0" data-panel="diagnostics" hidden>
+          {featured.map((e) => (
+            <div>
+              <h3 class="gaugesub">{e.name} <span class="muted" style="font-weight:400">· {e.type}</span></h3>
+              <div class="gaugegrid">
+                {e.sensors.map((s) => (
+                  <div class="gauge">
+                    <Gauge value={Math.round(s.value)} min={s.min} max={s.max} unit={s.unit} status={s.status} title={`${s.name}: ${Math.round(s.value)} ${s.unit}, ${s.status}`} />
+                    <div class="gauge__name">{s.name} <span class={`badge badge--${SENS[s.status]}`}>{s.status}</span></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </ChromeAccessible>
+  </div>
+
+  <div class="modal-backdrop" id="eqbackdrop" hidden>
+    <div class="modal" style="width:min(660px,100%)" role="dialog" aria-modal="true" aria-labelledby="eqtitle">
+      <div class="modal__head">
+        <h2 class="modal__title" id="eqtitle" tabindex="-1">Equipment</h2>
+        <button class="modal__close" id="eqclose" type="button" aria-label="Close dialog"><span aria-hidden="true">✕</span></button>
+      </div>
+      <div class="modal__body">
+        <div class="tablist" role="tablist" aria-label="Equipment detail" id="eqtabs"></div>
+        <div id="eqpanel" style="padding-top:1rem"></div>
+      </div>
+      <div class="modal__foot">
+        <button class="btn btn--ghost" type="button" id="eqcancel">Close</button>
+        <button class="btn btn--primary" type="button">Request maintenance</button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script define:vars={{ detail, SENS }}>
+  // Roving-tabindex + arrow-key tab widget. Returns a select(key) fn.
+  function wireTabs(listEl, onSelect) {
+    const tabsArr = Array.from(listEl.querySelectorAll('[role="tab"]'));
+    function select(tab, focus) {
+      tabsArr.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        t.classList.toggle('is-active', on);
+      });
+      if (focus) tab.focus();
+      onSelect(tab);
+    }
+    listEl.addEventListener('click', (e) => { const t = e.target.closest('[role="tab"]'); if (t) select(t, false); });
+    listEl.addEventListener('keydown', (e) => {
+      const i = tabsArr.indexOf(document.activeElement);
+      if (i < 0) return;
+      let n = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') n = (i + 1) % tabsArr.length;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') n = (i - 1 + tabsArr.length) % tabsArr.length;
+      else if (e.key === 'Home') n = 0;
+      else if (e.key === 'End') n = tabsArr.length - 1;
+      if (n !== null) { e.preventDefault(); select(tabsArr[n], true); }
+    });
+    return select;
+  }
+
+  // Page tabs
+  const ptabs = document.getElementById('ptabs');
+  wireTabs(ptabs, (tab) => {
+    const p = tab.dataset.panel;
+    document.querySelectorAll('.tabpanel[data-panel]').forEach((pn) => (pn.hidden = pn.dataset.panel !== p));
+  });
+
+  // Inventory search + type filter
+  const cards = Array.from(document.querySelectorAll('#cards .eqcard'));
+  function applyFilter() {
+    const q = (document.getElementById('eqsearch').value || '').toLowerCase();
+    const sel = Array.from(document.querySelectorAll('.f-type:checked')).map((c) => c.value);
+    cards.forEach((c) => { c.style.display = (c.dataset.name.includes(q) && (!sel.length || sel.includes(c.dataset.type))) ? '' : 'none'; });
+  }
+  document.getElementById('eqsearch').addEventListener('input', applyFilter);
+  document.querySelectorAll('.f-type').forEach((b) => b.addEventListener('change', applyFilter));
+
+  // Accessible modal: dialog semantics, inner ARIA tabs, focus mgmt, Esc, trap.
+  const back = document.getElementById('eqbackdrop');
+  const modal = back.querySelector('.modal');
+  const tabsEl = document.getElementById('eqtabs');
+  const panel = document.getElementById('eqpanel');
+  const title = document.getElementById('eqtitle');
+  let lastFocused = null;
+  function gauge(s) {
+    const r = 42, C = 2 * Math.PI * r, pct = Math.max(0, Math.min(1, (s.value - s.min) / ((s.max - s.min) || 1)));
+    return `<div class="gauge"><svg viewBox="0 0 108 108" role="img" aria-label="${s.name}: ${s.value} ${s.unit}, ${s.status}"><circle class="gauge__track" cx="54" cy="54" r="${r}" stroke-width="9"/><circle class="gauge__val gauge__val--${s.status}" cx="54" cy="54" r="${r}" stroke-width="9" stroke-dasharray="${(pct * C).toFixed(1)} ${C.toFixed(1)}"/><text class="gauge__num" x="54" y="52" text-anchor="middle">${s.value}</text><text class="gauge__unit" x="54" y="68" text-anchor="middle">${s.unit}</text></svg><div class="gauge__name">${s.name} <span class="badge badge--${SENS[s.status]}">${s.status}</span></div></div>`;
+  }
+  function panelHTML(d, tab) {
+    if (tab === 'sensors') return `<div class="gaugegrid">${d.sensors.map(gauge).join('')}</div>`;
+    if (tab === 'history') return d.history.length ? `<ul class="tlist">${d.history.map((h) => `<li class="titem"><span class="titem__dot" aria-hidden="true"></span><div class="titem__title">${h.desc}</div><div class="titem__meta">${h.date} · ${h.type} · ${h.tech}</div></li>`).join('')}</ul>` : '<p class="muted">No maintenance history.</p>';
+    return `<dl class="detailgrid">
+      <div class="detailitem"><dt>Type</dt><dd>${d.type}</dd></div>
+      <div class="detailitem"><dt>Status</dt><dd>${d.status}</dd></div>
+      <div class="detailitem"><dt>Utilization</dt><dd>${d.util}%</dd></div>
+      <div class="detailitem"><dt>Location</dt><dd>${d.location}</dd></div>
+      <div class="detailitem"><dt>Manufacturer</dt><dd>${d.manuf}</dd></div>
+      <div class="detailitem"><dt>Model</dt><dd>${d.model}</dd></div>
+      <div class="detailitem"><dt>Power</dt><dd>${d.power} kW</dd></div>
+      <div class="detailitem"><dt>Weight</dt><dd>${d.weight} kg</dd></div></dl>`;
+  }
+  const innerTabs = [['overview', 'Overview'], ['sensors', 'Sensors'], ['history', 'History']];
+  function buildModal(d) {
+    tabsEl.innerHTML = innerTabs.map(([k, l], i) =>
+      `<button role="tab" id="et-${k}" aria-controls="eqpanel" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}" class="tab${i === 0 ? ' is-active' : ''}" data-t="${k}">${l}</button>`).join('');
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', 'et-overview');
+    panel.innerHTML = panelHTML(d, 'overview');
+    wireTabs(tabsEl, (tab) => { panel.setAttribute('aria-labelledby', tab.id); panel.innerHTML = panelHTML(d, tab.dataset.t); });
+  }
+  function focusable() {
+    return Array.from(modal.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),[tabindex]:not([tabindex="-1"])')).filter((el) => el.offsetParent !== null);
+  }
+  function onKeydown(e) {
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key === 'Tab') {
+      const f = focusable(); if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }
+  function open(id, trigger) {
+    const d = detail.find((x) => x.id === id); if (!d) return;
+    lastFocused = trigger;
+    title.textContent = d.name;
+    buildModal(d);
+    back.hidden = false;
+    document.addEventListener('keydown', onKeydown);
+    title.focus();
+  }
+  function close() {
+    back.hidden = true;
+    document.removeEventListener('keydown', onKeydown);
+    if (lastFocused) lastFocused.focus();
+  }
+  document.querySelectorAll('#cards .eqcard').forEach((c) => c.addEventListener('click', () => open(c.dataset.id, c)));
+  document.getElementById('eqclose').addEventListener('click', close);
+  document.getElementById('eqcancel').addEventListener('click', close);
+  back.addEventListener('click', (e) => { if (e.target === back) close(); });
+</script>

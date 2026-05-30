@@ -1,0 +1,23 @@
+---
+/**
+ * Circular gauge (replaces react-circular-progressbar). Visual only: renders a
+ * track ring + a value arc + the centre number. Pass `title` to give the SVG an
+ * accessible name (role="img"); omit it and the SVG is aria-hidden so the
+ * wrapping page can supply the name/status text itself.
+ *
+ * Props: value, min=0, max=100, unit='', status='normal', title (optional).
+ */
+const { value, min = 0, max = 100, unit = '', status = 'normal', title } = Astro.props;
+const r = 42, cx = 54, cy = 54, sw = 9;
+const C = 2 * Math.PI * r;
+const pct = Math.max(0, Math.min(1, (value - min) / (max - min || 1)));
+const len = +(pct * C).toFixed(1);
+const num = Math.round(value);
+---
+<svg viewBox="0 0 108 108" role={title ? 'img' : undefined} aria-label={title} aria-hidden={title ? undefined : 'true'}>
+  <circle class="gauge__track" cx={cx} cy={cy} r={r} stroke-width={sw} />
+  <circle class={`gauge__val gauge__val--${status}`} cx={cx} cy={cy} r={r} stroke-width={sw}
+    stroke-dasharray={`${len} ${C.toFixed(1)}`} />
+  <text class="gauge__num" x="54" y="52" text-anchor="middle">{num}</text>
+  <text class="gauge__unit" x="54" y="68" text-anchor="middle">{unit}</text>
+</svg>

@@ -1,0 +1,212 @@
+---
+/**
+ * Equipment — ROOT (inaccessible) tree.  Patterns: TABS + CARDS + GAUGES +
+ * TIMELINE + tabbed MODAL.
+ *
+ * Deliberate WCAG failures:
+ *  - Page tabs are clickable <div>s: no tablist/tab/tabpanel roles, no
+ *    aria-selected, no keyboard, selected by colour only (4.1.2, 2.1.1, 1.4.1).
+ *  - Inventory search has no <label> (1.3.1, 3.3.2). Cards are clickable <div>s,
+ *    not buttons (2.1.1, 4.1.2).
+ *  - Diagnostics gauges have no accessible name and sensor status is by ring
+ *    colour only (1.1.1, 1.4.1).
+ *  - Timeline priority is conveyed by dot colour only (1.4.1).
+ *  - Detail modal: no role="dialog"/aria-modal, no Escape, no focus management;
+ *    its inner tabs have no roles/aria-selected; footer buttons use positive
+ *    tabindex (4.1.2, 2.1.2, 2.4.3).
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ChromeRoot from '@components/ChromeRoot.astro';
+import Gauge from '@components/Gauge.astro';
+import { equipmentData, scheduledMaintenance, getEquipmentStats } from '@data/equipment.js';
+
+const stats = getEquipmentStats();
+const types = [...new Set(equipmentData.map((e) => e.type))];
+const statuses = ['operational', 'idle', 'maintenance', 'offline'];
+const STATUS = { operational: 'Operational', idle: 'Idle', maintenance: 'Maintenance', offline: 'Offline' };
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const fmt = (iso) => { const d = new Date(iso); return `${months[d.getMonth()]} ${d.getDate()}`; };
+
+const now = new Date();
+const groups = { Overdue: [], 'This week': [], Upcoming: [] };
+[...scheduledMaintenance].sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate)).forEach((m) => {
+  const days = (new Date(m.scheduledDate) - now) / 86400000;
+  (days < 0 ? groups.Overdue : days < 7 ? groups['This week'] : groups.Upcoming).push(m);
+});
+const featured = [...equipmentData].sort((a, b) => b.utilization - a.utilization).slice(0, 3);
+
+const detail = equipmentData.map((e) => ({
+  id: e.id, name: e.name, type: e.type, status: e.status, util: e.utilization, location: e.location,
+  manuf: e.specifications.manufacturer, model: e.specifications.model,
+  power: e.specifications.powerConsumption, weight: e.specifications.weight,
+  sensors: e.sensors.map((s) => ({ name: s.name, value: Math.round(s.value), unit: s.unit, min: s.min, max: s.max, status: s.status })),
+  history: (e.maintenanceHistory || []).slice(0, 3).map((h) => ({ date: fmt(h.date), type: h.type, desc: h.description, tech: h.technician })),
+}));
+---
+<BaseLayout title="Equipment — Discover Mercury Mining Operations" variant="root">
+  <div class="app">
+    <ChromeRoot active="equipment">
+      <div class="pagehead">
+        <h1>Equipment Monitoring</h1>
+        <p>{stats.total} units across {types.length} classes — inventory, maintenance, and live diagnostics.</p>
+      </div>
+
+      <div class="grid grid--kpi" style="margin-bottom:1.2rem">
+        {statuses.map((s) => (
+          <div class="card">
+            <div class="kpi__label">{STATUS[s]}</div>
+            <div class="kpi__value">{stats.byStatus[s] || 0}</div>
+          </div>
+        ))}
+      </div>
+
+      <div class="tabs">
+        <div class="tablist" id="ptabs">
+          <span class="tab is-active" data-panel="inventory">Inventory</span>
+          <span class="tab" data-panel="maintenance">Maintenance</span>
+          <span class="tab" data-panel="diagnostics">Diagnostics</span>
+        </div>
+
+        <div class="tabpanel" data-panel="inventory">
+          <div class="filterbar">
+            <input class="input" id="eqsearch" type="text" placeholder="Search equipment…" style="max-width:280px" />
+            <div class="filtergroup"><span class="filtergroup__label">Type</span>
+              {types.map((t) => <span class="chk"><span class="pagebtn f-type" data-val={t}>{t}</span></span>)}
+            </div>
+          </div>
+          <div class="eqcards" id="cards">
+            {equipmentData.map((e) => (
+              <div class="eqcard" data-id={e.id} data-name={e.name.toLowerCase()} data-type={e.type}>
+                <div class="eqcard__head">
+                  <div><div class="eqcard__name">{e.name}</div><div class="eqcard__type">{e.type}</div></div>
+                  <span class={`otext otext--${e.status === 'operational' ? 'active' : e.status === 'offline' ? 'offline' : e.status === 'maintenance' ? 'maintenance' : 'idle'}`}>{STATUS[e.status]}</span>
+                </div>
+                <div class="eqcard__util muted" style="font-size:.8rem">Utilization {e.utilization}%</div>
+                <div class="meter"><div class="meter__fill" style={`width:${e.utilization}%`}></div></div>
+                <div class="eqcard__meta"><span>{e.location}</span><span>Next: {fmt(e.nextMaintenance)}</span></div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="tabpanel" data-panel="maintenance" hidden>
+          <div class="timeline">
+            {Object.entries(groups).map(([label, items]) => items.length > 0 && (
+              <div class="tgroup">
+                <h3 class="tgroup__title">{label} ({items.length})</h3>
+                <ul class="tlist">
+                  {items.map((m) => (
+                    <li class="titem">
+                      <span class={`titem__dot titem__dot--${m.priority}`}></span>
+                      <div class="titem__title">{m.equipmentName} — {m.type}</div>
+                      <div class="titem__meta">{fmt(m.scheduledDate)} · {m.assignedTechnician} · {m.estimatedDuration}h</div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="tabpanel" data-panel="diagnostics" hidden>
+          {featured.map((e) => (
+            <div>
+              <div class="gaugesub">{e.name} <span class="muted" style="font-weight:400">· {e.type}</span></div>
+              <div class="gaugegrid">
+                {e.sensors.map((s) => (
+                  <div class="gauge">
+                    <Gauge value={Math.round(s.value)} min={s.min} max={s.max} unit={s.unit} status={s.status} />
+                    <div class="gauge__name">{s.name}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </ChromeRoot>
+  </div>
+
+  <div class="modal-backdrop" id="eqbackdrop" hidden>
+    <div class="modal" style="width:min(660px,100%)">
+      <div class="modal__head">
+        <h2 class="modal__title" id="eqtitle">Equipment</h2>
+        <span class="modal__close" id="eqclose">✕</span>
+      </div>
+      <div class="modal__body">
+        <div class="tablist" id="eqtabs"></div>
+        <div id="eqpanel" style="padding-top:1rem"></div>
+      </div>
+      <div class="modal__foot">
+        <button class="btn btn--ghost" type="button" tabindex="2" id="eqcancel">Close</button>
+        <button class="btn btn--primary" type="button" tabindex="1">Request maintenance</button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script define:vars={{ detail }}>
+  // page tabs
+  const ptabs = document.getElementById('ptabs');
+  ptabs.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => {
+    ptabs.querySelectorAll('.tab').forEach((x) => x.classList.remove('is-active'));
+    t.classList.add('is-active');
+    const p = t.dataset.panel;
+    document.querySelectorAll('.tabpanel[data-panel]').forEach((pn) => (pn.hidden = pn.dataset.panel !== p));
+  }));
+
+  // inventory search + type filter
+  const cards = Array.from(document.querySelectorAll('#cards .eqcard'));
+  let typeFilter = null;
+  function applyFilter() {
+    const q = (document.getElementById('eqsearch').value || '').toLowerCase();
+    cards.forEach((c) => {
+      c.style.display = (c.dataset.name.includes(q) && (!typeFilter || c.dataset.type === typeFilter)) ? '' : 'none';
+    });
+  }
+  document.getElementById('eqsearch').addEventListener('input', applyFilter);
+  document.querySelectorAll('.f-type').forEach((b) => b.addEventListener('click', () => {
+    typeFilter = typeFilter === b.dataset.val ? null : b.dataset.val;
+    document.querySelectorAll('.f-type').forEach((x) => x.classList.toggle('is-current', x.dataset.val === typeFilter));
+    applyFilter();
+  }));
+
+  // detail modal
+  const back = document.getElementById('eqbackdrop');
+  const tabsEl = document.getElementById('eqtabs');
+  const panel = document.getElementById('eqpanel');
+  function gauge(s) {
+    const r = 42, C = 2 * Math.PI * r, pct = Math.max(0, Math.min(1, (s.value - s.min) / ((s.max - s.min) || 1)));
+    return `<div class="gauge"><svg viewBox="0 0 108 108" aria-hidden="true"><circle class="gauge__track" cx="54" cy="54" r="${r}" stroke-width="9"/><circle class="gauge__val gauge__val--${s.status}" cx="54" cy="54" r="${r}" stroke-width="9" stroke-dasharray="${(pct * C).toFixed(1)} ${C.toFixed(1)}"/><text class="gauge__num" x="54" y="52" text-anchor="middle">${s.value}</text><text class="gauge__unit" x="54" y="68" text-anchor="middle">${s.unit}</text></svg><div class="gauge__name">${s.name}</div></div>`;
+  }
+  function panelHTML(d, tab) {
+    if (tab === 'sensors') return `<div class="gaugegrid">${d.sensors.map(gauge).join('')}</div>`;
+    if (tab === 'history') return d.history.length ? `<ul class="tlist">${d.history.map((h) => `<li class="titem"><span class="titem__dot"></span><div class="titem__title">${h.desc}</div><div class="titem__meta">${h.date} · ${h.type} · ${h.tech}</div></li>`).join('')}</ul>` : '<p class="muted">No maintenance history.</p>';
+    return `<dl class="detailgrid">
+      <div class="detailitem"><dt>Type</dt><dd>${d.type}</dd></div>
+      <div class="detailitem"><dt>Status</dt><dd>${d.status}</dd></div>
+      <div class="detailitem"><dt>Utilization</dt><dd>${d.util}%</dd></div>
+      <div class="detailitem"><dt>Location</dt><dd>${d.location}</dd></div>
+      <div class="detailitem"><dt>Manufacturer</dt><dd>${d.manuf}</dd></div>
+      <div class="detailitem"><dt>Model</dt><dd>${d.model}</dd></div>
+      <div class="detailitem"><dt>Power</dt><dd>${d.power} kW</dd></div>
+      <div class="detailitem"><dt>Weight</dt><dd>${d.weight} kg</dd></div></dl>`;
+  }
+  let current = null;
+  function renderTabs(d, active) {
+    const tabs = [['overview', 'Overview'], ['sensors', 'Sensors'], ['history', 'History']];
+    tabsEl.innerHTML = tabs.map(([k, l]) => `<span class="tab${k === active ? ' is-active' : ''}" data-t="${k}">${l}</span>`).join('');
+    tabsEl.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => renderTabs(d, t.dataset.t)));
+    panel.innerHTML = panelHTML(d, active);
+  }
+  function open(id) {
+    const d = detail.find((x) => x.id === id); if (!d) return;
+    current = d;
+    document.getElementById('eqtitle').textContent = d.name;
+    renderTabs(d, 'overview');
+    back.hidden = false;
+  }
+  document.querySelectorAll('#cards .eqcard').forEach((c) => c.addEventListener('click', () => open(c.dataset.id)));
+  document.getElementById('eqclose').addEventListener('click', () => (back.hidden = true));
+  document.getElementById('eqcancel').addEventListener('click', () => (back.hidden = true));
+</script>
