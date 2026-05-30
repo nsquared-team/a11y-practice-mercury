@@ -204,6 +204,78 @@ legend { padding: 0 0.4rem; font-weight: 650; }
   .sidebar { display: none; }
 }
 
+/* --- Login (full-screen) ------------------------------------------------ */
+/* Full-viewport stage with the operator's background photo. A Mercury-toned
+   gradient sits underneath as a fallback until /mercury-bg.jpg is present. */
+.login-stage {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background-color: #0b0f14;
+  background-image:
+    linear-gradient(135deg, rgba(178, 90, 18, 0.55), rgba(11, 15, 20, 0.9)),
+    url("/mercury-bg.jpg");
+  background-size: cover;
+  background-position: center;
+}
+/* Legibility scrim — used by the ACCESSIBLE login so card/text contrast holds
+   over any photo. The inaccessible login omits it on purpose. */
+.login-scrim {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 40%, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.7));
+}
+.login-card {
+  position: relative;
+  width: min(420px, 100%);
+  padding: 2rem 1.9rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+/* Accessible: solid, high-contrast panel. */
+.login-card--solid {
+  background: rgba(13, 19, 27, 0.92);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(6px);
+}
+/* Inaccessible: barely-there panel, so text sits low-contrast over the photo. */
+.login-card--thin {
+  background: rgba(20, 26, 35, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.login-card .brand { justify-content: center; margin-bottom: 1.1rem; }
+.login-card h1 { font-size: 1.4rem; text-align: center; }
+.login-tagline { text-align: center; color: var(--text-muted); margin: 0 0 1.4rem; font-size: 0.9rem; }
+.login-error {
+  display: none;
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 107, 107, 0.14);
+  border: 1px solid rgba(255, 107, 107, 0.5);
+  color: var(--crit-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.login-error.is-shown { display: block; }
+.login-success {
+  display: none;
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-sm);
+  background: rgba(61, 220, 145, 0.14);
+  border: 1px solid rgba(61, 220, 145, 0.5);
+  color: var(--ok-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.login-success.is-shown { display: block; }
+.login-card .btn--primary { width: 100%; justify-content: center; margin-top: 0.3rem; }
+.login-foot { text-align: center; margin-top: 1.2rem; font-size: 0.82rem; }
+.login-hint { text-align: center; color: var(--text-muted); font-size: 0.78rem; margin-top: 0.9rem; }
+
 /* Live pulse used by the alerts feed; respects reduced-motion via base.css
    in the accessible tree, and is re-enabled by the override in the root tree. */
 @keyframes pt-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
