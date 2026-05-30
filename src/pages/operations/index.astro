@@ -1,0 +1,225 @@
+---
+/**
+ * Operations — ROOT (inaccessible) tree.  Patterns: DATA TABLE + MODAL DIALOG.
+ *
+ * Deliberate WCAG failures:
+ *  - Table has no <caption> and header cells have no scope (1.3.1).
+ *  - Sort controls are clickable <span>s (not buttons): not focusable, not
+ *    keyboard-operable, no aria-sort; direction shown by a colour glyph (2.1.1,
+ *    4.1.2, 1.4.1).
+ *  - Select-all and row checkboxes have no <label>/accessible name (4.1.2).
+ *  - Status is colour-only text (1.4.1).
+ *  - Filter checkboxes have no <label> (1.3.1, 4.1.2).
+ *  - The selection count is not announced (no live region) (4.1.3).
+ *  - "Details" is a clickable <span>, not a button (2.1.1, 4.1.2).
+ *  - Pagination controls are <span>s with no aria-current (2.1.1, 4.1.2).
+ *  - The detail modal is a plain overlay: no role="dialog"/aria-modal, no Escape
+ *    handler, no focus trap or focus return, and footer buttons use positive
+ *    tabindex that breaks focus order (4.1.2, 2.1.2, 2.4.3).
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ChromeRoot from '@components/ChromeRoot.astro';
+import { miningSites } from '@data/sites.js';
+
+const STATUS = {
+  active: 'Active', idle: 'Idle', maintenance: 'Maintenance', offline: 'Offline',
+};
+const minerals = [...new Set(miningSites.map((s) => s.mineralType))];
+const statuses = ['active', 'idle', 'maintenance', 'offline'];
+const detail = miningSites.map((s) => ({
+  id: s.id, name: s.name, location: s.location, mineral: s.mineralType,
+  rate: s.extractionRate, status: s.status, personnel: s.personnelCount,
+  temp: s.temperature, target: s.dailyTarget, progress: s.dailyProgress,
+  equipment: s.equipmentAssigned,
+  history: Array.from({ length: 7 }, (_, i) => Math.round(s.extractionRate * (0.82 + 0.04 * i + (i % 2 ? 0.03 : -0.015)))),
+}));
+---
+<BaseLayout title="Operations — Discover Mercury Mining Operations" variant="root">
+  <div class="app">
+    <ChromeRoot active="operations">
+      <div class="pagehead">
+        <h1>Extraction Sites</h1>
+        <p>Monitor and manage all active mining sites across the {miningSites.length}-site network.</p>
+      </div>
+
+      <div class="filterbar">
+        <div class="filtergroup">
+          <span class="filtergroup__label">Mineral</span>
+          {minerals.map((m) => (
+            <span class="chk"><input type="checkbox" class="f-mineral" value={m} />{m}</span>
+          ))}
+        </div>
+        <div class="filtergroup">
+          <span class="filtergroup__label">Status</span>
+          {statuses.map((s) => (
+            <span class="chk"><input type="checkbox" class="f-status" value={s} />{STATUS[s]}</span>
+          ))}
+        </div>
+      </div>
+
+      <div class="batchbar" id="batchbar" hidden>
+        <strong id="batchcount">0 selected</strong>
+        <button class="btn btn--ghost" type="button">Export</button>
+        <button class="btn btn--ghost" type="button">Change status</button>
+      </div>
+
+      <div class="card">
+        <div class="tablewrap">
+          <table class="data" id="sites">
+            <thead>
+              <tr>
+                <th class="selectcol"><input type="checkbox" id="selectall" /></th>
+                <th><span class="sortbtn" data-key="name">Site <span class="sortbtn__arrow"></span></span></th>
+                <th><span class="sortbtn" data-key="location">Location <span class="sortbtn__arrow"></span></span></th>
+                <th><span class="sortbtn" data-key="mineral">Mineral <span class="sortbtn__arrow"></span></span></th>
+                <th class="num"><span class="sortbtn" data-key="rate">Rate (kg/h) <span class="sortbtn__arrow"></span></span></th>
+                <th class="num"><span class="sortbtn" data-key="personnel">Crew <span class="sortbtn__arrow"></span></span></th>
+                <th><span class="sortbtn" data-key="status">Status <span class="sortbtn__arrow"></span></span></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {miningSites.map((s) => (
+                <tr data-id={s.id} data-name={s.name} data-location={s.location} data-mineral={s.mineralType} data-rate={s.extractionRate} data-personnel={s.personnelCount} data-status={s.status}>
+                  <td class="selectcol"><input type="checkbox" class="rowsel" /></td>
+                  <td>{s.name}</td>
+                  <td>{s.location}</td>
+                  <td>{s.mineralType}</td>
+                  <td class="num">{s.extractionRate.toLocaleString()}</td>
+                  <td class="num">{s.personnelCount}</td>
+                  <td><span class={`otext otext--${s.status}`}>{STATUS[s.status]}</span></td>
+                  <td><span class="rowdetails" data-id={s.id}>Details</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="pager"></div>
+      </div>
+    </ChromeRoot>
+  </div>
+
+  {/* Detail modal: plain overlay, no dialog semantics / Esc / focus management. */}
+  <div class="modal-backdrop" id="backdrop" hidden>
+    <div class="modal">
+      <div class="modal__head">
+        <h2 class="modal__title" id="modaltitle">Site detail</h2>
+        <span class="modal__close" id="modalclose">✕</span>
+      </div>
+      <div class="modal__body" id="modalbody"></div>
+      <div class="modal__foot">
+        <button class="btn btn--ghost" type="button" tabindex="2" id="modalcancel">Close</button>
+        <button class="btn btn--primary" type="button" tabindex="1">Assign crew</button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script define:vars={{ detail, STATUS }}>
+  const table = document.getElementById('sites');
+  const tbody = table.querySelector('tbody');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const pager = document.getElementById('pager');
+  const pageSize = 8;
+  let page = 1, sortKey = null, sortDir = 1;
+
+  const numKeys = new Set(['rate', 'personnel']);
+  function val(tr, key) {
+    const v = tr.dataset[key];
+    return numKeys.has(key) ? Number(v) : (v || '').toLowerCase();
+  }
+  function activeFilters(cls) {
+    return Array.from(document.querySelectorAll('.' + cls + ':checked')).map((c) => c.value);
+  }
+  function filtered() {
+    const fm = activeFilters('f-mineral'), fs = activeFilters('f-status');
+    return rows.filter((tr) =>
+      (!fm.length || fm.includes(tr.dataset.mineral)) &&
+      (!fs.length || fs.includes(tr.dataset.status)));
+  }
+  function render() {
+    let list = filtered();
+    if (sortKey) list.sort((a, b) => (val(a, sortKey) > val(b, sortKey) ? 1 : val(a, sortKey) < val(b, sortKey) ? -1 : 0) * sortDir);
+    list.forEach((tr) => tbody.appendChild(tr));
+    rows.forEach((tr) => (tr.hidden = true));
+    const pages = Math.max(1, Math.ceil(list.length / pageSize));
+    if (page > pages) page = pages;
+    const start = (page - 1) * pageSize;
+    list.slice(start, start + pageSize).forEach((tr) => (tr.hidden = false));
+    // pagination controls
+    pager.innerHTML = '';
+    for (let p = 1; p <= pages; p++) {
+      const b = document.createElement('span');
+      b.className = 'pagebtn' + (p === page ? ' is-current' : '');
+      b.textContent = p;
+      b.addEventListener('click', () => { page = p; render(); });
+      pager.appendChild(b);
+    }
+    const info = document.createElement('span');
+    info.className = 'pageinfo';
+    info.textContent = `${list.length} sites`;
+    pager.appendChild(info);
+  }
+
+  // column sort
+  table.querySelectorAll('.sortbtn').forEach((sb) => {
+    sb.addEventListener('click', () => {
+      const key = sb.dataset.key;
+      if (sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
+      table.querySelectorAll('.sortbtn__arrow').forEach((a) => (a.textContent = ''));
+      sb.querySelector('.sortbtn__arrow').textContent = sortDir > 0 ? '▲' : '▼';
+      render();
+    });
+  });
+
+  document.querySelectorAll('.f-mineral, .f-status').forEach((c) => c.addEventListener('change', () => { page = 1; render(); }));
+
+  // row selection
+  const batchbar = document.getElementById('batchbar');
+  const batchcount = document.getElementById('batchcount');
+  function updateSelection() {
+    const n = document.querySelectorAll('.rowsel:checked').length;
+    batchcount.textContent = n + ' selected';
+    batchbar.hidden = n === 0;
+  }
+  document.getElementById('selectall').addEventListener('change', (e) => {
+    document.querySelectorAll('.rowsel').forEach((c) => (c.checked = e.target.checked));
+    updateSelection();
+  });
+  document.querySelectorAll('.rowsel').forEach((c) => c.addEventListener('change', updateSelection));
+
+  // detail modal
+  const backdrop = document.getElementById('backdrop');
+  const body = document.getElementById('modalbody');
+  const title = document.getElementById('modaltitle');
+  function spark(history) {
+    const max = Math.max(...history), min = Math.min(...history), span = max - min || 1;
+    const pts = history.map((v, i) => `${10 + i * 30},${50 - ((v - min) / span) * 40}`).join(' ');
+    return `<svg viewBox="0 0 190 60" class="chart" style="max-width:220px"><polyline points="${pts}" fill="none" stroke="#ff9e3d" stroke-width="2.5"/></svg>`;
+  }
+  function openModal(id) {
+    const d = detail.find((x) => x.id === id);
+    if (!d) return;
+    title.textContent = d.name;
+    body.innerHTML = `
+      <dl class="detailgrid">
+        <div class="detailitem"><dt>Location</dt><dd>${d.location}</dd></div>
+        <div class="detailitem"><dt>Mineral</dt><dd>${d.mineral}</dd></div>
+        <div class="detailitem"><dt>Rate</dt><dd>${d.rate.toLocaleString()} kg/h</dd></div>
+        <div class="detailitem"><dt>Crew</dt><dd>${d.personnel}</dd></div>
+        <div class="detailitem"><dt>Surface temp</dt><dd>${d.temp}°C</dd></div>
+        <div class="detailitem"><dt>Status</dt><dd>${STATUS[d.status]}</dd></div>
+      </dl>
+      <p class="muted" style="margin:0 0 .3rem">Daily progress: ${d.progress.toLocaleString()} / ${d.target.toLocaleString()} kg</p>
+      <div class="meter" style="margin-bottom:1rem"><div class="meter__fill" style="width:${Math.min(100, Math.round(d.progress / d.target * 100))}%"></div></div>
+      <p class="muted" style="margin:0 0 .3rem">7-day extraction history</p>
+      ${spark(d.history)}`;
+    backdrop.hidden = false;
+  }
+  function closeModal() { backdrop.hidden = true; }
+  document.querySelectorAll('.rowdetails').forEach((el) => el.addEventListener('click', () => openModal(el.dataset.id)));
+  document.getElementById('modalclose').addEventListener('click', closeModal);
+  document.getElementById('modalcancel').addEventListener('click', closeModal);
+
+  render();
+</script>
