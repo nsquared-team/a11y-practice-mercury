@@ -1,26 +1,29 @@
 ---
 /**
- * Dashboard — ROOT (inaccessible) tree.  Pattern focus: CHARTS.
+ * Dashboard — ROOT (inaccessible) tree.  Patterns: CHARTS + status grid +
+ * commodity widget + alert feed.
  *
- * Deliberate WCAG failures on this page:
- *  - Charts are <svg> with NO accessible name, NO role, NO text alternative and
- *    NO data table. A screen reader gets nothing (1.1.1 Non-text Content).
- *  - The line series and the stream bars encode meaning by COLOUR ONLY — the
- *    legend pairs a colour swatch with a name but the chart marks carry no
- *    text/pattern, so colour is the only channel (1.4.1 Use of Colour).
- *  - KPI deltas use ▲/▼ glyphs + colour with no text saying up/down/good/bad.
- *  - The critical-incident banner is a styled <div>, not a role="alert" / status
- *    region, so it is never announced (4.1.3 Status Messages).
- *  - Heading order skips from <h1> straight to <h3> (1.3.1 Info & Relationships).
+ * Deliberate WCAG failures:
+ *  - Banner is a styled <div>, not a live/alert region (4.1.3).
+ *  - KPI deltas use ▲/▼ glyph + colour only, no text (1.4.1).
+ *  - Extraction chart <svg> has no name/role/alt and no data table (1.1.1).
+ *  - Equipment status grid: cells are non-focusable <div>s, status only in a
+ *    `title` attribute and by colour (1.1.1, 1.4.1, 2.1.1).
+ *  - Alert feed is a <div> stack (no list semantics), severity by left-border
+ *    colour only, no text label (1.3.1, 1.4.1).
+ *  - Commodity price change conveyed by colour only, no icon/text direction
+ *    (1.4.1). Names/symbols low-contrast (1.4.3, via the override).
  */
 import BaseLayout from '@layouts/BaseLayout.astro';
 import ChromeRoot from '@components/ChromeRoot.astro';
-import { SITE, KPIS, PRODUCTION_SERIES, STREAM_MIX } from '@data/ops.js';
-import { linePlot, barPlot } from '@lib/chart.js';
+import { SITE, KPIS, EXTRACTION_SERIES } from '@data/ops.js';
+import { commoditiesData, getRecentAlerts, formatAlertTime } from '@data/alerts.js';
+import { equipmentData } from '@data/equipment.js';
+import { multiSeriesPlot } from '@lib/chart.js';
 
-const plot = linePlot(PRODUCTION_SERIES.points);
-const bars = barPlot(STREAM_MIX.bars);
-const barClass = { IL: 'bar--il', AN: 'bar--an', PX: 'bar--px', WI: 'bar--wi' };
+const plot = multiSeriesPlot(EXTRACTION_SERIES.labels, EXTRACTION_SERIES.series);
+const recent = getRecentAlerts(4);
+const EQ = { operational: 'operational', idle: 'idle', maintenance: 'maintenance', offline: 'offline' };
 ---
 <BaseLayout title="Dashboard — Discover Mercury Mining Operations" variant="root">
   <div class="app">
@@ -30,13 +33,11 @@ const barClass = { IL: 'bar--il', AN: 'bar--an', PX: 'bar--px', WI: 'bar--wi' };
         <p>Live extraction telemetry for the {SITE.colony}.</p>
       </div>
 
-      {/* FAIL: styled div, not a live/alert region — never announced. */}
       <div class="banner banner--critical">
         <span class="live-dot"></span>
         Rig 07 auto-halted — drill head over-torque. Inspection crew dispatched.
       </div>
 
-      {/* KPI cards: deltas carry meaning via arrow glyph + colour only. */}
       <div class="grid grid--kpi" style="margin-bottom:1rem">
         {KPIS.map((k) => (
           <div class="card">
@@ -50,39 +51,76 @@ const barClass = { IL: 'bar--il', AN: 'bar--an', PX: 'bar--px', WI: 'bar--wi' };
       </div>
 
       <div class="grid grid--2">
-        {/* Line chart: no name, no role, no alt, no data table. */}
+        {/* Extraction chart: no name/role/alt, no data table. */}
         <div class="card">
-          <div class="card__title"><h3>{PRODUCTION_SERIES.label}</h3></div>
+          <div class="card__title"><h3>{EXTRACTION_SERIES.label}</h3></div>
           <svg class="chart" viewBox={`0 0 ${plot.width} ${plot.height}`}>
-            <defs>
-              <linearGradient id="area-grad" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stop-color="#ff9e3d" stop-opacity="0.35" />
-                <stop offset="100%" stop-color="#ff9e3d" stop-opacity="0" />
-              </linearGradient>
-            </defs>
-            <line class="chart__axis" x1={plot.pad} y1={plot.height - plot.pad} x2={plot.width - plot.pad} y2={plot.height - plot.pad} />
-            <path class="chart__area" d={plot.area} />
-            <path class="chart__line" d={plot.line} />
-            {plot.xy.map((p) => <circle class="chart__dot" cx={p.x} cy={p.y} r="3" />)}
-            {plot.xy.filter((_, i) => i % 2 === 0).map((p) => (
-              <text class="chart__label" x={p.x} y={plot.height - plot.pad + 14} text-anchor="middle">{p.t}</text>
+            <line class="chart__axis" x1={plot.pad} y1={plot.baseline} x2={plot.width - plot.pad} y2={plot.baseline} />
+            {plot.series.map((s) => (
+              <g>
+                <path class="chart__series-area" d={s.area} fill={s.color} />
+                <path d={s.line} fill="none" stroke={s.color} stroke-width="2.5" />
+              </g>
+            ))}
+            {plot.labels.filter((_, i) => i % 2 === 0).map((t, i) => (
+              <text class="chart__label" x={plot.x[i * 2]} y={plot.baseline + 14} text-anchor="middle">{t}</text>
             ))}
           </svg>
+          <div class="legend">
+            {plot.series.map((s) => (
+              <span class="legend__item"><span class="legend__swatch" style={`background:${s.color}`}></span>{s.label}</span>
+            ))}
+          </div>
         </div>
 
-        {/* Stream-mix bars: meaning by colour only (legend below). */}
+        {/* Alert feed: div stack, severity by colour only, no list semantics. */}
         <div class="card">
-          <div class="card__title"><h3>{STREAM_MIX.label}</h3></div>
-          <svg class="chart" viewBox={`0 0 ${bars.width} ${bars.height}`}>
-            <line class="chart__axis" x1={bars.pad} y1={bars.baseline} x2={bars.width - bars.pad} y2={bars.baseline} />
-            {bars.rects.map((r) => <rect class={barClass[r.code]} x={r.x} y={r.y} width={r.w} height={r.h} rx="3" />)}
-          </svg>
-          <div class="legend">
-            {STREAM_MIX.bars.map((b) => (
-              <span class="legend__item">
-                <span class={`legend__swatch ${barClass[b.code]}`} style={`background:${b.code === 'IL' ? '#ff9e3d' : b.code === 'AN' ? '#38e0c8' : b.code === 'PX' ? '#5aa6ff' : '#ffc371'}`}></span>
-                {b.stream}
-              </span>
+          <div class="card__title"><h3>Recent alerts</h3></div>
+          <div class="minifeed">
+            {recent.map((a) => (
+              <div class={`minialert minialert--${a.severity}`}>
+                <p class="minialert__title">{a.title}</p>
+                <span class="minialert__time">{formatAlertTime(a.timestamp)}</span>
+                <p class="minialert__msg">{a.message}</p>
+              </div>
+            ))}
+          </div>
+          <a class="feedlink" href="/alerts/">View all alerts →</a>
+        </div>
+      </div>
+
+      <div class="grid grid--2" style="margin-top:1rem">
+        {/* Equipment status grid: colour-only, non-focusable, info in title only. */}
+        <div class="card">
+          <div class="card__title"><h3>Equipment status</h3></div>
+          <div class="eqgrid">
+            {equipmentData.map((e) => (
+              <div class={`eqcell eqcell--${EQ[e.status]}`} title={`${e.name}: ${e.status}`}></div>
+            ))}
+          </div>
+          <div class="eqlegend">
+            <span class="legend__item"><span class="legend__swatch eqcell--operational"></span>Operational</span>
+            <span class="legend__item"><span class="legend__swatch eqcell--idle"></span>Idle</span>
+            <span class="legend__item"><span class="legend__swatch eqcell--maintenance"></span>Maintenance</span>
+            <span class="legend__item"><span class="legend__swatch eqcell--offline"></span>Offline</span>
+          </div>
+        </div>
+
+        {/* Commodity prices: change by colour only, no direction text/icon. */}
+        <div class="card">
+          <div class="card__title"><h3>Commodity prices</h3></div>
+          <div class="commoditylist">
+            {commoditiesData.map((c) => (
+              <div class="commodity">
+                <span class="commodity__name">
+                  {c.name}
+                  <span class="commodity__sym">{c.symbol}</span>
+                </span>
+                <span class="commodity__price">{c.price.toLocaleString()} ¢</span>
+                <span class={`commodity__chg commodity__chg--${c.trend === 'up' ? 'up' : c.trend === 'down' ? 'down' : 'stable'}`}>
+                  {c.change24h > 0 ? '+' : ''}{c.change24h}%
+                </span>
+              </div>
             ))}
           </div>
         </div>

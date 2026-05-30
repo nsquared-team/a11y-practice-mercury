@@ -60,6 +60,19 @@ export const STREAM_MIX = {
   ],
 };
 
+// Multi-series extraction rate (kg/h) by commodity across the last 24h.
+// Static + deterministic (the ported chartData generators use Math.random/Date).
+export const EXTRACTION_SERIES = {
+  unit: 'kg/h',
+  label: 'Extraction rate by commodity — last 24h',
+  labels: ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'],
+  series: [
+    { key: 'mrc', label: 'Mercurium', color: '#ff9e3d', values: [86, 92, 104, 118, 121, 134, 142, 138, 120, 99, 84, 88] },
+    { key: 'spl', label: 'Solar Platinum', color: '#38e0c8', values: [48, 52, 58, 63, 61, 68, 72, 69, 60, 52, 46, 49] },
+    { key: 'txl', label: 'Thermal Crystals', color: '#5aa6ff', values: [33, 36, 40, 44, 42, 47, 50, 48, 41, 35, 31, 34] },
+  ],
+};
+
 // --- Alerts & notifications -------------------------------------------------
 // `level` ∈ critical | warning | info. `live` items are the ones that animate
 // into the feed (accessible tree announces them via a polite/assertive region).

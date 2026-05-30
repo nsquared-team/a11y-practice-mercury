@@ -1,28 +1,44 @@
 ---
 /**
- * Dashboard — ACCESSIBLE tree.  Pattern focus: CHARTS (corrected).
+ * Dashboard — ACCESSIBLE tree.  Patterns: CHARTS + status grid + commodity
+ * widget + alert feed (all corrected, one-to-one with the root dashboard).
  *
- * Fixes mirrored against the root dashboard:
- *  - Each chart is role="img" with an aria-label summary AND a real data table
- *    (visually hidden with .sr-only) so the underlying numbers are available to
- *    assistive tech (1.1.1).
- *  - KPI deltas pair the colour/glyph with text ("up", "down", "no change") via
- *    sr-only text; the glyph is aria-hidden (1.4.1).
- *  - The critical-incident banner is role="alert" so it is announced (4.1.3).
- *  - Heading order is h1 → h2 → h3 with sectioned regions (1.3.1).
+ * Fixes:
+ *  - Banner is role="alert" (4.1.3).
+ *  - KPI deltas pair glyph (aria-hidden) with sr-only direction text (1.4.1).
+ *  - Extraction chart is role="img" + aria-label summary + an sr-only data
+ *    table of every value (1.1.1).
+ *  - Equipment grid is a list; each cell has an sr-only "name: status" name and
+ *    a letter code so status is not by colour alone (1.1.1, 1.4.1).
+ *  - Alert feed is a <ul> with a text severity badge per item (1.3.1, 1.4.1).
+ *  - Commodity change pairs ▲/▼ (aria-hidden) with sr-only direction text and
+ *    keeps sufficient contrast (1.4.1, 1.4.3).
+ *  - Sectioned with h1 → h2 → h3 heading order (1.3.1).
  */
 import BaseLayout from '@layouts/BaseLayout.astro';
 import ChromeAccessible from '@components/ChromeAccessible.astro';
-import { SITE, KPIS, PRODUCTION_SERIES, STREAM_MIX } from '@data/ops.js';
-import { linePlot, barPlot } from '@lib/chart.js';
+import { SITE, KPIS, EXTRACTION_SERIES } from '@data/ops.js';
+import { commoditiesData, getRecentAlerts, formatAlertTime } from '@data/alerts.js';
+import { equipmentData } from '@data/equipment.js';
+import { multiSeriesPlot } from '@lib/chart.js';
 
-const plot = linePlot(PRODUCTION_SERIES.points);
-const bars = barPlot(STREAM_MIX.bars);
-const barClass = { IL: 'bar--il', AN: 'bar--an', PX: 'bar--px', WI: 'bar--wi' };
-const swatch = { IL: '#ff9e3d', AN: '#38e0c8', PX: '#5aa6ff', WI: '#ffc371' };
-const peak = plot.xy.reduce((a, b) => (b.value > a.value ? b : a));
-const trough = plot.xy.reduce((a, b) => (b.value < a.value ? b : a));
+const plot = multiSeriesPlot(EXTRACTION_SERIES.labels, EXTRACTION_SERIES.series);
+const recent = getRecentAlerts(4);
 const deltaWord = (d) => (d > 0 ? 'up' : d < 0 ? 'down' : 'no change');
+const EQ = {
+  operational: { code: 'O', label: 'Operational' },
+  idle: { code: 'I', label: 'Idle' },
+  maintenance: { code: 'M', label: 'Maintenance' },
+  offline: { code: 'X', label: 'Offline' },
+};
+const SEV = {
+  critical: { cls: 'crit', label: 'Critical' },
+  warning: { cls: 'warn', label: 'Warning' },
+  info: { cls: 'muted', label: 'Info' },
+  success: { cls: 'ok', label: 'Success' },
+};
+const peak = (s) => Math.max(...s.values);
+const chartLabel = `Area chart of extraction rate in kilograms per hour by commodity over the last 24 hours. ${EXTRACTION_SERIES.series.map((s) => `${s.label} peaks at ${peak(s)}`).join('; ')}. Full data in the table below.`;
 ---
 <BaseLayout title="Dashboard — Discover Mercury Mining Operations" variant="accessible">
   <div class="app">
@@ -53,62 +69,105 @@ const deltaWord = (d) => (d > 0 ? 'up' : d < 0 ? 'down' : 'no change');
         </div>
       </section>
 
-      <section aria-labelledby="charts-h">
-        <h2 id="charts-h" class="sr-only">Production charts</h2>
+      <section aria-labelledby="ops-h">
+        <h2 id="ops-h" class="sr-only">Extraction and recent alerts</h2>
         <div class="grid grid--2">
           <div class="card">
-            <div class="card__title"><h3 id="line-h">{PRODUCTION_SERIES.label}</h3></div>
-            <svg class="chart" viewBox={`0 0 ${plot.width} ${plot.height}`} role="img"
-                 aria-label={`Line chart of refined output per 2-hour window this sol. Peak ${peak.value} ${PRODUCTION_SERIES.unit} at ${peak.t}; low ${trough.value} ${PRODUCTION_SERIES.unit} at ${trough.t}. Full data in the table below.`}>
-              <defs>
-                <linearGradient id="area-grad" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stop-color="#ff9e3d" stop-opacity="0.35" />
-                  <stop offset="100%" stop-color="#ff9e3d" stop-opacity="0" />
-                </linearGradient>
-              </defs>
-              <line class="chart__axis" x1={plot.pad} y1={plot.height - plot.pad} x2={plot.width - plot.pad} y2={plot.height - plot.pad} />
-              <path class="chart__area" d={plot.area} />
-              <path class="chart__line" d={plot.line} />
-              {plot.xy.map((p) => <circle class="chart__dot" cx={p.x} cy={p.y} r="3" />)}
-              {plot.xy.filter((_, i) => i % 2 === 0).map((p) => (
-                <text class="chart__label" x={p.x} y={plot.height - plot.pad + 14} text-anchor="middle">{p.t}</text>
+            <div class="card__title"><h3 id="chart-h">{EXTRACTION_SERIES.label}</h3></div>
+            <svg class="chart" viewBox={`0 0 ${plot.width} ${plot.height}`} role="img" aria-label={chartLabel}>
+              <line class="chart__axis" x1={plot.pad} y1={plot.baseline} x2={plot.width - plot.pad} y2={plot.baseline} />
+              {plot.series.map((s) => (
+                <g>
+                  <path class="chart__series-area" d={s.area} fill={s.color} />
+                  <path d={s.line} fill="none" stroke={s.color} stroke-width="2.5" />
+                </g>
+              ))}
+              {plot.labels.filter((_, i) => i % 2 === 0).map((t, i) => (
+                <text class="chart__label" x={plot.x[i * 2]} y={plot.baseline + 14} text-anchor="middle">{t}</text>
               ))}
             </svg>
+            <div class="legend" aria-hidden="true">
+              {plot.series.map((s) => (
+                <span class="legend__item"><span class="legend__swatch" style={`background:${s.color}`}></span>{s.label}</span>
+              ))}
+            </div>
             <table class="data sr-only">
-              <caption>Refined output per 2-hour window (tonnes)</caption>
-              <thead><tr><th scope="col">Window</th><th scope="col" class="num">Output (t)</th></tr></thead>
+              <caption>Extraction rate (kg/h) by commodity over 24 hours</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Time</th>
+                  {EXTRACTION_SERIES.series.map((s) => <th scope="col" class="num">{s.label}</th>)}
+                </tr>
+              </thead>
               <tbody>
-                {PRODUCTION_SERIES.points.map((p) => (
-                  <tr><th scope="row">{p.t}</th><td class="num">{p.value}</td></tr>
+                {EXTRACTION_SERIES.labels.map((t, i) => (
+                  <tr>
+                    <th scope="row">{t}</th>
+                    {EXTRACTION_SERIES.series.map((s) => <td class="num">{s.values[i]}</td>)}
+                  </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
           <div class="card">
-            <div class="card__title"><h3 id="bars-h">{STREAM_MIX.label}</h3></div>
-            <svg class="chart" viewBox={`0 0 ${bars.width} ${bars.height}`} role="img"
-                 aria-label={`Bar chart of output by mineral stream this sol, in tonnes. ${STREAM_MIX.bars.map((b) => `${b.stream} ${b.value}`).join(', ')}. Full data in the table below.`}>
-              <line class="chart__axis" x1={bars.pad} y1={bars.baseline} x2={bars.width - bars.pad} y2={bars.baseline} />
-              {bars.rects.map((r) => <rect class={barClass[r.code]} x={r.x} y={r.y} width={r.w} height={r.h} rx="3" />)}
-            </svg>
-            <div class="legend" aria-hidden="true">
-              {STREAM_MIX.bars.map((b) => (
-                <span class="legend__item">
-                  <span class="legend__swatch" style={`background:${swatch[b.code]}`}></span>
-                  {b.stream}
-                </span>
+            <div class="card__title"><h3>Recent alerts</h3></div>
+            <ul class="minifeed">
+              {recent.map((a) => (
+                <li class={`minialert minialert--${a.severity}`}>
+                  <p class="minialert__title">
+                    <span class={`badge badge--${SEV[a.severity].cls}`}>{SEV[a.severity].label}</span>
+                    {a.title}
+                  </p>
+                  <span class="minialert__time">{formatAlertTime(a.timestamp)}</span>
+                  <p class="minialert__msg">{a.message}</p>
+                </li>
               ))}
+            </ul>
+            <a class="feedlink" href="/accessible/alerts/">View all alerts →</a>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="fleet-h">
+        <h2 id="fleet-h" class="sr-only">Equipment and commodities</h2>
+        <div class="grid grid--2" style="margin-top:1rem">
+          <div class="card">
+            <div class="card__title"><h3 id="eq-h">Equipment status</h3></div>
+            <ul class="eqgrid" aria-labelledby="eq-h">
+              {equipmentData.map((e) => (
+                <li class={`eqcell eqcell--${e.status}`}>
+                  <span aria-hidden="true">{EQ[e.status].code}</span>
+                  <span class="sr-only">{e.name}: {EQ[e.status].label}</span>
+                </li>
+              ))}
+            </ul>
+            <div class="eqlegend">
+              <span class="legend__item"><span class="legend__swatch eqcell--operational" aria-hidden="true">O</span>Operational</span>
+              <span class="legend__item"><span class="legend__swatch eqcell--idle" aria-hidden="true">I</span>Idle</span>
+              <span class="legend__item"><span class="legend__swatch eqcell--maintenance" aria-hidden="true">M</span>Maintenance</span>
+              <span class="legend__item"><span class="legend__swatch eqcell--offline" aria-hidden="true">X</span>Offline</span>
             </div>
-            <table class="data sr-only">
-              <caption>Output by mineral stream (tonnes per sol)</caption>
-              <thead><tr><th scope="col">Stream</th><th scope="col" class="num">Output (t)</th></tr></thead>
-              <tbody>
-                {STREAM_MIX.bars.map((b) => (
-                  <tr><th scope="row">{b.stream}</th><td class="num">{b.value}</td></tr>
-                ))}
-              </tbody>
-            </table>
+          </div>
+
+          <div class="card">
+            <div class="card__title"><h3>Commodity prices</h3></div>
+            <ul class="commoditylist">
+              {commoditiesData.map((c) => (
+                <li class="commodity">
+                  <span class="commodity__name">
+                    {c.name}
+                    <span class="commodity__sym">{c.symbol}</span>
+                  </span>
+                  <span class="commodity__price">{c.price.toLocaleString()} ¢</span>
+                  <span class={`commodity__chg commodity__chg--${c.trend === 'up' ? 'up' : c.trend === 'down' ? 'down' : 'stable'}`}>
+                    <span aria-hidden="true">{c.trend === 'up' ? '▲' : c.trend === 'down' ? '▼' : '■'}</span>
+                    <span class="sr-only">{c.trend === 'up' ? 'up' : c.trend === 'down' ? 'down' : 'unchanged'}</span>
+                    {c.change24h > 0 ? '+' : ''}{c.change24h}%
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
