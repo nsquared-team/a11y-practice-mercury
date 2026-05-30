@@ -75,7 +75,7 @@ h3 { font-size: 1.05rem; }
 .main    { grid-area: main; padding: 1.5rem; max-width: var(--pt-container-max, 1200px); }
 
 .brand { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.4rem; }
-.brand__mark { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, var(--amber), #b25a12); display: grid; place-items: center; font-weight: 800; color: #1a0f02; flex: 0 0 auto; }
+.brand__mark { width: 34px; height: 34px; flex: 0 0 auto; display: block; object-fit: contain; }
 .brand__name { font-weight: 700; letter-spacing: 0.2px; }
 .brand__sub { display: block; font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
 

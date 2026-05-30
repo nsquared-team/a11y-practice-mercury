@@ -1,11 +1,11 @@
-// Shared, a11y-neutral data for the Mercury Mining Operations dashboard.
+// Shared, a11y-neutral data for the Discover Mercury Mining Operations dashboard.
 // Imported by BOTH trees (root + /accessible/) so the two mirrors show the
 // same numbers and the only difference between them is the accessibility of
 // the markup. Do not put presentation or a11y logic here — data only.
 
 export const SITE = {
-  name: 'Mercury Mining Operations',
-  short: 'MMO',
+  name: 'Discover Mercury Mining Operations',
+  short: 'Discover Mercury',
   colony: 'Caloris Basin Extraction Complex',
   sol: 'Sol 4,182',
 };

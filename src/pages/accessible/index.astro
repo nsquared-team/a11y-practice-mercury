@@ -18,12 +18,12 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { SITE } from '@data/ops.js';
 ---
-<BaseLayout title="Sign in — Mercury Mining Operations" variant="accessible">
+<BaseLayout title="Sign in — Discover Mercury Mining Operations" variant="accessible">
   <div class="login-stage login-stage--scrim">
     <div class="login-scrim" aria-hidden="true"></div>
     <main class="login-card login-card--solid" id="main">
       <div class="brand">
-        <span class="brand__mark" aria-hidden="true">M</span>
+        <img class="brand__mark" src="/mercury-logo.svg" alt="" width="34" height="34" />
         <span>
           <span class="brand__name">{SITE.short}</span>
           <span class="brand__sub">Mining Operations</span>

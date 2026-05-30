@@ -24,7 +24,7 @@ const peak = plot.xy.reduce((a, b) => (b.value > a.value ? b : a));
 const trough = plot.xy.reduce((a, b) => (b.value < a.value ? b : a));
 const deltaWord = (d) => (d > 0 ? 'up' : d < 0 ? 'down' : 'no change');
 ---
-<BaseLayout title="Dashboard — Mercury Mining Operations" variant="accessible">
+<BaseLayout title="Dashboard — Discover Mercury Mining Operations" variant="accessible">
   <div class="app">
     <ChromeAccessible active="dashboard">
       <div class="pagehead">

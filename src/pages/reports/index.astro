@@ -26,7 +26,7 @@ const rows = [...SHIFT_REPORT.rows].sort((a, b) => b.tonnes - a.tonnes);
 const statusColor = (s) =>
   s === 'Nominal' ? 'var(--ok-text)' : s === 'Degraded' ? 'var(--warn-text)' : 'var(--crit-text)';
 ---
-<BaseLayout title="Reports — Mercury Mining Operations" variant="root">
+<BaseLayout title="Reports — Discover Mercury Mining Operations" variant="root">
   <div class="app">
     <ChromeRoot active="reports">
       <div class="pagehead">
