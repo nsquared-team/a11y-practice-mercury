@@ -1,0 +1,277 @@
+---
+/**
+ * Personnel — ROOT (inaccessible) tree.  Patterns: TABS + CARDS + MODAL +
+ * drag-drop REORDER + multi-step FORM WIZARD.
+ *
+ * Deliberate WCAG failures:
+ *  - Page tabs are clickable <div>s (no roles/keyboard, colour-only) (4.1.2, 2.1.1, 1.4.1).
+ *  - Directory search + filter selects have no <label> (1.3.1, 3.3.2). Cards are
+ *    clickable <div>s; status is colour-only (2.1.1, 1.4.1).
+ *  - Shift roster reorders by mouse drag only — no keyboard alternative and the
+ *    move is not announced (2.1.1, 4.1.3).
+ *  - Certification "time remaining" meters have no text/role (1.1.1, 4.1.2);
+ *    cert status is colour-only (1.4.1).
+ *  - Add-technician wizard: no role="dialog"/Escape/focus management; step state
+ *    not conveyed (no aria-current); step-1 fields have no <label>; the error is
+ *    a loose div; footer buttons use positive tabindex (4.1.2, 2.1.2, 2.4.3, 3.3.2).
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ChromeRoot from '@components/ChromeRoot.astro';
+import { personnelData, availableRoles, availableShifts, availableCertificationTypes, getPersonnelStats } from '@data/personnel.js';
+
+const stats = getPersonnelStats();
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const fmt = (iso) => { const d = new Date(iso); return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`; };
+const initials = (p) => (p.firstName[0] + p.lastName[0]).toUpperCase();
+const SBADGE = { 'On Duty': 'active', 'On Break': 'maintenance', 'Off Duty': 'idle', 'On Leave': 'offline' };
+const now = new Date();
+
+const rosters = availableShifts.map((s) => ({
+  shift: s,
+  people: personnelData.filter((p) => p.shift === s).slice(0, 6).map((p) => ({ id: p.id, name: `${p.firstName} ${p.lastName}`, role: p.role })),
+}));
+const certRows = [];
+personnelData.forEach((p) => p.certifications.forEach((c) => {
+  if (c.status === 'expiring' || c.status === 'expired') {
+    const days = Math.round((new Date(c.expirationDate) - now) / 86400000);
+    certRows.push({ person: `${p.firstName} ${p.lastName}`, cert: c.name, status: c.status, expires: fmt(c.expirationDate), days });
+  }
+}));
+const detail = personnelData.map((p) => ({
+  id: p.id, name: `${p.firstName} ${p.lastName}`, role: p.role, shift: p.shift, status: p.status,
+  email: p.email, hire: fmt(p.hireDate), emergency: p.emergencyContact,
+  certs: p.certifications.map((c) => ({ name: c.name, status: c.status })),
+}));
+---
+<BaseLayout title="Personnel — Discover Mercury Mining Operations" variant="root">
+  <div class="app">
+    <ChromeRoot active="personnel">
+      <div class="pagehead">
+        <h1>Personnel Management</h1>
+        <p>{stats.total} crew across {availableShifts.length} shifts — directory, schedule, and certifications.</p>
+      </div>
+
+      <div class="grid grid--kpi" style="margin-bottom:1.2rem">
+        <div class="card"><div class="kpi__label">On Duty</div><div class="kpi__value">{stats.byStatus['On Duty'] || 0}</div></div>
+        <div class="card"><div class="kpi__label">On Leave</div><div class="kpi__value">{stats.byStatus['On Leave'] || 0}</div></div>
+        <div class="card"><div class="kpi__label">Certs Expiring</div><div class="kpi__value">{stats.certsByStatus.expiring || 0}</div></div>
+        <div class="card"><div class="kpi__label">Certs Expired</div><div class="kpi__value">{stats.certsByStatus.expired || 0}</div></div>
+      </div>
+
+      <div class="tabs">
+        <div class="tablist" id="ptabs">
+          <span class="tab is-active" data-panel="directory">Directory</span>
+          <span class="tab" data-panel="schedule">Shift Schedule</span>
+          <span class="tab" data-panel="certs">Certifications</span>
+        </div>
+
+        <div class="tabpanel" data-panel="directory">
+          <div class="filterbar">
+            <input class="input" id="psearch" type="text" placeholder="Search crew…" style="max-width:240px" />
+            <select class="select f-role" style="max-width:200px">
+              <option value="">All roles</option>
+              {availableRoles.map((r) => <option value={r}>{r}</option>)}
+            </select>
+            <select class="select f-shift" style="max-width:150px">
+              <option value="">All shifts</option>
+              {availableShifts.map((s) => <option value={s}>{s}</option>)}
+            </select>
+            <span class="spacer"></span>
+            <span class="btn btn--primary" id="addbtn">+ Add technician</span>
+          </div>
+          <div class="eqcards" id="pcards">
+            {personnelData.map((p) => (
+              <div class="eqcard" data-id={p.id} data-name={`${p.firstName} ${p.lastName} ${p.email}`.toLowerCase()} data-role={p.role} data-shift={p.shift}>
+                <div class="pcard__head">
+                  <span class="avatar">{initials(p)}</span>
+                  <div><div class="pcard__name">{p.firstName} {p.lastName}</div><div class="pcard__role">{p.role}</div></div>
+                </div>
+                <div class="eqcard__meta">
+                  <span>Shift {p.shift}</span>
+                  <span class={`otext otext--${SBADGE[p.status]}`}>{p.status}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="tabpanel" data-panel="schedule" hidden>
+          <p class="muted">Drag crew to reorder duty priority within each shift.</p>
+          <div class="shiftcols">
+            {rosters.map((r) => (
+              <div class="shiftcol">
+                <h3 class="shiftcol__title">Shift {r.shift}</h3>
+                <p class="shiftcol__sub">{r.people.length} on duty roster</p>
+                <ul class="roster" data-shift={r.shift}>
+                  {r.people.map((p) => (
+                    <li class="rosteritem" draggable="true" data-id={p.id}>
+                      <span class="rosteritem__grip">⋮⋮</span>
+                      <span class="rosteritem__name">{p.name}<span class="rosteritem__role"> · {p.role}</span></span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="tabpanel" data-panel="certs" hidden>
+          <div class="filterbar">
+            <select class="select f-cert" style="max-width:180px">
+              <option value="">Needs attention</option>
+              <option value="expiring">Expiring</option>
+              <option value="expired">Expired</option>
+            </select>
+          </div>
+          <div class="tablewrap">
+            <table class="data" id="certtable">
+              <thead><tr><th>Technician</th><th>Certification</th><th>Status</th><th>Expires</th><th>Time remaining</th></tr></thead>
+              <tbody>
+                {certRows.map((c) => (
+                  <tr data-status={c.status}>
+                    <td>{c.person}</td>
+                    <td>{c.cert}</td>
+                    <td><span class={`otext otext--${c.status === 'expired' ? 'offline' : 'maintenance'}`}>{c.status}</span></td>
+                    <td>{c.expires}</td>
+                    <td style="min-width:120px"><div class="meter"><div class="meter__fill" style={`width:${Math.max(0, Math.min(100, Math.round(c.days / 90 * 100)))}%`}></div></div></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </ChromeRoot>
+  </div>
+
+  {/* Detail modal: plain overlay, no dialog semantics. */}
+  <div class="modal-backdrop" id="pbackdrop" hidden>
+    <div class="modal">
+      <div class="modal__head">
+        <h2 class="modal__title" id="ptitle">Crew member</h2>
+        <span class="modal__close" id="pclose">✕</span>
+      </div>
+      <div class="modal__body" id="pbody"></div>
+    </div>
+  </div>
+
+  {/* Add-technician wizard: no dialog role, no Esc, positive tabindex footer. */}
+  <div class="modal-backdrop" id="wbackdrop" hidden>
+    <div class="modal" style="width:min(560px,100%)">
+      <div class="modal__head">
+        <h2 class="modal__title">Add technician</h2>
+        <span class="modal__close" id="wclose">✕</span>
+      </div>
+      <div class="modal__body">
+        <div class="steps" id="wsteps"></div>
+        <div id="werror" class="login-error"></div>
+        <div id="wpanel"></div>
+      </div>
+      <div class="modal__foot">
+        <button class="btn btn--ghost" type="button" tabindex="3" id="wback">Back</button>
+        <button class="btn btn--primary" type="button" tabindex="1" id="wnext">Next</button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script define:vars={{ detail, roles: availableRoles, shifts: availableShifts, certTypes: availableCertificationTypes }}>
+  // page tabs
+  const ptabs = document.getElementById('ptabs');
+  ptabs.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => {
+    ptabs.querySelectorAll('.tab').forEach((x) => x.classList.remove('is-active'));
+    t.classList.add('is-active');
+    document.querySelectorAll('.tabpanel[data-panel]').forEach((pn) => (pn.hidden = pn.dataset.panel !== t.dataset.panel));
+  }));
+
+  // directory search + filters
+  const cards = Array.from(document.querySelectorAll('#pcards .eqcard'));
+  function applyFilter() {
+    const q = (document.getElementById('psearch').value || '').toLowerCase();
+    const role = document.querySelector('.f-role').value, shift = document.querySelector('.f-shift').value;
+    cards.forEach((c) => { c.style.display = (c.dataset.name.includes(q) && (!role || c.dataset.role === role) && (!shift || c.dataset.shift === shift)) ? '' : 'none'; });
+  }
+  document.getElementById('psearch').addEventListener('input', applyFilter);
+  document.querySelector('.f-role').addEventListener('change', applyFilter);
+  document.querySelector('.f-shift').addEventListener('change', applyFilter);
+
+  // cert filter
+  const certFilter = document.querySelector('.f-cert');
+  certFilter.addEventListener('change', () => {
+    const v = certFilter.value;
+    document.querySelectorAll('#certtable tbody tr').forEach((tr) => { tr.style.display = (!v || tr.dataset.status === v) ? '' : 'none'; });
+  });
+
+  // roster reorder
+  let dragged = null;
+  document.querySelectorAll('.roster .rosteritem').forEach((li) => {
+    li.addEventListener('dragstart', () => { dragged = li; li.classList.add('dragging'); });
+    li.addEventListener('dragend', () => { dragged && dragged.classList.remove('dragging'); dragged = null; });
+  });
+  document.querySelectorAll('.roster').forEach((ul) => {
+    ul.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (!dragged || dragged.parentElement !== ul) return;
+      const after = [...ul.querySelectorAll('.rosteritem:not(.dragging)')].find((el) => e.clientY < el.getBoundingClientRect().top + el.offsetHeight / 2);
+      if (after) ul.insertBefore(dragged, after); else ul.appendChild(dragged);
+    });
+  });
+
+  // detail modal
+  const pback = document.getElementById('pbackdrop'), pbody = document.getElementById('pbody'), ptitle = document.getElementById('ptitle');
+  function openDetail(id) {
+    const d = detail.find((x) => x.id === id); if (!d) return;
+    ptitle.textContent = d.name;
+    pbody.innerHTML = `<dl class="detailgrid">
+      <div class="detailitem"><dt>Role</dt><dd>${d.role}</dd></div>
+      <div class="detailitem"><dt>Shift</dt><dd>${d.shift}</dd></div>
+      <div class="detailitem"><dt>Status</dt><dd>${d.status}</dd></div>
+      <div class="detailitem"><dt>Email</dt><dd>${d.email}</dd></div>
+      <div class="detailitem"><dt>Hired</dt><dd>${d.hire}</dd></div>
+      <div class="detailitem"><dt>Emergency</dt><dd>${d.emergency || '—'}</dd></div></dl>
+      <p class="muted" style="margin:.4rem 0 .3rem">Certifications</p>
+      <ul class="tlist">${d.certs.map((c) => `<li class="titem"><span class="titem__dot"></span><div class="titem__title">${c.name}</div><div class="titem__meta">${c.status}</div></li>`).join('')}</ul>`;
+    pback.hidden = false;
+  }
+  document.querySelectorAll('#pcards .eqcard').forEach((c) => c.addEventListener('click', () => openDetail(c.dataset.id)));
+  document.getElementById('pclose').addEventListener('click', () => (pback.hidden = true));
+
+  // add-technician wizard
+  const wback = document.getElementById('wbackdrop'), wpanel = document.getElementById('wpanel'), wsteps = document.getElementById('wsteps'), werror = document.getElementById('werror');
+  const wnext = document.getElementById('wnext'), wprev = document.getElementById('wback');
+  const labels = ['Identity', 'Assignment', 'Certifications', 'Review'];
+  const form = { first: '', last: '', email: '', role: roles[0], shift: shifts[0], certs: [] };
+  let step = 0;
+  function renderSteps() {
+    wsteps.innerHTML = labels.map((l, i) => `<div class="step ${i === step ? 'is-active' : i < step ? 'is-done' : ''}"><span class="step__num">${i + 1}</span>${l}</div>${i < labels.length - 1 ? '<span class="step__line"></span>' : ''}`).join('');
+  }
+  function renderPanel() {
+    werror.style.display = 'none';
+    if (step === 0) wpanel.innerHTML = `<div class="field"><input class="input" id="w-first" placeholder="First name" value="${form.first}"></div><div class="field"><input class="input" id="w-last" placeholder="Last name" value="${form.last}"></div><div class="field"><input class="input" id="w-email" placeholder="Email" value="${form.email}"></div>`;
+    else if (step === 1) wpanel.innerHTML = `<div class="field"><div class="field__label">Role</div><select class="select" id="w-role">${roles.map((r) => `<option ${r === form.role ? 'selected' : ''}>${r}</option>`).join('')}</select></div><div class="field"><div class="field__label">Shift</div><select class="select" id="w-shift">${shifts.map((s) => `<option ${s === form.shift ? 'selected' : ''}>${s}</option>`).join('')}</select></div>`;
+    else if (step === 2) wpanel.innerHTML = `<div class="field"><div class="field__label">Certifications</div>${certTypes.map((c, i) => `<div class="checkrow"><span class="chk"><input type="checkbox" id="wc-${i}" value="${c}" ${form.certs.includes(c) ? 'checked' : ''}>${c}</span></div>`).join('')}</div>`;
+    else wpanel.innerHTML = `<dl class="detailgrid"><div class="detailitem"><dt>Name</dt><dd>${form.first} ${form.last}</dd></div><div class="detailitem"><dt>Email</dt><dd>${form.email}</dd></div><div class="detailitem"><dt>Role</dt><dd>${form.role}</dd></div><div class="detailitem"><dt>Shift</dt><dd>${form.shift}</dd></div></dl><p class="muted">${form.certs.length} certification(s) selected.</p>`;
+    wprev.style.visibility = step === 0 ? 'hidden' : 'visible';
+    wnext.textContent = step === labels.length - 1 ? 'Add technician' : 'Next';
+  }
+  function save() {
+    if (step === 0) { form.first = wpanel.querySelector('#w-first').value.trim(); form.last = wpanel.querySelector('#w-last').value.trim(); form.email = wpanel.querySelector('#w-email').value.trim(); }
+    else if (step === 1) { form.role = wpanel.querySelector('#w-role').value; form.shift = wpanel.querySelector('#w-shift').value; }
+    else if (step === 2) { form.certs = [...wpanel.querySelectorAll('input:checked')].map((c) => c.value); }
+  }
+  function validate() {
+    if (step === 0 && (!wpanel.querySelector('#w-first').value.trim() || !wpanel.querySelector('#w-last').value.trim())) {
+      werror.textContent = 'First and last name are required.'; werror.style.display = 'block'; return false;
+    }
+    return true;
+  }
+  function openWizard() { step = 0; renderSteps(); renderPanel(); wback.hidden = false; }
+  wnext.addEventListener('click', () => {
+    if (!validate()) return; save();
+    if (step === labels.length - 1) { wback.hidden = true; return; }
+    step++; renderSteps(); renderPanel();
+  });
+  wprev.addEventListener('click', () => { save(); step--; renderSteps(); renderPanel(); });
+  document.getElementById('addbtn').addEventListener('click', openWizard);
+  document.getElementById('wclose').addEventListener('click', () => (wback.hidden = true));
+</script>

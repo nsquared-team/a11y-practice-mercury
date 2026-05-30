@@ -15,6 +15,7 @@ export const SITE = {
 export const NAV = [
   { key: 'dashboard', label: 'Dashboard', path: 'dashboard/' },
   { key: 'operations', label: 'Operations', path: 'operations/' },
+  { key: 'personnel', label: 'Personnel', path: 'personnel/' },
   { key: 'equipment', label: 'Equipment', path: 'equipment/' },
   { key: 'alerts', label: 'Alerts', path: 'alerts/' },
   { key: 'reports', label: 'Reports', path: 'reports/' },

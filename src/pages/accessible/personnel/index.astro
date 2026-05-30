@@ -1,0 +1,431 @@
+---
+/**
+ * Personnel — ACCESSIBLE tree.  Patterns: TABS + CARDS + MODAL +
+ * keyboard REORDER + multi-step FORM WIZARD (all corrected, one-to-one with
+ * the root Personnel page).
+ *
+ * Fixes:
+ *  - Page tabs use role="tablist"/"tab"/"tabpanel" with aria-selected, roving
+ *    tabindex, and arrow-key navigation (4.1.2, 2.1.1).
+ *  - Directory search + filter selects have real <label>s; the add control and
+ *    cards are real <button>s; status shown as a text badge (1.3.1, 2.1.1, 1.4.1).
+ *  - Shift rosters reorder with keyboard move buttons, announced via a polite
+ *    live region — no mouse-only drag (2.1.1, 4.1.3).
+ *  - Certification table has caption + scoped headers; time-remaining is a
+ *    progressbar with visible text; status is a text badge (1.1.1, 4.1.2, 1.4.1).
+ *  - Detail + wizard modals are role="dialog" aria-modal with focus move-in,
+ *    trap, Escape, and focus return; the wizard conveys step state via
+ *    aria-current and a real role="alert"; step-1 fields have <label>s; footer
+ *    buttons have no positive tabindex (4.1.2, 2.1.2, 2.4.3, 3.3.2).
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ChromeAccessible from '@components/ChromeAccessible.astro';
+import { personnelData, availableRoles, availableShifts, availableCertificationTypes, getPersonnelStats } from '@data/personnel.js';
+
+const stats = getPersonnelStats();
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const fmt = (iso) => { const d = new Date(iso); return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`; };
+const initials = (p) => (p.firstName[0] + p.lastName[0]).toUpperCase();
+const BADGE = { 'On Duty': 'ok', 'On Break': 'warn', 'Off Duty': 'muted', 'On Leave': 'crit' };
+const now = new Date();
+
+const rosters = availableShifts.map((s) => ({
+  shift: s,
+  people: personnelData.filter((p) => p.shift === s).slice(0, 6).map((p) => ({ id: p.id, name: `${p.firstName} ${p.lastName}`, role: p.role })),
+}));
+const certRows = [];
+personnelData.forEach((p) => p.certifications.forEach((c) => {
+  if (c.status === 'expiring' || c.status === 'expired') {
+    const days = Math.round((new Date(c.expirationDate) - now) / 86400000);
+    certRows.push({ person: `${p.firstName} ${p.lastName}`, cert: c.name, status: c.status, expires: fmt(c.expirationDate), days });
+  }
+}));
+const detail = personnelData.map((p) => ({
+  id: p.id, name: `${p.firstName} ${p.lastName}`, role: p.role, shift: p.shift, status: p.status,
+  email: p.email, hire: fmt(p.hireDate), emergency: p.emergencyContact,
+  certs: p.certifications.map((c) => ({ name: c.name, status: c.status })),
+}));
+
+const ptabs = [['directory', 'Directory'], ['schedule', 'Shift Schedule'], ['certs', 'Certifications']];
+---
+<BaseLayout title="Personnel — Discover Mercury Mining Operations" variant="accessible">
+  <div class="app">
+    <ChromeAccessible active="personnel">
+      <div class="pagehead">
+        <h1>Personnel Management</h1>
+        <p>{stats.total} crew across {availableShifts.length} shifts — directory, schedule, and certifications.</p>
+      </div>
+
+      <section aria-labelledby="stats-h">
+        <h2 id="stats-h" class="sr-only">Personnel status counts</h2>
+        <div class="grid grid--kpi" style="margin-bottom:1.2rem">
+          <div class="card"><div class="kpi__label">On Duty</div><div class="kpi__value">{stats.byStatus['On Duty'] || 0}</div></div>
+          <div class="card"><div class="kpi__label">On Leave</div><div class="kpi__value">{stats.byStatus['On Leave'] || 0}</div></div>
+          <div class="card"><div class="kpi__label">Certs Expiring</div><div class="kpi__value">{stats.certsByStatus.expiring || 0}</div></div>
+          <div class="card"><div class="kpi__label">Certs Expired</div><div class="kpi__value">{stats.certsByStatus.expired || 0}</div></div>
+        </div>
+      </section>
+
+      <div class="tabs">
+        <div class="tablist" role="tablist" aria-label="Personnel views" id="ptabs">
+          {ptabs.map(([k, l], i) => (
+            <button role="tab" id={`pt-${k}`} aria-controls={`pp-${k}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? '0' : '-1'} class={`tab${i === 0 ? ' is-active' : ''}`} data-panel={k}>{l}</button>
+          ))}
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="pp-directory" aria-labelledby="pt-directory" tabindex="0" data-panel="directory">
+          <div class="filterbar">
+            <span class="topsearch" style="max-width:280px">
+              <label for="psearch" class="sr-only">Search crew by name or email</label>
+              <span class="topsearch__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+              <input class="topsearch__input" id="psearch" type="search" placeholder="Search crew…" />
+            </span>
+            <span class="field">
+              <label for="f-role" class="sr-only">Filter by role</label>
+              <select class="select f-role" id="f-role" style="max-width:200px">
+                <option value="">All roles</option>
+                {availableRoles.map((r) => <option value={r}>{r}</option>)}
+              </select>
+            </span>
+            <span class="field">
+              <label for="f-shift" class="sr-only">Filter by shift</label>
+              <select class="select f-shift" id="f-shift" style="max-width:150px">
+                <option value="">All shifts</option>
+                {availableShifts.map((s) => <option value={s}>{s}</option>)}
+              </select>
+            </span>
+            <span class="spacer"></span>
+            <button class="btn btn--primary" type="button" id="addbtn">+ Add technician</button>
+          </div>
+          <div class="eqcards" id="pcards">
+            {personnelData.map((p) => (
+              <button type="button" class="eqcard" data-id={p.id} data-name={`${p.firstName} ${p.lastName} ${p.email}`.toLowerCase()} data-role={p.role} data-shift={p.shift}>
+                <span class="pcard__head">
+                  <span class="avatar">{initials(p)}</span>
+                  <span><span class="pcard__name">{p.firstName} {p.lastName}</span><span class="pcard__role">{p.role}</span></span>
+                </span>
+                <span class="eqcard__meta">
+                  <span>Shift {p.shift}</span>
+                  <span class={`badge badge--${BADGE[p.status]}`}>{p.status}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="pp-schedule" aria-labelledby="pt-schedule" tabindex="0" data-panel="schedule" hidden>
+          <p class="muted">Use the Move up and Move down buttons to reorder duty priority within each shift.</p>
+          <p class="sr-only" aria-live="polite" id="reorder-status"></p>
+          <div class="shiftcols">
+            {rosters.map((r) => (
+              <div class="shiftcol">
+                <h3 class="shiftcol__title">Shift {r.shift}</h3>
+                <p class="shiftcol__sub">{r.people.length} on duty roster</p>
+                <ul class="roster" data-shift={r.shift}>
+                  {r.people.map((p) => (
+                    <li class="rosteritem" data-id={p.id} data-name={p.name}>
+                      <span class="rosteritem__name">{p.name}<span class="rosteritem__role"> · {p.role}</span></span>
+                      <span class="movebtns">
+                        <button type="button" class="movebtn movebtn--up" aria-label={`Move ${p.name} up`}>↑<span class="sr-only"> Move up</span></button>
+                        <button type="button" class="movebtn movebtn--down" aria-label={`Move ${p.name} down`}>↓<span class="sr-only"> Move down</span></button>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="pp-certs" aria-labelledby="pt-certs" tabindex="0" data-panel="certs" hidden>
+          <div class="filterbar">
+            <span class="field">
+              <label for="f-cert" class="sr-only">Filter certifications by status</label>
+              <select class="select f-cert" id="f-cert" style="max-width:180px">
+                <option value="">Needs attention</option>
+                <option value="expiring">Expiring</option>
+                <option value="expired">Expired</option>
+              </select>
+            </span>
+          </div>
+          <div class="tablewrap">
+            <table class="data" id="certtable">
+              <caption>Certifications needing attention: expiring and expired credentials by technician.</caption>
+              <thead><tr><th scope="col">Technician</th><th scope="col">Certification</th><th scope="col">Status</th><th scope="col">Expires</th><th scope="col">Time remaining</th></tr></thead>
+              <tbody>
+                {certRows.map((c) => (
+                  <tr data-status={c.status}>
+                    <th scope="row">{c.person}</th>
+                    <td>{c.cert}</td>
+                    <td><span class={`badge badge--${c.status === 'expired' ? 'crit' : 'warn'}`}>{c.status}</span></td>
+                    <td>{c.expires}</td>
+                    <td style="min-width:140px">
+                      <div class="meter" role="progressbar" aria-valuenow={Math.max(0, Math.min(100, Math.round(c.days / 90 * 100)))} aria-valuemin="0" aria-valuemax="100" aria-label={`Time remaining for ${c.cert}`}>
+                        <div class="meter__fill" style={`width:${Math.max(0, Math.min(100, Math.round(c.days / 90 * 100)))}%`}></div>
+                      </div>
+                      <span class="muted" style="font-size:.78rem">{c.days > 0 ? `${c.days} days` : 'Expired'}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </ChromeAccessible>
+  </div>
+
+  {/* Detail modal: dialog semantics, focus move-in, trap, Escape, focus return. */}
+  <div class="modal-backdrop" id="pbackdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ptitle">
+      <div class="modal__head">
+        <h2 class="modal__title" id="ptitle" tabindex="-1">Crew member</h2>
+        <button class="modal__close" id="pclose" type="button" aria-label="Close dialog"><span aria-hidden="true">✕</span></button>
+      </div>
+      <div class="modal__body" id="pbody"></div>
+    </div>
+  </div>
+
+  {/* Add-technician wizard: dialog semantics, step state, validation, focus mgmt. */}
+  <div class="modal-backdrop" id="wbackdrop" hidden>
+    <div class="modal" style="width:min(560px,100%)" role="dialog" aria-modal="true" aria-labelledby="wtitle">
+      <div class="modal__head">
+        <h2 class="modal__title" id="wtitle" tabindex="-1">Add technician</h2>
+        <button class="modal__close" id="wclose" type="button" aria-label="Close dialog"><span aria-hidden="true">✕</span></button>
+      </div>
+      <div class="modal__body">
+        <ol class="steps" id="wsteps"></ol>
+        <div id="werror" class="login-error" role="alert"></div>
+        <div id="wpanel"></div>
+      </div>
+      <div class="modal__foot">
+        <button class="btn btn--ghost" type="button" id="wback">Back</button>
+        <button class="btn btn--primary" type="button" id="wnext">Next</button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script define:vars={{ detail, roles: availableRoles, shifts: availableShifts, certTypes: availableCertificationTypes, BADGE }}>
+  // Roving-tabindex + arrow-key tab widget. Returns a select(tab, focus) fn.
+  function wireTabs(listEl, onSelect) {
+    const tabsArr = Array.from(listEl.querySelectorAll('[role="tab"]'));
+    function select(tab, focus) {
+      tabsArr.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        t.classList.toggle('is-active', on);
+      });
+      if (focus) tab.focus();
+      onSelect(tab);
+    }
+    listEl.addEventListener('click', (e) => { const t = e.target.closest('[role="tab"]'); if (t) select(t, false); });
+    listEl.addEventListener('keydown', (e) => {
+      const i = tabsArr.indexOf(document.activeElement);
+      if (i < 0) return;
+      let n = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') n = (i + 1) % tabsArr.length;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') n = (i - 1 + tabsArr.length) % tabsArr.length;
+      else if (e.key === 'Home') n = 0;
+      else if (e.key === 'End') n = tabsArr.length - 1;
+      if (n !== null) { e.preventDefault(); select(tabsArr[n], true); }
+    });
+    return select;
+  }
+
+  // Page tabs
+  const ptabsEl = document.getElementById('ptabs');
+  wireTabs(ptabsEl, (tab) => {
+    const p = tab.dataset.panel;
+    document.querySelectorAll('.tabpanel[data-panel]').forEach((pn) => (pn.hidden = pn.dataset.panel !== p));
+  });
+
+  // Directory search + filters
+  const cards = Array.from(document.querySelectorAll('#pcards .eqcard'));
+  function applyFilter() {
+    const q = (document.getElementById('psearch').value || '').toLowerCase();
+    const role = document.querySelector('.f-role').value, shift = document.querySelector('.f-shift').value;
+    cards.forEach((c) => { c.style.display = (c.dataset.name.includes(q) && (!role || c.dataset.role === role) && (!shift || c.dataset.shift === shift)) ? '' : 'none'; });
+  }
+  document.getElementById('psearch').addEventListener('input', applyFilter);
+  document.querySelector('.f-role').addEventListener('change', applyFilter);
+  document.querySelector('.f-shift').addEventListener('change', applyFilter);
+
+  // Cert filter
+  const certFilter = document.querySelector('.f-cert');
+  certFilter.addEventListener('change', () => {
+    const v = certFilter.value;
+    document.querySelectorAll('#certtable tbody tr').forEach((tr) => { tr.style.display = (!v || tr.dataset.status === v) ? '' : 'none'; });
+  });
+
+  // Keyboard roster reorder: move buttons, disabled edges, polite announcement.
+  const reorderStatus = document.getElementById('reorder-status');
+  function refreshRoster(ul) {
+    const items = Array.from(ul.querySelectorAll('.rosteritem'));
+    items.forEach((li, i) => {
+      li.querySelector('.movebtn--up').disabled = i === 0;
+      li.querySelector('.movebtn--down').disabled = i === items.length - 1;
+    });
+  }
+  function announceMove(ul, li, btn) {
+    const items = Array.from(ul.querySelectorAll('.rosteritem'));
+    const i = items.indexOf(li);
+    const shift = ul.dataset.shift;
+    reorderStatus.textContent = `Moved ${li.dataset.name} to position ${i + 1} of ${items.length} in Shift ${shift}`;
+    btn.focus();
+  }
+  document.querySelectorAll('.roster').forEach((ul) => {
+    refreshRoster(ul);
+    ul.addEventListener('click', (e) => {
+      const btn = e.target.closest('.movebtn');
+      if (!btn || btn.disabled) return;
+      const li = btn.closest('.rosteritem');
+      if (btn.classList.contains('movebtn--up')) {
+        const prev = li.previousElementSibling;
+        if (prev) ul.insertBefore(li, prev);
+      } else {
+        const next = li.nextElementSibling;
+        if (next) ul.insertBefore(next, li);
+      }
+      refreshRoster(ul);
+      announceMove(ul, li, btn.disabled ? li.querySelector('.movebtn:not([disabled])') : btn);
+    });
+  });
+
+  // Shared modal helpers: focusable list, Tab trap + Escape per active dialog.
+  function focusableIn(modal) {
+    return Array.from(modal.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])')).filter((el) => el.offsetParent !== null);
+  }
+
+  // Detail modal
+  const pback = document.getElementById('pbackdrop');
+  const pmodal = pback.querySelector('.modal');
+  const pbody = document.getElementById('pbody');
+  const ptitle = document.getElementById('ptitle');
+  let pLastFocused = null;
+  function pOnKeydown(e) {
+    if (e.key === 'Escape') { closeDetail(); return; }
+    if (e.key === 'Tab') {
+      const f = focusableIn(pmodal); if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }
+  function openDetail(id, trigger) {
+    const d = detail.find((x) => x.id === id); if (!d) return;
+    pLastFocused = trigger;
+    ptitle.textContent = d.name;
+    pbody.innerHTML = `<dl class="detailgrid">
+      <div class="detailitem"><dt>Role</dt><dd>${d.role}</dd></div>
+      <div class="detailitem"><dt>Shift</dt><dd>${d.shift}</dd></div>
+      <div class="detailitem"><dt>Status</dt><dd><span class="badge badge--${BADGE[d.status]}">${d.status}</span></dd></div>
+      <div class="detailitem"><dt>Email</dt><dd>${d.email}</dd></div>
+      <div class="detailitem"><dt>Hired</dt><dd>${d.hire}</dd></div>
+      <div class="detailitem"><dt>Emergency</dt><dd>${d.emergency ? `${d.emergency.name} (${d.emergency.relationship}) · ${d.emergency.phone}` : '—'}</dd></div></dl>
+      <p class="muted" style="margin:.4rem 0 .3rem">Certifications</p>
+      <ul class="tlist">${d.certs.map((c) => `<li class="titem"><span class="titem__dot" aria-hidden="true"></span><div class="titem__title">${c.name}</div><div class="titem__meta">${c.status}</div></li>`).join('')}</ul>`;
+    pback.hidden = false;
+    document.addEventListener('keydown', pOnKeydown);
+    ptitle.focus();
+  }
+  function closeDetail() {
+    pback.hidden = true;
+    document.removeEventListener('keydown', pOnKeydown);
+    if (pLastFocused) pLastFocused.focus();
+  }
+  document.querySelectorAll('#pcards .eqcard').forEach((c) => c.addEventListener('click', () => openDetail(c.dataset.id, c)));
+  document.getElementById('pclose').addEventListener('click', closeDetail);
+  pback.addEventListener('click', (e) => { if (e.target === pback) closeDetail(); });
+
+  // Add-technician wizard: dialog semantics, step state, validation, focus mgmt.
+  const wback = document.getElementById('wbackdrop');
+  const wmodal = wback.querySelector('.modal');
+  const wpanel = document.getElementById('wpanel');
+  const wsteps = document.getElementById('wsteps');
+  const werror = document.getElementById('werror');
+  const wnext = document.getElementById('wnext'), wprev = document.getElementById('wback');
+  const labels = ['Identity', 'Assignment', 'Certifications', 'Review'];
+  const form = { first: '', last: '', email: '', role: roles[0], shift: shifts[0], certs: [] };
+  let step = 0;
+  let wLastFocused = null;
+
+  function renderSteps() {
+    wsteps.innerHTML = labels.map((l, i) =>
+      `<li class="step ${i === step ? 'is-active' : i < step ? 'is-done' : ''}"${i === step ? ' aria-current="step"' : ''}><span class="step__num" aria-hidden="true">${i + 1}</span><span class="sr-only">Step ${i + 1} of ${labels.length}: </span>${l}</li>`).join('');
+  }
+  function renderPanel() {
+    werror.textContent = '';
+    werror.style.display = 'none';
+    if (step === 0) {
+      wpanel.innerHTML = `<div class="field"><label for="w-first">First name</label><input class="input" id="w-first" type="text" value="${form.first}"></div><div class="field"><label for="w-last">Last name</label><input class="input" id="w-last" type="text" value="${form.last}"></div><div class="field"><label for="w-email">Email</label><input class="input" id="w-email" type="email" value="${form.email}"></div>`;
+    } else if (step === 1) {
+      wpanel.innerHTML = `<div class="field"><label for="w-role">Role</label><select class="select" id="w-role">${roles.map((r) => `<option ${r === form.role ? 'selected' : ''}>${r}</option>`).join('')}</select></div><div class="field"><label for="w-shift">Shift</label><select class="select" id="w-shift">${shifts.map((s) => `<option ${s === form.shift ? 'selected' : ''}>${s}</option>`).join('')}</select></div>`;
+    } else if (step === 2) {
+      wpanel.innerHTML = `<fieldset class="field"><legend class="field__label">Certifications</legend>${certTypes.map((c, i) => `<div class="checkrow"><label class="chk"><input type="checkbox" id="wc-${i}" value="${c}" ${form.certs.includes(c) ? 'checked' : ''}>${c}</label></div>`).join('')}</fieldset>`;
+    } else {
+      wpanel.innerHTML = `<dl class="detailgrid"><div class="detailitem"><dt>Name</dt><dd>${form.first} ${form.last}</dd></div><div class="detailitem"><dt>Email</dt><dd>${form.email}</dd></div><div class="detailitem"><dt>Role</dt><dd>${form.role}</dd></div><div class="detailitem"><dt>Shift</dt><dd>${form.shift}</dd></div></dl><p class="muted">${form.certs.length} certification(s) selected.</p>`;
+    }
+    wprev.disabled = step === 0;
+    wnext.textContent = step === labels.length - 1 ? 'Add technician' : 'Next';
+    const heading = wpanel.querySelector('label, legend');
+    const firstField = wpanel.querySelector('input, select');
+    if (firstField) firstField.focus();
+    else if (heading) heading.focus();
+  }
+  function save() {
+    if (step === 0) { form.first = wpanel.querySelector('#w-first').value.trim(); form.last = wpanel.querySelector('#w-last').value.trim(); form.email = wpanel.querySelector('#w-email').value.trim(); }
+    else if (step === 1) { form.role = wpanel.querySelector('#w-role').value; form.shift = wpanel.querySelector('#w-shift').value; }
+    else if (step === 2) { form.certs = [...wpanel.querySelectorAll('input:checked')].map((c) => c.value); }
+  }
+  function validate() {
+    if (step !== 0) return true;
+    const firstEl = wpanel.querySelector('#w-first'), lastEl = wpanel.querySelector('#w-last');
+    firstEl.removeAttribute('aria-invalid'); lastEl.removeAttribute('aria-invalid');
+    const firstEmpty = !firstEl.value.trim(), lastEmpty = !lastEl.value.trim();
+    if (firstEmpty || lastEmpty) {
+      werror.textContent = 'First and last name are required.';
+      werror.style.display = 'block';
+      if (firstEmpty) firstEl.setAttribute('aria-invalid', 'true');
+      if (lastEmpty) lastEl.setAttribute('aria-invalid', 'true');
+      (firstEmpty ? firstEl : lastEl).focus();
+      return false;
+    }
+    return true;
+  }
+  function wOnKeydown(e) {
+    if (e.key === 'Escape') { closeWizard(); return; }
+    if (e.key === 'Tab') {
+      const f = focusableIn(wmodal); if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }
+  function openWizard(trigger) {
+    wLastFocused = trigger;
+    step = 0;
+    form.first = ''; form.last = ''; form.email = ''; form.role = roles[0]; form.shift = shifts[0]; form.certs = [];
+    renderSteps();
+    wback.hidden = false;
+    document.addEventListener('keydown', wOnKeydown);
+    renderPanel();
+  }
+  function closeWizard() {
+    wback.hidden = true;
+    document.removeEventListener('keydown', wOnKeydown);
+    if (wLastFocused) wLastFocused.focus();
+  }
+  wnext.addEventListener('click', () => {
+    if (!validate()) return;
+    save();
+    if (step === labels.length - 1) { closeWizard(); return; }
+    step++; renderSteps(); renderPanel();
+  });
+  wprev.addEventListener('click', () => { if (step === 0) return; save(); step--; renderSteps(); renderPanel(); });
+  document.getElementById('addbtn').addEventListener('click', (e) => openWizard(e.currentTarget));
+  document.getElementById('wclose').addEventListener('click', closeWizard);
+  wback.addEventListener('click', (e) => { if (e.target === wback) closeWizard(); });
+</script>
+</BaseLayout>

@@ -301,6 +301,35 @@ button.eqcard { font: inherit; color: inherit; cursor: pointer; }
 .titem__title { font-weight: 600; }
 .titem__meta { color: var(--text-muted); font-size: 0.82rem; margin-top: 0.15rem; }
 
+/* --- Personnel: avatars, cards, shift roster, wizard -------------------- */
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--bg-elev); color: var(--amber-bright); display: grid; place-items: center; font-weight: 700; font-size: 0.85rem; flex: 0 0 auto; }
+.pcard__head { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.5rem; }
+.pcard__name { font-weight: 650; }
+.pcard__role { color: var(--text-muted); font-size: 0.8rem; }
+
+.shiftcols { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; }
+.shiftcol { background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.9rem 1rem; }
+.shiftcol__title { font-weight: 650; margin: 0 0 0.2rem; }
+.shiftcol__sub { color: var(--text-muted); font-size: 0.8rem; margin: 0 0 0.8rem; }
+.roster { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.rosteritem { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.6rem; background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.rosteritem__grip { color: var(--text-muted); cursor: grab; flex: 0 0 auto; }
+.rosteritem__name { flex: 1 1 auto; font-size: 0.9rem; }
+.rosteritem__role { color: var(--text-muted); font-size: 0.76rem; }
+.rosteritem.dragging { opacity: 0.45; }
+.movebtns { display: inline-flex; gap: 0.2rem; flex: 0 0 auto; }
+.movebtn { all: unset; cursor: pointer; padding: 0.1rem 0.4rem; border-radius: 5px; border: 1px solid var(--line); color: var(--text-dim); font-size: 0.85rem; }
+.movebtn:hover { background: var(--bg-panel); color: var(--text); }
+.movebtn[disabled] { opacity: 0.4; cursor: default; }
+
+.steps { display: flex; align-items: center; gap: 0.3rem; margin-bottom: 1.3rem; flex-wrap: wrap; }
+.step { display: flex; align-items: center; gap: 0.45rem; color: var(--text-muted); font-size: 0.85rem; }
+.step__num { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--line); font-weight: 700; font-size: 0.8rem; }
+.step.is-active { color: var(--text); }
+.step.is-active .step__num { border-color: var(--amber); color: var(--amber-bright); }
+.step.is-done .step__num { background: var(--amber); border-color: var(--amber); color: #1a0f02; }
+.step__line { width: 18px; height: 2px; background: var(--line); }
+
 /* --- Misc ---------------------------------------------------------------- */
 .stack > * + * { margin-top: 1rem; }
 .muted { color: var(--text-muted); }
