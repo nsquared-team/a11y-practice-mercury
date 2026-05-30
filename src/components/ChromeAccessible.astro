@@ -8,8 +8,13 @@
  * Props: active (nav key for the current page).
  */
 import { SITE, NAV } from '../data/ops.js';
+import { getUnreadAlerts } from '../data/alerts.js';
+import { getSitesByStatus } from '../data/sites.js';
+import Icon from './Icon.astro';
 const BASE = '/accessible/';
 const { active } = Astro.props;
+const unread = getUnreadAlerts().length;
+const activeSites = getSitesByStatus('active').length;
 ---
 <a class="skiplink pt-sr-only-focusable" href="#main">Skip to main content</a>
 
@@ -37,16 +42,29 @@ const { active } = Astro.props;
 </nav>
 
 <header class="topbar">
-  <p class="topbar__sol" style="margin:0">{SITE.colony}</p>
+  <search class="topsearch">
+    <label for="global-search" class="sr-only">Search sites, equipment, and personnel</label>
+    <span class="topsearch__icon"><Icon name="search" size={16} /></span>
+    <input id="global-search" class="input topsearch__input" type="search" name="q"
+           placeholder="Search sites, equipment, personnel…" autocomplete="off" />
+  </search>
   <div class="topbar__meta">
-    <span class="topbar__sol">{SITE.sol}</span>
+    <span class="topbar__sol" title={`${SITE.colony} · Mercury day cycle`}>{SITE.sol} · Day cycle</span>
+    <a class="iconbtn" href={`${BASE}alerts/`} aria-label={`Notifications: ${unread} unread`}>
+      <Icon name="bell" size={18} />
+      {unread > 0 && <span class="iconbtn__badge" aria-hidden="true">{unread}</span>}
+    </a>
     <span class="badge badge--ok"><span class="badge__dot" aria-hidden="true"></span>Systems nominal</span>
   </div>
 </header>
 
 <main class="main" id="main" tabindex="-1">
   <slot />
-  <footer class="footer">
-    <p>{SITE.name} · {SITE.colony} · Accessible reference build. Telemetry is simulated.</p>
+  <footer class="footer footer--status">
+    <p class="footstat"><span class="footstat__dot footstat__dot--ok" aria-hidden="true"></span>System status: <strong>Operational</strong></p>
+    <p class="footstat">Active sites: <strong>{activeSites}</strong></p>
+    <p class="footstat">Last sync: <strong>14:38 UTC</strong></p>
+    <p class="footstat">Connection: <strong>Stable</strong></p>
+    <p class="footstat footstat--end">{SITE.name} · Accessible reference build. Telemetry is simulated.</p>
   </footer>
 </main>

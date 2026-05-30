@@ -32,14 +32,14 @@ const isRoot = variant === 'root';
     <meta name="description" content={description} />
     <title>{title}</title>
 
-    <!-- 1. Site theme (a11y-neutral chrome). -->
+    {/* 1. Site theme (a11y-neutral chrome). */}
     <link rel="stylesheet" href="/styles/theme.css" />
 
     <!-- 2. Toolkit base.css — imported AFTER the theme so its focus / sr-only /
             reduced-motion rules win (CONVENTIONS.md §4). -->
     <link rel="stylesheet" href={`${TOOLKIT}/css/base.css`} />
 
-    <!-- 3. Version switcher styles. -->
+    {/* 3. Version switcher styles. */}
     <link rel="stylesheet" href={`${TOOLKIT}/switcher/switcher.css`} />
 
     {/* 4. ROOT tree only: override stylesheet that breaks the base.css behaviour
@@ -47,7 +47,7 @@ const isRoot = variant === 'root';
            /accessible/ tree omits this entirely and keeps base.css intact. */}
     {isRoot && <link rel="stylesheet" href="/styles/inaccessible-overrides.css" />}
 
-    <!-- 5. Version switcher — path-driven, auto-mounts, docks bottom-right. -->
+    {/* 5. Version switcher — path-driven, auto-mounts, docks bottom-right. */}
     <script src={`${TOOLKIT}/switcher/switcher.js`} defer></script>
   </head>
   <body class={bodyClass}>

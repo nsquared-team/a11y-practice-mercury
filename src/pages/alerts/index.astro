@@ -28,13 +28,13 @@ const icon = { critical: '⛔', warning: '⚠', info: 'ℹ' };
         <p>Live operational alerts across the {SITE.colony}.</p>
       </div>
 
-      <!-- Toolbar: "Simulate incoming alert" is a clickable div, not a button. -->
+      {/* Toolbar: "Simulate incoming alert" is a clickable div, not a button. */}
       <div class="toolbar">
         <div class="btn btn--primary" id="simulate">Simulate incoming alert</div>
         <span class="muted" id="alert-count">{ALERTS.length} active alerts</span>
       </div>
 
-      <!-- FAIL: plain div stack, no list semantics, no live region. -->
+      {/* FAIL: plain div stack, no list semantics, no live region. */}
       <div class="alertlist" id="feed">
         {ALERTS.map((a) => (
           <div class={`alert alert--${a.level}`} data-alert>

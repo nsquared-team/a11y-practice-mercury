@@ -30,13 +30,13 @@ const barClass = { IL: 'bar--il', AN: 'bar--an', PX: 'bar--px', WI: 'bar--wi' };
         <p>Live extraction telemetry for the {SITE.colony}.</p>
       </div>
 
-      <!-- FAIL: styled div, not a live/alert region — never announced. -->
+      {/* FAIL: styled div, not a live/alert region — never announced. */}
       <div class="banner banner--critical">
         <span class="live-dot"></span>
         Rig 07 auto-halted — drill head over-torque. Inspection crew dispatched.
       </div>
 
-      <!-- KPI cards: deltas carry meaning via arrow glyph + colour only. -->
+      {/* KPI cards: deltas carry meaning via arrow glyph + colour only. */}
       <div class="grid grid--kpi" style="margin-bottom:1rem">
         {KPIS.map((k) => (
           <div class="card">
@@ -50,7 +50,7 @@ const barClass = { IL: 'bar--il', AN: 'bar--an', PX: 'bar--px', WI: 'bar--wi' };
       </div>
 
       <div class="grid grid--2">
-        <!-- Line chart: no name, no role, no alt, no data table. -->
+        {/* Line chart: no name, no role, no alt, no data table. */}
         <div class="card">
           <div class="card__title"><h3>{PRODUCTION_SERIES.label}</h3></div>
           <svg class="chart" viewBox={`0 0 ${plot.width} ${plot.height}`}>
@@ -70,7 +70,7 @@ const barClass = { IL: 'bar--il', AN: 'bar--an', PX: 'bar--px', WI: 'bar--wi' };
           </svg>
         </div>
 
-        <!-- Stream-mix bars: meaning by colour only (legend below). -->
+        {/* Stream-mix bars: meaning by colour only (legend below). */}
         <div class="card">
           <div class="card__title"><h3>{STREAM_MIX.label}</h3></div>
           <svg class="chart" viewBox={`0 0 ${bars.width} ${bars.height}`}>

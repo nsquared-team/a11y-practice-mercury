@@ -34,17 +34,17 @@ import { RIGS, SETTINGS_TABS } from '@data/ops.js';
       </div>
 
       <div class="tabs">
-        <!-- FAIL: clickable divs, no tab semantics, no keyboard, colour-only state. -->
+        {/* FAIL: clickable divs, no tab semantics, no keyboard, colour-only state. */}
         <div class="tablist">
           {SETTINGS_TABS.map((t, i) => (
             <div class={`tab${i === 0 ? ' is-active' : ''}`} data-tab={t.key}>{t.label}</div>
           ))}
         </div>
 
-        <!-- General -->
+        {/* General */}
         <div class="tabpanel" data-panel="general">
           <form id="rig-form" class="stack">
-            <!-- FAIL: placeholder-only, no <label>. -->
+            {/* FAIL: placeholder-only, no <label>. */}
             <div class="field">
               <select class="select" name="rig">
                 <option value="" disabled selected>Active rig…</option>
@@ -57,15 +57,15 @@ import { RIGS, SETTINGS_TABS } from '@data/ops.js';
             </div>
 
             <div class="field">
-              <!-- FAIL: required field not marked required, no label. -->
+              {/* FAIL: required field not marked required, no label. */}
               <input class="input" type="text" name="supervisor" id="sup" placeholder="Shift supervisor" />
-              <!-- FAIL: loose error div, not associated, not announced. -->
+              {/* FAIL: loose error div, not associated, not announced. */}
               <div class="field__error" id="sup-err" hidden>Shift supervisor is required.</div>
             </div>
 
             <div class="field">
               <div class="field__label">Options</div>
-              <!-- FAIL: custom clickable div "checkboxes". -->
+              {/* FAIL: custom clickable div "checkboxes". */}
               <div class="checkrow">
                 <div class="fakecheck" data-check="autohalt"></div>
                 <span>Auto-halt on over-torque</span>
@@ -76,12 +76,12 @@ import { RIGS, SETTINGS_TABS } from '@data/ops.js';
               </div>
             </div>
 
-            <!-- FAIL: clickable div, not a button. -->
+            {/* FAIL: clickable div, not a button. */}
             <div class="btn btn--primary" id="save-btn" data-save>Save changes</div>
           </form>
         </div>
 
-        <!-- Alert Thresholds -->
+        {/* Alert Thresholds */}
         <div class="tabpanel" data-panel="thresholds" hidden>
           <div class="stack">
             <div class="field">
@@ -96,7 +96,7 @@ import { RIGS, SETTINGS_TABS } from '@data/ops.js';
           </div>
         </div>
 
-        <!-- Crew & Shifts -->
+        {/* Crew & Shifts */}
         <div class="tabpanel" data-panel="crew" hidden>
           <dl>
             <dt>Shift A supervisor</dt>
