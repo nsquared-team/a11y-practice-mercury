@@ -5,9 +5,9 @@ onto `main`'s statically pre-rendered Astro site, honouring the
 [planet-sites toolkit](https://github.com/nsquared-team/a11y-planet-sites-toolkit)
 two-tree contract.
 
-## Status & resume notes (last updated: through Phase F)
+## Status & resume notes (last updated: through Phase G)
 
-**Done — phases A–F (committed + deployed to `main`):**
+**Done — phases A–G (committed + deployed to `main`):**
 
 | Phase | What landed | Commit |
 |---|---|---|
@@ -17,14 +17,10 @@ two-tree contract.
 | D | Equipment page-pair: 3 tabs (inventory cards / maintenance timeline / diagnostics **gauges**) + tabbed detail modal; `Gauge.astro` | `4bf4525` |
 | E | Personnel page-pair: directory + shift-schedule **reorder** + cert table + 4-step **form wizard** | `18e90bf` |
 | F | Reports module: builder (accordion + live preview) + saved library + analytics + export modal | `b494cc6` |
+| G | Notifications centre: 4 stat cards (`getAlertStats()`) + severity & category **filter selects** over the feed; fixture gains `category` field + `success` severity (`ALERT_CATEGORIES` + `getAlertStats()` in `ops.js`; now 7 alerts). Root: unlabeled selects, colour-only stat cards/severity. Accessible: `<label for>` selects, text stat cards, `success` text badge (`badge--ok`/`badge--info`), filter result announced via `#alert-count` `role="status"` | _pending_ |
 
 **Remaining — resume here:**
 
-- **G ⬜ — Notifications.** Enrich `/alerts/` + `/accessible/alerts/` into the
-  notifications centre: add 4 stat cards (Critical/Warning/Info/Success counts via
-  `getAlertStats()`) + severity & category **filter** controls over the existing
-  feed. The feed/live-region already exists from the first build. Root: unlabeled
-  filter selects, colour-only severity. Accessible: labelled filters, text badges.
 - **H ⬜ — Settings expansion.** `/settings/` already has the tabs+form+thresholds.
   Expand to mirror mining-ops: Display prefs (**toggle switches**, `role="switch"`),
   Notification prefs (**range sliders** + category toggles), Dashboard widget

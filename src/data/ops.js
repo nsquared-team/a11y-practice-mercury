@@ -77,12 +77,25 @@ export const EXTRACTION_SERIES = {
 };
 
 // --- Alerts & notifications -------------------------------------------------
-// `level` ∈ critical | warning | info. `live` items are the ones that animate
-// into the feed (accessible tree announces them via a polite/assertive region).
+// `level` ∈ critical | warning | info | success. `category` ∈ equipment |
+// safety | production | personnel | system. `live` items are the ones that
+// animate into the feed (accessible tree announces them via a polite/assertive
+// region). Items are ordered newest-first by `time`.
 export const ALERTS = [
+  {
+    id: 'AL-7742',
+    level: 'success',
+    category: 'production',
+    rig: 'Refinery',
+    title: 'Refinery throughput target met',
+    detail: 'Sol output reached 1,284 t — 4% above target for the current cycle.',
+    time: '14:45',
+    live: true,
+  },
   {
     id: 'AL-7741',
     level: 'critical',
+    category: 'safety',
     rig: 'Rig 07',
     title: 'Drill head over-torque — auto-shutdown engaged',
     detail: 'Torque exceeded 240 kN·m for 12 s. Rig 07 halted and isolated pending inspection.',
@@ -92,6 +105,7 @@ export const ALERTS = [
   {
     id: 'AL-7740',
     level: 'warning',
+    category: 'production',
     rig: 'Array B',
     title: 'Solar Array B output below threshold',
     detail: 'Output 7.4 MW vs 9.0 MW target. Dust accumulation suspected on panels 12–18.',
@@ -101,6 +115,7 @@ export const ALERTS = [
   {
     id: 'AL-7738',
     level: 'warning',
+    category: 'equipment',
     rig: 'Hauler 3',
     title: 'Hauler 3 battery margin low',
     detail: 'State of charge 16%. Re-route to charging bay C recommended within 40 min.',
@@ -108,8 +123,19 @@ export const ALERTS = [
     live: false,
   },
   {
+    id: 'AL-7736',
+    level: 'success',
+    category: 'equipment',
+    rig: 'Array A',
+    title: 'Solar Array A maintenance complete',
+    detail: 'Panel cleaning on Array A finished; output restored to 9.2 MW.',
+    time: '13:42',
+    live: false,
+  },
+  {
     id: 'AL-7735',
     level: 'info',
+    category: 'personnel',
     rig: 'Refinery',
     title: 'Shift B handover complete',
     detail: 'Refinery throughput nominal. 1,284 t logged for the sol so far.',
@@ -119,6 +145,7 @@ export const ALERTS = [
   {
     id: 'AL-7731',
     level: 'info',
+    category: 'system',
     rig: 'Comms',
     title: 'Deep Space Network window opens 15:10',
     detail: 'Telemetry uplink to Earth scheduled. Buffered logs will flush automatically.',
@@ -126,6 +153,20 @@ export const ALERTS = [
     live: false,
   },
 ];
+
+// Notification categories used by the alerts-page filter control.
+export const ALERT_CATEGORIES = ['equipment', 'safety', 'production', 'personnel', 'system'];
+
+// Counts by severity for the alerts-page stat cards.
+export function getAlertStats(alerts = ALERTS) {
+  return {
+    total: alerts.length,
+    critical: alerts.filter((a) => a.level === 'critical').length,
+    warning: alerts.filter((a) => a.level === 'warning').length,
+    info: alerts.filter((a) => a.level === 'info').length,
+    success: alerts.filter((a) => a.level === 'success').length,
+  };
+}
 
 // --- Reports: shift output table (data tables pattern) ----------------------
 export const SHIFT_REPORT = {

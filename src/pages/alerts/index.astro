@@ -6,29 +6,76 @@
  *  - The feed container is NOT a live region, so alerts injected by the script
  *    (Simulate incoming alert) are never announced to AT (4.1.3 Status Messages).
  *  - Severity is conveyed by the coloured left border ONLY — there is no text or
- *    label naming the level (Critical / Warning / Info) (1.4.1 Use of Colour).
+ *    label naming the level (Critical / Warning / Info / Success) (1.4.1).
  *  - Dismiss is a non-focusable <span> wired by click only — not keyboard
  *    operable and has no accessible name (2.1.1 Keyboard, 4.1.2 Name/Role/Value).
  *  - "Simulate incoming alert" is a clickable <div>, not a <button>
  *    (2.1.1 Keyboard, 4.1.2 Name/Role/Value).
  *  - The feed is a stack of <div>s, not a list — no programmatic grouping
  *    (1.3.1 Info & Relationships).
+ *  - The 4 stat cards differentiate severity by COLOUR ONLY (coloured icon +
+ *    coloured number); they are plain non-semantic <div>s (1.4.1 / 1.3.1).
+ *  - The two filter <select>s have NO associated <label> / accessible name —
+ *    only a nearby plain text span that is not programmatically tied to them
+ *    (1.3.1 Info & Relationships, 4.1.2 Name/Role/Value, 3.3.2 Labels).
  */
 import BaseLayout from '@layouts/BaseLayout.astro';
 import ChromeRoot from '@components/ChromeRoot.astro';
-import { SITE, ALERTS } from '@data/ops.js';
+import { SITE, ALERTS, ALERT_CATEGORIES, getAlertStats } from '@data/ops.js';
 
-const icon = { critical: '⛔', warning: '⚠', info: 'ℹ' };
+const icon = { critical: '⛔', warning: '⚠', info: 'ℹ', success: '✓' };
+const stats = getAlertStats(ALERTS);
+const statCards = [
+  { key: 'critical', label: 'Critical', value: stats.critical },
+  { key: 'warning', label: 'Warning', value: stats.warning },
+  { key: 'info', label: 'Info', value: stats.info },
+  { key: 'success', label: 'Success', value: stats.success },
+];
 ---
 <BaseLayout title="Alerts — Discover Mercury Mining Operations" variant="root">
   <div class="app">
     <ChromeRoot active="alerts">
       <div class="pagehead">
-        <h1>Alerts &amp; Notifications</h1>
+        <h1>Notifications Centre</h1>
         <p>Live operational alerts across the {SITE.colony}.</p>
       </div>
 
-      {/* Toolbar: "Simulate incoming alert" is a clickable div, not a button. */}
+      {/* Stat cards: colour-only severity, plain divs. */}
+      <div class="statcards">
+        {statCards.map((c) => (
+          <div class={`statcard statcard--${c.key}`}>
+            <div class="statcard__head">
+              <span class="statcard__icon" aria-hidden="true">{icon[c.key]}</span>
+              <span>{c.label}</span>
+            </div>
+            <div class="statcard__value">{c.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters: selects with no associated label, only nearby text spans. */}
+      <div class="alertfilters">
+        <div class="alertfilter">
+          <span class="alertfilter__label">Severity</span>
+          <select class="select" id="filter-severity">
+            <option value="all">All severities</option>
+            <option value="critical">Critical</option>
+            <option value="warning">Warning</option>
+            <option value="info">Info</option>
+            <option value="success">Success</option>
+          </select>
+        </div>
+        <div class="alertfilter">
+          <span class="alertfilter__label">Category</span>
+          <select class="select" id="filter-category">
+            <option value="all">All categories</option>
+            {ALERT_CATEGORIES.map((cat) => (
+              <option value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <div class="toolbar">
         <div class="btn btn--primary" id="simulate">Simulate incoming alert</div>
         <span class="muted" id="alert-count">{ALERTS.length} active alerts</span>
@@ -37,7 +84,7 @@ const icon = { critical: '⛔', warning: '⚠', info: 'ℹ' };
       {/* FAIL: plain div stack, no list semantics, no live region. */}
       <div class="alertlist" id="feed">
         {ALERTS.map((a) => (
-          <div class={`alert alert--${a.level}`} data-alert>
+          <div class={`alert alert--${a.level}`} data-alert data-level={a.level} data-category={a.category}>
             <span class="alert__icon" aria-hidden="true">{icon[a.level]}</span>
             <div class="alert__body">
               <h3>{a.title}</h3>
@@ -57,10 +104,21 @@ const icon = { critical: '⛔', warning: '⚠', info: 'ℹ' };
   const feed = document.getElementById('feed');
   const simulate = document.getElementById('simulate');
   const countEl = document.getElementById('alert-count');
+  const sevSel = document.getElementById('filter-severity');
+  const catSel = document.getElementById('filter-category');
 
-  function updateCount() {
-    const n = feed.querySelectorAll('[data-alert]').length;
-    countEl.textContent = n + ' active alerts';
+  function applyFilters() {
+    const sev = sevSel.value;
+    const cat = catSel.value;
+    let visible = 0;
+    feed.querySelectorAll('[data-alert]').forEach((el) => {
+      const okSev = sev === 'all' || el.dataset.level === sev;
+      const okCat = cat === 'all' || el.dataset.category === cat;
+      const show = okSev && okCat;
+      el.style.display = show ? '' : 'none';
+      if (show) visible += 1;
+    });
+    countEl.textContent = visible + ' active alerts';
   }
 
   function wireDismiss(node) {
@@ -68,11 +126,13 @@ const icon = { critical: '⛔', warning: '⚠', info: 'ℹ' };
     if (!btn) return;
     btn.addEventListener('click', () => {
       node.remove();
-      updateCount();
+      applyFilters();
     });
   }
 
   feed.querySelectorAll('[data-alert]').forEach(wireDismiss);
+  sevSel.addEventListener('change', applyFilters);
+  catSel.addEventListener('change', applyFilters);
 
   let seq = 0;
   simulate.addEventListener('click', () => {
@@ -82,6 +142,8 @@ const icon = { critical: '⛔', warning: '⚠', info: 'ℹ' };
     const node = document.createElement('div');
     node.className = 'alert alert--warning';
     node.setAttribute('data-alert', '');
+    node.setAttribute('data-level', 'warning');
+    node.setAttribute('data-category', 'production');
     node.innerHTML =
       '<span class="alert__icon" aria-hidden="true">⚠</span>' +
       '<div class="alert__body">' +
@@ -93,6 +155,6 @@ const icon = { critical: '⛔', warning: '⚠', info: 'ℹ' };
       '<span class="alert__dismiss" data-dismiss>×</span>';
     feed.prepend(node);
     wireDismiss(node);
-    updateCount();
+    applyFilters();
   });
 </script>

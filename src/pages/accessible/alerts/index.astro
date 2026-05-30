@@ -6,44 +6,95 @@
  *  - The feed is a polite live region (role="log" aria-live="polite"
  *    aria-label="Alerts feed"), so script-inserted alerts are announced (4.1.3).
  *  - Each alert names its level as TEXT via a badge ("Critical" / "Warning" /
- *    "Info") alongside an aria-hidden icon — never colour alone (1.4.1).
+ *    "Info" / "Success") alongside an aria-hidden icon — never colour alone (1.4.1).
  *  - Dismiss is a real <button> with an aria-label naming the alert it removes
  *    (2.1.1 Keyboard, 4.1.2 Name/Role/Value).
  *  - "Simulate incoming alert" is a real <button class="btn btn--primary">
  *    (2.1.1 Keyboard, 4.1.2 Name/Role/Value).
  *  - The feed is a <ul class="alertlist"> of <li> items, with titles as <h3>
  *    under the page <h1> (1.3.1 Info & Relationships).
+ *  - The 4 stat cards state the level word + count as TEXT (read e.g.
+ *    "Critical: 1"); icons are aria-hidden, colour is supplementary (1.4.1).
+ *  - Each filter <select> has an associated <label for="…"> giving it an
+ *    accessible name (1.3.1, 4.1.2, 3.3.2) — the fix for the root's unlabeled
+ *    selects.
+ *  - Filtering updates a polite status ("Showing N of M alerts") so the result
+ *    is conveyed (4.1.3 Status Messages).
  */
 import BaseLayout from '@layouts/BaseLayout.astro';
 import ChromeAccessible from '@components/ChromeAccessible.astro';
-import { SITE, ALERTS } from '@data/ops.js';
+import { SITE, ALERTS, ALERT_CATEGORIES, getAlertStats } from '@data/ops.js';
 
-const icon = { critical: '⛔', warning: '⚠', info: 'ℹ' };
-const levelText = { critical: 'Critical', warning: 'Warning', info: 'Info' };
-const levelBadge = { critical: 'badge--crit', warning: 'badge--warn', info: 'badge--muted' };
+const icon = { critical: '⛔', warning: '⚠', info: 'ℹ', success: '✓' };
+const levelText = { critical: 'Critical', warning: 'Warning', info: 'Info', success: 'Success' };
+const levelBadge = { critical: 'badge--crit', warning: 'badge--warn', info: 'badge--info', success: 'badge--ok' };
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const stats = getAlertStats(ALERTS);
+const statCards = [
+  { key: 'critical', label: 'Critical', value: stats.critical },
+  { key: 'warning', label: 'Warning', value: stats.warning },
+  { key: 'info', label: 'Info', value: stats.info },
+  { key: 'success', label: 'Success', value: stats.success },
+];
 ---
 <BaseLayout title="Alerts — Discover Mercury Mining Operations" variant="accessible">
   <div class="app">
     <ChromeAccessible active="alerts">
       <div class="pagehead">
-        <h1>Alerts &amp; Notifications</h1>
+        <h1>Notifications Centre</h1>
         <p>Live operational alerts across the {SITE.colony}.</p>
+      </div>
+
+      {/* Stat cards: level word + count stated as text; colour is supplementary. */}
+      <ul class="statcards" aria-label="Alert counts by severity">
+        {statCards.map((c) => (
+          <li class={`statcard statcard--${c.key}`}>
+            <div class="statcard__head">
+              <span class="statcard__icon" aria-hidden="true">{icon[c.key]}</span>
+              <span>{c.label}</span>
+            </div>
+            <div class="statcard__value">{c.value}</div>
+          </li>
+        ))}
+      </ul>
+
+      {/* Filters: each select has an associated <label for>. */}
+      <div class="alertfilters">
+        <div class="alertfilter">
+          <label for="filter-severity" class="alertfilter__label">Filter by severity</label>
+          <select class="select" id="filter-severity">
+            <option value="all">All severities</option>
+            <option value="critical">Critical</option>
+            <option value="warning">Warning</option>
+            <option value="info">Info</option>
+            <option value="success">Success</option>
+          </select>
+        </div>
+        <div class="alertfilter">
+          <label for="filter-category" class="alertfilter__label">Filter by category</label>
+          <select class="select" id="filter-category">
+            <option value="all">All categories</option>
+            {ALERT_CATEGORIES.map((cat) => (
+              <option value={cat}>{cap(cat)}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div class="toolbar">
         <button type="button" class="btn btn--primary" id="simulate">Simulate incoming alert</button>
-        <span class="muted" id="alert-count">{ALERTS.length} active alerts</span>
+        <span class="muted" id="alert-count" role="status" aria-live="polite">{ALERTS.length} active alerts</span>
       </div>
 
       <ul class="alertlist" id="feed" role="log" aria-live="polite" aria-label="Alerts feed">
         {ALERTS.map((a) => (
-          <li class={`alert alert--${a.level}`} data-alert>
+          <li class={`alert alert--${a.level}`} data-alert data-level={a.level} data-category={a.category}>
             <span class="alert__icon" aria-hidden="true">{icon[a.level]}</span>
             <div class="alert__body">
               <span class={`badge ${levelBadge[a.level]}`}>{levelText[a.level]}</span>
               <h3>{a.title}</h3>
               <p class="alert__detail">{a.detail}</p>
-              <div class="alert__meta">{a.rig} · {a.id}</div>
+              <div class="alert__meta">{a.rig} · {a.id} · {cap(a.category)}</div>
             </div>
             <span class="alert__time">{a.time}</span>
             <button type="button" class="alert__dismiss" data-dismiss aria-label={`Dismiss alert: ${a.title}`}>×</button>
@@ -58,10 +109,22 @@ const levelBadge = { critical: 'badge--crit', warning: 'badge--warn', info: 'bad
   const feed = document.getElementById('feed');
   const simulate = document.getElementById('simulate');
   const countEl = document.getElementById('alert-count');
+  const sevSel = document.getElementById('filter-severity');
+  const catSel = document.getElementById('filter-category');
 
-  function updateCount() {
-    const n = feed.querySelectorAll('[data-alert]').length;
-    countEl.textContent = n + ' active alerts';
+  function applyFilters() {
+    const sev = sevSel.value;
+    const cat = catSel.value;
+    const items = feed.querySelectorAll('[data-alert]');
+    let visible = 0;
+    items.forEach((el) => {
+      const okSev = sev === 'all' || el.dataset.level === sev;
+      const okCat = cat === 'all' || el.dataset.category === cat;
+      const show = okSev && okCat;
+      el.style.display = show ? '' : 'none';
+      if (show) visible += 1;
+    });
+    countEl.textContent = 'Showing ' + visible + ' of ' + items.length + ' alerts';
   }
 
   function wireDismiss(node) {
@@ -69,11 +132,13 @@ const levelBadge = { critical: 'badge--crit', warning: 'badge--warn', info: 'bad
     if (!btn) return;
     btn.addEventListener('click', () => {
       node.remove();
-      updateCount();
+      applyFilters();
     });
   }
 
   feed.querySelectorAll('[data-alert]').forEach(wireDismiss);
+  sevSel.addEventListener('change', applyFilters);
+  catSel.addEventListener('change', applyFilters);
 
   let seq = 0;
   simulate.addEventListener('click', () => {
@@ -84,18 +149,20 @@ const levelBadge = { critical: 'badge--crit', warning: 'badge--warn', info: 'bad
     const node = document.createElement('li');
     node.className = 'alert alert--warning';
     node.setAttribute('data-alert', '');
+    node.setAttribute('data-level', 'warning');
+    node.setAttribute('data-category', 'production');
     node.innerHTML =
       '<span class="alert__icon" aria-hidden="true">⚠</span>' +
       '<div class="alert__body">' +
         '<span class="badge badge--warn">Warning</span>' +
         '<h3>' + title + '</h3>' +
         '<p class="alert__detail">Particulate density rising fast. Secure exposed rigs and reduce array exposure.</p>' +
-        '<div class="alert__meta">Sector S · ' + id + '</div>' +
+        '<div class="alert__meta">Sector S · ' + id + ' · Production</div>' +
       '</div>' +
       '<span class="alert__time">' + time + '</span>' +
       '<button type="button" class="alert__dismiss" data-dismiss aria-label="Dismiss alert: ' + title + '">×</button>';
     feed.prepend(node);
     wireDismiss(node);
-    updateCount();
+    applyFilters();
   });
 </script>
