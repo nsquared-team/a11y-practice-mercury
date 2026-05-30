@@ -25,8 +25,8 @@ contract:
 
 | Version | Lives at | Purpose |
 | --- | --- | --- |
-| **Inaccessible** (default) | `/`, `/alerts/`, `/reports/`, `/settings/` | Real WCAG failures to find |
-| **Accessible** | `/accessible/`, `/accessible/alerts/`, … | The corrected mirror |
+| **Inaccessible** (default) | `/` (login), `/dashboard/`, `/alerts/`, `/reports/`, `/settings/` | Real WCAG failures to find |
+| **Accessible** | `/accessible/` (login), `/accessible/dashboard/`, … | The corrected mirror |
 
 The two trees are **parallel page sets** (not one source with conditionals), so
 the intentional flaws stay legible. The version switcher (bottom-right, from the
@@ -38,7 +38,8 @@ Each route demonstrates failures and fixes for an assigned set of patterns:
 
 | Route | Mission screen | Patterns |
 | --- | --- | --- |
-| `/` Dashboard | Production telemetry & KPIs | Charts (line + bar), status banner |
+| `/` | Operator sign-in | Forms (login) — fake auth: any email with "mercury" gets in |
+| `/dashboard/` | Production telemetry & KPIs | Charts (line + bar), status banner |
 | `/alerts/` | Incident feed | Alerts & notifications (live regions, dismissible feed) |
 | `/reports/` | Per-rig shift output | Data tables (sortable, semantic) |
 | `/settings/` | Rig configuration | Forms + Tabs & panels |

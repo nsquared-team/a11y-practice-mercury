@@ -13,7 +13,7 @@ export const SITE = {
 // Primary nav — same routes in both trees. `href` is tree-relative; pages pass
 // the correct base ('/' or '/accessible/') so links stay within their tree.
 export const NAV = [
-  { key: 'dashboard', label: 'Dashboard', path: '' },
+  { key: 'dashboard', label: 'Dashboard', path: 'dashboard/' },
   { key: 'alerts', label: 'Alerts', path: 'alerts/' },
   { key: 'reports', label: 'Reports', path: 'reports/' },
   { key: 'settings', label: 'Settings', path: 'settings/' },

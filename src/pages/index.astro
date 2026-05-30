@@ -1,92 +1,77 @@
 ---
 /**
- * Dashboard — ROOT (inaccessible) tree.  Pattern focus: CHARTS.
+ * Operator sign-in — ROOT (inaccessible) tree.  Pattern focus: FORMS.
+ *
+ * Fake auth (client-side only): any email containing "mercury" signs in and
+ * redirects to the dashboard; anything else shows a failure message.
  *
  * Deliberate WCAG failures on this page:
- *  - Charts are <svg> with NO accessible name, NO role, NO text alternative and
- *    NO data table. A screen reader gets nothing (1.1.1 Non-text Content).
- *  - The line series and the stream bars encode meaning by COLOUR ONLY — the
- *    legend pairs a colour swatch with a name but the chart marks carry no
- *    text/pattern, so colour is the only channel (1.4.1 Use of Colour).
- *  - KPI deltas use ▲/▼ glyphs + colour with no text saying up/down/good/bad.
- *  - The critical-incident banner is a styled <div>, not a role="alert" / status
- *    region, so it is never announced (4.1.3 Status Messages).
- *  - Heading order skips from <h1> straight to <h3> (1.3.1 Info & Relationships).
+ *  - The fields have NO associated <label> — placeholder text only
+ *    (1.3.1 Info & Relationships, 3.3.2 Labels or Instructions, 4.1.2).
+ *  - There is no <form>, and Sign in is a clickable <div>, so Enter does not
+ *    submit and the control is not keyboard operable / has no role or name
+ *    (2.1.1 Keyboard, 4.1.2 Name, Role, Value).
+ *  - The failure message is a styled <div> toggled on with no live region and
+ *    not associated with the field, so it is never announced (4.1.3, 3.3.1).
+ *  - The card is barely opaque and there is no legibility scrim, so text sits
+ *    low-contrast over the photo (1.4.3 Contrast). The global override also
+ *    washes out the muted text.
+ *  - Inputs omit autocomplete tokens (1.3.5 Identify Input Purpose).
  */
 import BaseLayout from '@layouts/BaseLayout.astro';
-import ChromeRoot from '@components/ChromeRoot.astro';
-import { SITE, KPIS, PRODUCTION_SERIES, STREAM_MIX } from '@data/ops.js';
-import { linePlot, barPlot } from '@lib/chart.js';
-
-const plot = linePlot(PRODUCTION_SERIES.points);
-const bars = barPlot(STREAM_MIX.bars);
-const barClass = { IL: 'bar--il', AN: 'bar--an', PX: 'bar--px', WI: 'bar--wi' };
+import { SITE } from '@data/ops.js';
 ---
-<BaseLayout title="Dashboard — Mercury Mining Operations" variant="root">
-  <div class="app">
-    <ChromeRoot active="dashboard">
-      <div class="pagehead">
-        <h1>Operations Dashboard</h1>
-        <p>Live extraction telemetry for the {SITE.colony}.</p>
-      </div>
-
-      <!-- FAIL: styled div, not a live/alert region — never announced. -->
-      <div class="banner banner--critical">
-        <span class="live-dot"></span>
-        Rig 07 auto-halted — drill head over-torque. Inspection crew dispatched.
-      </div>
-
-      <!-- KPI cards: deltas carry meaning via arrow glyph + colour only. -->
-      <div class="grid grid--kpi" style="margin-bottom:1rem">
-        {KPIS.map((k) => (
-          <div class="card">
-            <div class="kpi__label">{k.label}</div>
-            <div class="kpi__value">{k.value} <span class="kpi__unit">{k.unit}</span></div>
-            <div class={`kpi__delta ${k.delta > 0 ? 'kpi__delta--up' : k.delta < 0 ? 'kpi__delta--down' : 'kpi__delta--flat'}`}>
-              {k.delta > 0 ? '▲' : k.delta < 0 ? '▼' : '■'} {Math.abs(k.delta)}%
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div class="grid grid--2">
-        <!-- Line chart: no name, no role, no alt, no data table. -->
-        <div class="card">
-          <div class="card__title"><h3>{PRODUCTION_SERIES.label}</h3></div>
-          <svg class="chart" viewBox={`0 0 ${plot.width} ${plot.height}`}>
-            <defs>
-              <linearGradient id="area-grad" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stop-color="#ff9e3d" stop-opacity="0.35" />
-                <stop offset="100%" stop-color="#ff9e3d" stop-opacity="0" />
-              </linearGradient>
-            </defs>
-            <line class="chart__axis" x1={plot.pad} y1={plot.height - plot.pad} x2={plot.width - plot.pad} y2={plot.height - plot.pad} />
-            <path class="chart__area" d={plot.area} />
-            <path class="chart__line" d={plot.line} />
-            {plot.xy.map((p) => <circle class="chart__dot" cx={p.x} cy={p.y} r="3" />)}
-            {plot.xy.filter((_, i) => i % 2 === 0).map((p) => (
-              <text class="chart__label" x={p.x} y={plot.height - plot.pad + 14} text-anchor="middle">{p.t}</text>
-            ))}
-          </svg>
-        </div>
-
-        <!-- Stream-mix bars: meaning by colour only (legend below). -->
-        <div class="card">
-          <div class="card__title"><h3>{STREAM_MIX.label}</h3></div>
-          <svg class="chart" viewBox={`0 0 ${bars.width} ${bars.height}`}>
-            <line class="chart__axis" x1={bars.pad} y1={bars.baseline} x2={bars.width - bars.pad} y2={bars.baseline} />
-            {bars.rects.map((r) => <rect class={barClass[r.code]} x={r.x} y={r.y} width={r.w} height={r.h} rx="3" />)}
-          </svg>
-          <div class="legend">
-            {STREAM_MIX.bars.map((b) => (
-              <span class="legend__item">
-                <span class={`legend__swatch ${barClass[b.code]}`} style={`background:${b.code === 'IL' ? '#ff9e3d' : b.code === 'AN' ? '#38e0c8' : b.code === 'PX' ? '#5aa6ff' : '#ffc371'}`}></span>
-                {b.stream}
-              </span>
-            ))}
-          </div>
+<BaseLayout title="Sign in — Mercury Mining Operations" variant="root">
+  <div class="login-stage">
+    <div class="login-card login-card--thin">
+      <div class="brand">
+        <div class="brand__mark">M</div>
+        <div>
+          <div class="brand__name">{SITE.short}</div>
+          <div class="brand__sub">Mining Operations</div>
         </div>
       </div>
-    </ChromeRoot>
+
+      <h1>Operator sign-in</h1>
+      <p class="login-tagline">{SITE.colony}</p>
+
+      <div id="error" class="login-error">Access denied — credentials not recognised for this mission.</div>
+      <div id="success" class="login-success">Access granted. Routing to operations console…</div>
+
+      <div class="field">
+        <input id="email" class="input" type="text" placeholder="Operator email" />
+      </div>
+      <div class="field">
+        <input id="password" class="input" type="password" placeholder="Passphrase" />
+      </div>
+
+      <div id="signin" class="btn btn--primary">Sign in</div>
+
+      <p class="login-hint">Demo only — any email with “mercury” in it gets you in.</p>
+      <p class="login-foot"><a href="/dashboard/">Skip to the demo dashboard →</a></p>
+    </div>
   </div>
 </BaseLayout>
+
+<script>
+  const email = document.getElementById('email');
+  const err = document.getElementById('error');
+  const ok = document.getElementById('success');
+  const btn = document.getElementById('signin');
+
+  function attempt() {
+    const value = (email.value || '').trim();
+    const passes = /mercury/i.test(value);
+    if (passes) {
+      err.classList.remove('is-shown');
+      ok.classList.add('is-shown');
+      window.setTimeout(() => { window.location.href = '/dashboard/'; }, 900);
+    } else {
+      ok.classList.remove('is-shown');
+      err.classList.add('is-shown');
+    }
+  }
+
+  // Click only — no real form, so keyboard / Enter does not submit (the failure).
+  btn.addEventListener('click', attempt);
+</script>
