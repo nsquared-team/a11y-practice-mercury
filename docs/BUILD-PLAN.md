@@ -5,6 +5,71 @@ onto `main`'s statically pre-rendered Astro site, honouring the
 [planet-sites toolkit](https://github.com/nsquared-team/a11y-planet-sites-toolkit)
 two-tree contract.
 
+## Status & resume notes (last updated: through Phase F)
+
+**Done — phases A–F (committed + deployed to `main`):**
+
+| Phase | What landed | Commit |
+|---|---|---|
+| A | Ported data fixtures (`src/data/*.js`, `src/lib/{chart,chartData,mercuryCycle}.js`); enriched chrome: Header (search + Mercury time + notifications bell) + Footer (system status); `Icon.astro` | `d9b82ee` |
+| B | Dashboard widgets: multi-series extraction chart, equipment-status grid, commodity widget, alert feed | `b703276` |
+| C | Operations page-pair: sortable/filterable/paginated/selectable sites table + batch bar + site-detail **modal** | `a445414` |
+| D | Equipment page-pair: 3 tabs (inventory cards / maintenance timeline / diagnostics **gauges**) + tabbed detail modal; `Gauge.astro` | `4bf4525` |
+| E | Personnel page-pair: directory + shift-schedule **reorder** + cert table + 4-step **form wizard** | `18e90bf` |
+| F | Reports module: builder (accordion + live preview) + saved library + analytics + export modal | `b494cc6` |
+
+**Remaining — resume here:**
+
+- **G ⬜ — Notifications.** Enrich `/alerts/` + `/accessible/alerts/` into the
+  notifications centre: add 4 stat cards (Critical/Warning/Info/Success counts via
+  `getAlertStats()`) + severity & category **filter** controls over the existing
+  feed. The feed/live-region already exists from the first build. Root: unlabeled
+  filter selects, colour-only severity. Accessible: labelled filters, text badges.
+- **H ⬜ — Settings expansion.** `/settings/` already has the tabs+form+thresholds.
+  Expand to mirror mining-ops: Display prefs (**toggle switches**, `role="switch"`),
+  Notification prefs (**range sliders** + category toggles), Dashboard widget
+  customization (**reorder** — reuse the Personnel keyboard-reorder pattern),
+  Account form. Introduces the toggle-switch + range-slider patterns (root: custom
+  `<div>` toggles / unlabeled sliders; accessible: `role="switch"` / labelled
+  `<input type=range>`).
+- **I ⬜ — Audit + ship.** Cross-tree asymmetry sweep, optional `/about` testing-guide
+  page, final build → the deploy workflow auto-runs sitemaps.
+
+**Hard-won conventions a new session MUST follow:**
+
+1. **Page-pairs, not conditionals.** Each route = `src/pages/<r>/index.astro`
+   (root, uses `ChromeRoot`, `variant="root"`) + `src/pages/accessible/<r>/index.astro`
+   (uses `ChromeAccessible`, `variant="accessible"`). Add the route to `NAV` in
+   `src/data/ops.js`. Imports use aliases: `@layouts`, `@components`, `@data`, `@lib`.
+2. **Inline `<script define:vars>` ships VERBATIM** — any comment in it that names a
+   failure leaks the answer into the root HTML. Keep those script comments neutral
+   (e.g. `// detail modal`, not `// modal with no dialog role`). Frontmatter
+   docblock comments (`---` block) and bundled non-`define:vars` `<script>` are
+   stripped/minified, so they're safe. In templates use `{/* */}`, never `<!-- -->`.
+3. **Reusable accessible JS already exists** — copy from
+   `src/pages/accessible/equipment/index.astro`: `wireTabs()` (ARIA tablist + roving
+   tabindex + arrow/Home/End) and the modal pattern (`focusable()`, `onKeydown`
+   Esc+Tab-trap, `lastFocused` focus-return, `open/close`). The Personnel page has
+   the keyboard **reorder** (move ↑/↓ buttons + `aria-live` status); reuse for H.
+4. **Charts** = inline SVG via `src/lib/chart.js` (`linePlot`/`barPlot`/`multiSeriesPlot`)
+   or hand-built SVG strings in islands; accessible tree adds `role="img"` +
+   aria-label + an `class="data sr-only"` table. Gauges via `Gauge.astro`.
+5. **Verify each page-pair:** `node_modules/.bin/astro build`, then grep the built
+   HTML for failure/fix asymmetry (use `grep -o … | wc -l` for occurrences, not
+   `grep -c`), run the leak check, and browser-test with the `agent-browser` skill
+   (use `eval("…click()")` for reliable clicks; `find role` can miss reordered rows).
+6. **Env:** the global npm cache is root-owned — install with
+   `npm install --cache /tmp/<name>`; run the local binary `node_modules/.bin/astro`
+   (not `npx astro`). The `mining-ops` source is on `origin/mining-ops`
+   (`git worktree add /tmp/mo origin/mining-ops` to read it).
+7. **Big accessible mirrors can be delegated** to a subagent given the root file +
+   a precise per-section fix list + the reference accessible pages (worked well for
+   Personnel and Reports). Then verify + fix leaks yourself.
+
+Current nav order: Dashboard, Operations, Personnel, Equipment, Alerts, Reports,
+Settings (16 pages build: 8 routes × 2 trees). Deploy is automatic on push to
+`main`; live at <https://discovermercury.site>.
+
 ## Locked decisions
 
 1. **Fidelity: faithful re-create.** Rebuild every page / widget / modal / gauge
@@ -74,29 +139,29 @@ overlay component.
 
 ## Phases (each = both trees, then build + browser-verify)
 
-- **A — Foundation.** Port data fixtures; grow Sidebar nav; add Header (global
+- **A ✅ — Foundation.** Port data fixtures; grow Sidebar nav; add Header (global
   search + notifications bell + Mercury time) and Footer (system status) to the
   chrome with root-tree failures (per TESTING-GUIDE: low-contrast labels,
   unlabeled search, `focus:outline-none`, missing button names); build the shared
   pattern components.
-- **B — Dashboard expansion.** Equipment-status grid (root: color-only +
+- **B ✅ — Dashboard expansion.** Equipment-status grid (root: color-only +
   non-focusable; accessible: text+icon, focusable), commodity-prices widget,
   multi-series extraction chart, alert-feed widget → `/alerts/`.
-- **C — Operations.** Sortable/filterable/paginated/selectable sites table +
+- **C ✅ — Operations.** Sortable/filterable/paginated/selectable sites table +
   batch toolbar + site-detail **modal** (root: no `role=dialog`/Esc, `tabindex`
   order; accessible: full dialog semantics + focus management).
-- **D — Equipment.** Inventory cards + maintenance timeline + diagnostics gauges
+- **D ✅ — Equipment.** Inventory cards + maintenance timeline + diagnostics gauges
   (SVG) + detail modal (tabbed) + maintenance request form.
-- **E — Personnel.** Directory + shift schedule (reorder per decision #2) + cert
+- **E ✅ — Personnel.** Directory + shift schedule (reorder per decision #2) + cert
   tracker (progress bars) + 4-step form wizard (root: `tabindex` order, no Esc,
   missing dialog role; accessible: corrected).
-- **F — Reports expansion.** Report builder + live preview (SVG charts) + saved
+- **F ✅ — Reports expansion.** Report builder + live preview (SVG charts) + saved
   library table + comparison charts + export modal (root: ExportModal issues from
   TESTING-GUIDE; accessible: fixed).
-- **G — Notifications.** Enrich `/alerts/` into the Notifications centre.
-- **H — Settings expansion.** Display + notification prefs (toggles, sliders),
+- **G ⬜ — Notifications.** Enrich `/alerts/` into the Notifications centre.
+- **H ⬜ — Settings expansion.** Display + notification prefs (toggles, sliders),
   dashboard widget customization (reorder), account form.
-- **I — Audit + ship.** Verify each pattern's failure/fix asymmetry across both
+- **I ⬜ — Audit + ship.** Verify each pattern's failure/fix asymmetry across both
   trees, optional testing-guide page, build → sitemaps → deploy.
 
 Phases C/D/E/F are the high-effort ones (tables, modals, gauges, wizard). Run
