@@ -1,11 +1,19 @@
 # Discover Mercury — A11y Practice Site
 
-**Mercury Mining Operations** is a deliberately imperfect web app for practising
-accessibility (a11y) testing. It presents as a real-time mining-operations
-dashboard for a fictional colony on Mercury.
+**Mercury Mining Operations (MMO)** is a deliberately imperfect web app for
+practising accessibility (a11y) testing. It presents as the real-time control
+dashboard for a mineral-extraction mission on Mercury — the **Caloris Basin
+Extraction Complex**, where automated rigs mine regolith for ilmenite, anorthite,
+pyroxene, and polar water ice under a solar-powered colony.
 
-> 🚀 Not a real product. A deliberately flawed dashboard built by NSquared for
-> accessibility training, part of a solar-system series of a11y-practice sites.
+The dashboard surfaces the kind of operational UI a mission control crew would
+live in: live production charts, an incident/alert feed, per-rig shift reports,
+and rig-configuration settings — all running on simulated telemetry.
+
+> 🚀 Not a real product, and definitely not a real space program. A deliberately
+> flawed dashboard built by NSquared for accessibility training, part of a
+> solar-system series of a11y-practice sites. (It replaces an earlier travel-site
+> concept for this planet — that's gone; this is the mining mission now.)
 
 **Live site:** <https://discovermercury.site>
 
@@ -28,12 +36,28 @@ toolkit) jumps between the equivalent page in each tree.
 
 Each route demonstrates failures and fixes for an assigned set of patterns:
 
-| Route | Patterns |
-| --- | --- |
-| `/` Dashboard | Charts (line + bar), status banner |
-| `/alerts/` | Alerts & notifications (live regions, dismissible feed) |
-| `/reports/` | Data tables (sortable, semantic) |
-| `/settings/` | Forms + Tabs & panels |
+| Route | Mission screen | Patterns |
+| --- | --- | --- |
+| `/` Dashboard | Production telemetry & KPIs | Charts (line + bar), status banner |
+| `/alerts/` | Incident feed | Alerts & notifications (live regions, dismissible feed) |
+| `/reports/` | Per-rig shift output | Data tables (sortable, semantic) |
+| `/settings/` | Rig configuration | Forms + Tabs & panels |
+
+## What you can practice
+
+The **root** tree ships genuine WCAG failures to find; the **accessible** tree is
+the corrected mirror, so you can scan one, scan the other, and compare. Failures
+on offer include:
+
+- Charts with no text alternative, name, or role (color-only data encoding)
+- A notification feed that never announces (no live region) and color-only severity
+- Data tables built without header cells, scope, captions, or `aria-sort`
+- Tab widgets and form controls that are unlabeled divs — no roles, no keyboard
+- Missing skip links, landmarks, focus indicators, and low-contrast text
+
+Good for new testers, hands-on workshops, manual-audit practice, and prep for
+CPACC / WAS and similar certifications — with automated tools, manual technique,
+and assistive technology.
 
 ## Tech stack
 
