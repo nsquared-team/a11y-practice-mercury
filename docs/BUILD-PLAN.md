@@ -5,9 +5,9 @@ onto `main`'s statically pre-rendered Astro site, honouring the
 [planet-sites toolkit](https://github.com/nsquared-team/a11y-planet-sites-toolkit)
 two-tree contract.
 
-## Status & resume notes (last updated: through Phase H)
+## Status & resume notes (last updated: through Phase I — COMPLETE)
 
-**Done — phases A–H (committed + deployed to `main`):**
+**The port is complete. All phases A–I are committed + deployed to `main`.**
 
 | Phase | What landed | Commit |
 |---|---|---|
@@ -18,12 +18,10 @@ two-tree contract.
 | E | Personnel page-pair: directory + shift-schedule **reorder** + cert table + 4-step **form wizard** | `18e90bf` |
 | F | Reports module: builder (accordion + live preview) + saved library + analytics + export modal | `b494cc6` |
 | G | Notifications centre: 4 stat cards (`getAlertStats()`) + severity & category **filter selects** over the feed; fixture gains `category` field + `success` severity (`ALERT_CATEGORIES` + `getAlertStats()` in `ops.js`; now 7 alerts). Root: unlabeled selects, colour-only stat cards/severity. Accessible: `<label for>` selects, text stat cards, `success` text badge (`badge--ok`/`badge--info`), filter result announced via `#alert-count` `role="status"` | `2ec92f3` |
-| H | Settings expansion: 4 tabs (Display / Notifications / Dashboard / Account). New patterns — **toggle switches** + **range sliders** + dashboard-widget **reorder** + account form. `ops.js` gains `DISPLAY_PREFS`/`DISPLAY_TOGGLES`/`NOTIFICATION_SLIDERS`/`NOTIFICATION_CATEGORIES`/`DASHBOARD_WIDGETS`/`ACCOUNT` (SETTINGS_TABS now the 4 sections; old rig config kept as `SETTINGS_TABS_LEGACY`). Root: `<div>` toggles (no role/keyboard), unlabeled sliders + selects, pointer-only widget DnD, clickable-div Save. Accessible: `role="switch" aria-checked` buttons, `<label for>` + live-value sliders, keyboard widget reorder (Move ↑/↓ + `aria-live` status, reuses `.roster`/`.movebtn`), `aria-pressed` show/hide, real submit | _pending_ |
+| H | Settings expansion: 4 tabs (Display / Notifications / Dashboard / Account). New patterns — **toggle switches** + **range sliders** + dashboard-widget **reorder** + account form. `ops.js` gains `DISPLAY_PREFS`/`DISPLAY_TOGGLES`/`NOTIFICATION_SLIDERS`/`NOTIFICATION_CATEGORIES`/`DASHBOARD_WIDGETS`/`ACCOUNT` (SETTINGS_TABS now the 4 sections; old rig config kept as `SETTINGS_TABS_LEGACY`). Root: `<div>` toggles (no role/keyboard), unlabeled sliders + selects, pointer-only widget DnD, clickable-div Save. Accessible: `role="switch" aria-checked` buttons, `<label for>` + live-value sliders, keyboard widget reorder (Move ↑/↓ + `aria-live` status, reuses `.roster`/`.movebtn`), `aria-pressed` show/hide, real submit | `7ebd6f0` |
+| I | Audit + ship: cross-tree asymmetry sweep across all 8 page-pairs (every root HTML has 0 `for=`/ARIA-role/`aria-live`/`role="dialog"`/`aria-modal` while each accessible mirror has the fixes; root equipment+personnel keep their positive-`tabindex` traps, accessible has none) + leak sweep clean on all root pages. `/about` testing-guide page declined. 16 pages ship | this commit |
 
-**Remaining — resume here:**
-
-- **I ⬜ — Audit + ship.** Cross-tree asymmetry sweep, optional `/about` testing-guide
-  page, final build → the deploy workflow auto-runs sitemaps.
+The port stands at 8 routes × 2 trees = **16 pages**, live at <https://discovermercury.site>.
 
 **Hard-won conventions a new session MUST follow:**
 
@@ -151,7 +149,7 @@ overlay component.
 - **G ✅ — Notifications.** Enrich `/alerts/` into the Notifications centre.
 - **H ✅ — Settings expansion.** Display + notification prefs (toggles, sliders),
   dashboard widget customization (reorder), account form.
-- **I ⬜ — Audit + ship.** Verify each pattern's failure/fix asymmetry across both
+- **I ✅ — Audit + ship.** Verify each pattern's failure/fix asymmetry across both
   trees, optional testing-guide page, build → sitemaps → deploy.
 
 Phases C/D/E/F are the high-effort ones (tables, modals, gauges, wizard). Run
