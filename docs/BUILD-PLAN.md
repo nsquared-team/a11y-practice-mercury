@@ -5,9 +5,9 @@ onto `main`'s statically pre-rendered Astro site, honouring the
 [planet-sites toolkit](https://github.com/nsquared-team/a11y-planet-sites-toolkit)
 two-tree contract.
 
-## Status & resume notes (last updated: through Phase G)
+## Status & resume notes (last updated: through Phase H)
 
-**Done — phases A–G (committed + deployed to `main`):**
+**Done — phases A–H (committed + deployed to `main`):**
 
 | Phase | What landed | Commit |
 |---|---|---|
@@ -17,17 +17,11 @@ two-tree contract.
 | D | Equipment page-pair: 3 tabs (inventory cards / maintenance timeline / diagnostics **gauges**) + tabbed detail modal; `Gauge.astro` | `4bf4525` |
 | E | Personnel page-pair: directory + shift-schedule **reorder** + cert table + 4-step **form wizard** | `18e90bf` |
 | F | Reports module: builder (accordion + live preview) + saved library + analytics + export modal | `b494cc6` |
-| G | Notifications centre: 4 stat cards (`getAlertStats()`) + severity & category **filter selects** over the feed; fixture gains `category` field + `success` severity (`ALERT_CATEGORIES` + `getAlertStats()` in `ops.js`; now 7 alerts). Root: unlabeled selects, colour-only stat cards/severity. Accessible: `<label for>` selects, text stat cards, `success` text badge (`badge--ok`/`badge--info`), filter result announced via `#alert-count` `role="status"` | _pending_ |
+| G | Notifications centre: 4 stat cards (`getAlertStats()`) + severity & category **filter selects** over the feed; fixture gains `category` field + `success` severity (`ALERT_CATEGORIES` + `getAlertStats()` in `ops.js`; now 7 alerts). Root: unlabeled selects, colour-only stat cards/severity. Accessible: `<label for>` selects, text stat cards, `success` text badge (`badge--ok`/`badge--info`), filter result announced via `#alert-count` `role="status"` | `2ec92f3` |
+| H | Settings expansion: 4 tabs (Display / Notifications / Dashboard / Account). New patterns — **toggle switches** + **range sliders** + dashboard-widget **reorder** + account form. `ops.js` gains `DISPLAY_PREFS`/`DISPLAY_TOGGLES`/`NOTIFICATION_SLIDERS`/`NOTIFICATION_CATEGORIES`/`DASHBOARD_WIDGETS`/`ACCOUNT` (SETTINGS_TABS now the 4 sections; old rig config kept as `SETTINGS_TABS_LEGACY`). Root: `<div>` toggles (no role/keyboard), unlabeled sliders + selects, pointer-only widget DnD, clickable-div Save. Accessible: `role="switch" aria-checked` buttons, `<label for>` + live-value sliders, keyboard widget reorder (Move ↑/↓ + `aria-live` status, reuses `.roster`/`.movebtn`), `aria-pressed` show/hide, real submit | _pending_ |
 
 **Remaining — resume here:**
 
-- **H ⬜ — Settings expansion.** `/settings/` already has the tabs+form+thresholds.
-  Expand to mirror mining-ops: Display prefs (**toggle switches**, `role="switch"`),
-  Notification prefs (**range sliders** + category toggles), Dashboard widget
-  customization (**reorder** — reuse the Personnel keyboard-reorder pattern),
-  Account form. Introduces the toggle-switch + range-slider patterns (root: custom
-  `<div>` toggles / unlabeled sliders; accessible: `role="switch"` / labelled
-  `<input type=range>`).
 - **I ⬜ — Audit + ship.** Cross-tree asymmetry sweep, optional `/about` testing-guide
   page, final build → the deploy workflow auto-runs sitemaps.
 
@@ -154,8 +148,8 @@ overlay component.
 - **F ✅ — Reports expansion.** Report builder + live preview (SVG charts) + saved
   library table + comparison charts + export modal (root: ExportModal issues from
   TESTING-GUIDE; accessible: fixed).
-- **G ⬜ — Notifications.** Enrich `/alerts/` into the Notifications centre.
-- **H ⬜ — Settings expansion.** Display + notification prefs (toggles, sliders),
+- **G ✅ — Notifications.** Enrich `/alerts/` into the Notifications centre.
+- **H ✅ — Settings expansion.** Display + notification prefs (toggles, sliders),
   dashboard widget customization (reorder), account form.
 - **I ⬜ — Audit + ship.** Verify each pattern's failure/fix asymmetry across both
   trees, optional testing-guide page, build → sitemaps → deploy.

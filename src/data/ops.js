@@ -199,7 +199,67 @@ export const RIGS = [
   { id: 'rig-09', label: 'Rig 09' },
 ];
 
+// Settings sections. Each tab is a panel of preference controls; the page-pair
+// contrasts custom <div> toggles / unlabeled sliders / pointer-only widget DnD
+// (root) against role="switch" / labelled range inputs / keyboard reorder
+// (accessible).
 export const SETTINGS_TABS = [
+  { key: 'display', label: 'Display' },
+  { key: 'notifications', label: 'Notifications' },
+  { key: 'dashboard', label: 'Dashboard' },
+  { key: 'account', label: 'Account' },
+];
+
+// Display-preference selects (label + options + default value).
+export const DISPLAY_PREFS = [
+  { key: 'units', label: 'Units', hint: 'Measurement system for distances and mass.',
+    options: [{ value: 'metric', label: 'Metric' }, { value: 'imperial', label: 'Imperial' }], value: 'metric' },
+  { key: 'timeFormat', label: 'Time format', hint: 'How clock times are displayed.',
+    options: [{ value: '24h', label: '24-hour' }, { value: '12h', label: '12-hour' }], value: '24h' },
+  { key: 'temperatureScale', label: 'Temperature scale', hint: 'Units for temperature readouts.',
+    options: [{ value: 'celsius', label: 'Celsius (°C)' }, { value: 'fahrenheit', label: 'Fahrenheit (°F)' }], value: 'celsius' },
+  { key: 'refreshRate', label: 'Data refresh rate', hint: 'How often live readings update.',
+    options: [{ value: '15', label: '15 seconds' }, { value: '30', label: '30 seconds' }, { value: '60', label: '1 minute' }, { value: '300', label: '5 minutes' }], value: '30' },
+];
+
+// Toggle switches: { key, label, description, on }. Used in Display + Notifications.
+export const DISPLAY_TOGGLES = [
+  { key: 'simulation', label: 'Enable real-time simulation', description: 'Animate live data updates for demonstration.', on: true },
+  { key: 'reducedMotion', label: 'Reduce motion', description: 'Minimise non-essential animation across the console.', on: false },
+];
+
+// Notification range sliders: { key, label, description, min, max, value, unit }.
+export const NOTIFICATION_SLIDERS = [
+  { key: 'alertVolume', label: 'Alert sound volume', description: 'Loudness of audible alert notifications.', min: 0, max: 100, value: 70, unit: '%' },
+  { key: 'alertThreshold', label: 'Equipment warning threshold', description: 'Raise alerts when equipment utilisation exceeds this level.', min: 50, max: 100, value: 80, unit: '%' },
+];
+
+// Per-category alert toggles (mirror the alert categories).
+export const NOTIFICATION_CATEGORIES = [
+  { key: 'equipment', label: 'Equipment alerts', on: true },
+  { key: 'safety', label: 'Safety alerts', on: true },
+  { key: 'production', label: 'Production alerts', on: true },
+  { key: 'personnel', label: 'Personnel alerts', on: false },
+];
+
+// Dashboard widgets the operator can reorder + show/hide.
+export const DASHBOARD_WIDGETS = [
+  { id: 'metrics', name: 'Key Metrics', enabled: true },
+  { id: 'extraction-chart', name: 'Extraction Chart', enabled: true },
+  { id: 'equipment-status', name: 'Equipment Status', enabled: true },
+  { id: 'alert-feed', name: 'Alert Feed', enabled: true },
+  { id: 'commodity-prices', name: 'Commodity Prices', enabled: true },
+];
+
+// Account profile defaults.
+export const ACCOUNT = {
+  displayName: 'Operations Supervisor',
+  email: 'supervisor@discovermercury.site',
+  role: 'Shift Operations Lead',
+};
+
+// Legacy rig-config fields retained for reference (no longer surfaced as a tab).
+export const SETTINGS_TABS_LEGACY = [
   { key: 'general', label: 'General' },
   { key: 'thresholds', label: 'Alert Thresholds' },
   { key: 'crew', label: 'Crew & Shifts' },

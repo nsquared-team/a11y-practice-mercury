@@ -1,37 +1,44 @@
 ---
 /**
- * Settings — ACCESSIBLE tree.  Pattern focus: FORMS + TABS & PANELS (corrected).
+ * Settings — ACCESSIBLE tree.  Pattern focus: TABS + TOGGLE SWITCHES + RANGE
+ * SLIDERS + DASHBOARD WIDGET REORDER + ACCOUNT FORM (corrected).
  *
  * Fixes mirrored against the root settings page:
  *  TABS:
- *   - Proper APG tabs: role="tablist" (with aria-label), each tab a
- *     <button role="tab" aria-selected aria-controls id> with roving tabindex
- *     (selected = 0, others = -1) (4.1.2).
- *   - Full keyboard support: ArrowLeft/Right + Home/End move and activate, and
- *     activation focuses the panel (2.1.1).
- *   - Selection conveyed by aria-selected (and style), not colour alone (1.4.1).
- *   - Panels are <div role="tabpanel" aria-labelledby tabindex="0" hidden> when
- *     inactive.
- *  FORMS:
- *   - Every control has a real <label for>; related controls are grouped in a
- *     <fieldset><legend> (1.3.1 / 3.3.2 / 4.1.2).
- *   - The "Shift supervisor" field is required + aria-describedby its hint; on
- *     invalid submit it gets aria-invalid="true", focus moves to it, and a
- *     role="alert" error referenced by aria-describedby is shown
- *     (3.3.1 / 4.1.3).
- *   - Checkboxes are real <input type="checkbox" id> + <label> (2.1.1 / 4.1.2).
- *   - "Save" is a real <button type="submit" class="btn btn--primary"> (4.1.2).
+ *   - APG tabs: role="tablist" (labelled), each tab a <button role="tab"
+ *     aria-selected aria-controls id> with roving tabindex; ArrowLeft/Right +
+ *     Home/End move + activate; activation focuses the panel
+ *     (role="tabpanel" aria-labelledby tabindex="0") (4.1.2 / 2.1.1 / 1.4.1).
+ *  DISPLAY:
+ *   - Each preference <select> has a real <label for>; the hint is tied via
+ *     aria-describedby (1.3.1 / 3.3.2 / 4.1.2).
+ *   - Toggle switches are real <button role="switch" aria-checked> — focusable,
+ *     keyboard operable (Space/Enter), named via aria-labelledby; state is in
+ *     aria-checked, not colour alone (2.1.1 / 4.1.2 / 1.4.1).
+ *  NOTIFICATIONS:
+ *   - Range <input type=range> each have a <label for> and a live value tied via
+ *     aria-describedby, updated on input (1.3.1 / 4.1.2). Native = keyboard.
+ *   - Category toggles are the same real role="switch" buttons.
+ *  DASHBOARD:
+ *   - Widgets reorder with keyboard Move up / Move down <button>s (disabled at
+ *     edges), announced via a polite live region (2.1.1 / 4.1.3); show/hide is a
+ *     real <button aria-pressed> with a name; "Reset" is a real <button>.
+ *  ACCOUNT:
+ *   - Inputs have real <label for>; "Save changes" is a real <button type=submit>.
  */
 import BaseLayout from '@layouts/BaseLayout.astro';
 import ChromeAccessible from '@components/ChromeAccessible.astro';
-import { RIGS, SETTINGS_TABS } from '@data/ops.js';
+import {
+  SETTINGS_TABS, DISPLAY_PREFS, DISPLAY_TOGGLES, NOTIFICATION_SLIDERS,
+  NOTIFICATION_CATEGORIES, DASHBOARD_WIDGETS, ACCOUNT,
+} from '@data/ops.js';
 ---
 <BaseLayout title="Settings — Discover Mercury Mining Operations" variant="accessible">
   <div class="app">
     <ChromeAccessible active="settings">
       <div class="pagehead">
         <h1>Settings</h1>
-        <p>Configure rig targets, alert thresholds, and crew assignments for the extraction complex.</p>
+        <p>Configure display, notifications, dashboard layout, and your account.</p>
       </div>
 
       <div class="tabs">
@@ -50,106 +57,125 @@ import { RIGS, SETTINGS_TABS } from '@data/ops.js';
           ))}
         </div>
 
-        {/* General */}
-        <div
-          class="tabpanel"
-          role="tabpanel"
-          id="panel-general"
-          aria-labelledby="tab-general"
-          tabindex="0"
-          data-panel="general"
-        >
-          <form id="rig-form" class="stack" novalidate>
-            <div class="field">
-              <label class="field__label" for="rig">Active rig</label>
-              <select class="select" name="rig" id="rig">
-                <option value="" disabled selected>Choose a rig…</option>
-                {RIGS.map((r) => <option value={r.id}>{r.label}</option>)}
+        {/* Display */}
+        <div class="tabpanel" role="tabpanel" id="panel-display" aria-labelledby="tab-display" tabindex="0" data-panel="display">
+          <h2 class="section__title">Display preferences</h2>
+          {DISPLAY_PREFS.map((p) => (
+            <div class="prefrow">
+              <div class="prefrow__text">
+                <label class="prefrow__label" for={`pref-${p.key}`}>{p.label}</label>
+                <div class="prefrow__hint" id={`pref-${p.key}-hint`}>{p.hint}</div>
+              </div>
+              <select class="select prefrow__control" id={`pref-${p.key}`} data-pref={p.key} aria-describedby={`pref-${p.key}-hint`}>
+                {p.options.map((o) => (
+                  <option value={o.value} selected={o.value === p.value}>{o.label}</option>
+                ))}
               </select>
             </div>
+          ))}
 
-            <div class="field">
-              <label class="field__label" for="target">Target output (t/sol)</label>
-              <input class="input" type="number" name="target" id="target" />
-            </div>
-
-            <div class="field">
-              <label class="field__label" for="sup">Shift supervisor</label>
-              <input
-                class="input"
-                type="text"
-                name="supervisor"
-                id="sup"
-                required
-                aria-describedby="sup-hint sup-err"
-              />
-              <p class="field__hint" id="sup-hint">Name of the supervisor accountable for this rig this sol.</p>
-              {/* Error referenced by aria-describedby; role="alert" announces it. */}
-              <p class="field__error" id="sup-err" role="alert" hidden>Shift supervisor is required.</p>
-            </div>
-
-            <fieldset>
-              <legend>Options</legend>
-              <div class="checkrow">
-                <input type="checkbox" name="autohalt" id="autohalt" />
-                <label for="autohalt">Auto-halt on over-torque</label>
+          <h2 class="section__title" style="margin-top:1.4rem">Console</h2>
+          {DISPLAY_TOGGLES.map((t) => (
+            <div class="prefrow">
+              <div class="prefrow__text">
+                <div class="prefrow__label" id={`tg-${t.key}-label`}>{t.label}</div>
+                <div class="prefrow__hint" id={`tg-${t.key}-hint`}>{t.description}</div>
               </div>
-              <div class="checkrow">
-                <input type="checkbox" name="email" id="email" />
-                <label for="email">Email me critical alerts</label>
-              </div>
-            </fieldset>
-
-            <button type="submit" class="btn btn--primary" id="save-btn">Save changes</button>
-          </form>
+              <button
+                type="button"
+                class={`switch${t.on ? ' is-on' : ''}`}
+                role="switch"
+                aria-checked={t.on ? 'true' : 'false'}
+                aria-labelledby={`tg-${t.key}-label`}
+                aria-describedby={`tg-${t.key}-hint`}
+                data-toggle={t.key}
+              ><span class="switch__thumb"></span></button>
+            </div>
+          ))}
         </div>
 
-        {/* Alert Thresholds */}
-        <div
-          class="tabpanel"
-          role="tabpanel"
-          id="panel-thresholds"
-          aria-labelledby="tab-thresholds"
-          tabindex="0"
-          data-panel="thresholds"
-          hidden
-        >
-          <div class="stack">
-            <div class="field">
-              <label class="field__label" for="coreFloor">Core temp margin floor (°C)</label>
-              <input class="input" type="number" name="coreFloor" id="coreFloor" value="25" />
+        {/* Notifications */}
+        <div class="tabpanel" role="tabpanel" id="panel-notifications" aria-labelledby="tab-notifications" tabindex="0" data-panel="notifications" hidden>
+          <h2 class="section__title">Notification sliders</h2>
+          {NOTIFICATION_SLIDERS.map((s) => (
+            <div class="sliderrow">
+              <div class="prefrow__text">
+                <label class="prefrow__label" for={`sl-${s.key}`}>{s.label}</label>
+                <div class="prefrow__hint" id={`sl-${s.key}-hint`}>{s.description}</div>
+              </div>
+              <div class="sliderrow__control">
+                <input
+                  class="range" type="range" id={`sl-${s.key}`}
+                  min={s.min} max={s.max} value={s.value}
+                  data-slider={s.key} data-unit={s.unit}
+                  aria-describedby={`sl-${s.key}-hint sl-${s.key}-val`}
+                />
+                <span class="sliderrow__value" id={`sl-${s.key}-val`} data-slider-value={s.key}>{s.value}{s.unit}</span>
+              </div>
             </div>
-            <div class="field">
-              <label class="field__label" for="solarFloor">Solar output floor (MW)</label>
-              <input class="input" type="number" name="solarFloor" id="solarFloor" value="80" />
-            </div>
-            <div class="field">
-              <label class="field__label" for="torqueCeil">Drill torque ceiling (kN·m)</label>
-              <input class="input" type="number" name="torqueCeil" id="torqueCeil" value="240" />
-            </div>
+          ))}
+
+          <fieldset>
+            <legend>Alert categories</legend>
+            {NOTIFICATION_CATEGORIES.map((c) => (
+              <div class="prefrow">
+                <div class="prefrow__text">
+                  <div class="prefrow__label" id={`cat-${c.key}-label`}>{c.label}</div>
+                </div>
+                <button
+                  type="button"
+                  class={`switch switch--sm${c.on ? ' is-on' : ''}`}
+                  role="switch"
+                  aria-checked={c.on ? 'true' : 'false'}
+                  aria-labelledby={`cat-${c.key}-label`}
+                  data-toggle={`cat-${c.key}`}
+                ><span class="switch__thumb"></span></button>
+              </div>
+            ))}
+          </fieldset>
+        </div>
+
+        {/* Dashboard */}
+        <div class="tabpanel" role="tabpanel" id="panel-dashboard" aria-labelledby="tab-dashboard" tabindex="0" data-panel="dashboard" hidden>
+          <h2 class="section__title">Dashboard widgets</h2>
+          <div class="toolbar">
+            <span class="muted" id="widget-count">{DASHBOARD_WIDGETS.filter((w) => w.enabled).length} of {DASHBOARD_WIDGETS.length} widgets visible</span>
+            <button type="button" class="btn btn--ghost" id="widget-reset">Reset to default</button>
           </div>
+          <p class="muted">Use the Move up and Move down buttons to reorder widgets, and the show/hide button to toggle each widget on the dashboard.</p>
+          <p class="sr-only" aria-live="polite" id="widget-reorder-status"></p>
+          <ul class="roster widgetlist" id="widgetlist">
+            {DASHBOARD_WIDGETS.map((w) => (
+              <li class={`rosteritem widgetitem${w.enabled ? '' : ' is-hidden'}`} data-id={w.id} data-name={w.name} data-enabled={w.enabled ? '1' : '0'}>
+                <span class="rosteritem__name">{w.name}</span>
+                <span class="movebtns">
+                  <button type="button" class="movebtn movebtn--up" aria-label={`Move ${w.name} up`}>↑<span class="sr-only"> Move up</span></button>
+                  <button type="button" class="movebtn movebtn--down" aria-label={`Move ${w.name} down`}>↓<span class="sr-only"> Move down</span></button>
+                  <button type="button" class="movebtn widgetitem__vis" data-vis aria-pressed={w.enabled ? 'true' : 'false'} aria-label={`${w.enabled ? 'Hide' : 'Show'} ${w.name}`}>{w.enabled ? '👁' : '🚫'}</button>
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        {/* Crew & Shifts */}
-        <div
-          class="tabpanel"
-          role="tabpanel"
-          id="panel-crew"
-          aria-labelledby="tab-crew"
-          tabindex="0"
-          data-panel="crew"
-          hidden
-        >
-          <dl>
-            <dt>Shift A supervisor</dt>
-            <dd>K. Okonkwo</dd>
-            <dt>Shift B supervisor</dt>
-            <dd>R. Vasquez</dd>
-            <dt>Crew on shift</dt>
-            <dd>18 of 24</dd>
-            <dt>Next handover</dt>
-            <dd>Sol 4,182 · 22:00</dd>
-          </dl>
+        {/* Account */}
+        <div class="tabpanel" role="tabpanel" id="panel-account" aria-labelledby="tab-account" tabindex="0" data-panel="account" hidden>
+          <h2 class="section__title">Account information</h2>
+          <form id="account-form" class="stack">
+            <div class="field">
+              <label class="field__label" for="acc-name">Display name</label>
+              <input class="input" type="text" name="displayName" id="acc-name" value={ACCOUNT.displayName} />
+            </div>
+            <div class="field">
+              <label class="field__label" for="acc-email">Email</label>
+              <input class="input" type="email" name="email" id="acc-email" value={ACCOUNT.email} />
+            </div>
+            <div class="field">
+              <label class="field__label" for="acc-role">Role</label>
+              <input class="input" type="text" name="role" id="acc-role" value={ACCOUNT.role} />
+            </div>
+            <button type="submit" class="btn btn--primary" id="account-save">Save changes</button>
+          </form>
         </div>
       </div>
     </ChromeAccessible>
@@ -161,7 +187,6 @@ import { RIGS, SETTINGS_TABS } from '@data/ops.js';
   const tablist = document.querySelector('[role="tablist"]');
   const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
   const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
-
   function selectTab(tab, setFocus = true) {
     tabs.forEach((t) => {
       const selected = t === tab;
@@ -175,11 +200,7 @@ import { RIGS, SETTINGS_TABS } from '@data/ops.js';
     });
     if (setFocus) tab.focus();
   }
-
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', () => selectTab(tab));
-  });
-
+  tabs.forEach((tab) => tab.addEventListener('click', () => selectTab(tab)));
   tablist.addEventListener('keydown', (e) => {
     const current = tabs.indexOf(document.activeElement);
     if (current < 0) return;
@@ -188,37 +209,92 @@ import { RIGS, SETTINGS_TABS } from '@data/ops.js';
     else if (e.key === 'ArrowLeft') next = (current - 1 + tabs.length) % tabs.length;
     else if (e.key === 'Home') next = 0;
     else if (e.key === 'End') next = tabs.length - 1;
-    if (next >= 0) {
-      e.preventDefault();
-      selectTab(tabs[next]);
-    }
+    if (next >= 0) { e.preventDefault(); selectTab(tabs[next]); }
   });
 
-  // --- Form: real validation with announced, associated error. ---
-  const form = document.getElementById('rig-form');
-  const sup = document.getElementById('sup');
-  const err = document.getElementById('sup-err');
+  // --- Toggle switches: real buttons; flip aria-checked + class. ---
+  document.querySelectorAll('[role="switch"]').forEach((sw) => {
+    sw.addEventListener('click', () => {
+      const on = sw.getAttribute('aria-checked') === 'true';
+      sw.setAttribute('aria-checked', on ? 'false' : 'true');
+      sw.classList.toggle('is-on', !on);
+    });
+  });
 
-  form.addEventListener('submit', (e) => {
+  // --- Sliders: keep the associated value text in sync. ---
+  document.querySelectorAll('[data-slider]').forEach((sl) => {
+    const out = document.querySelector('[data-slider-value="' + sl.getAttribute('data-slider') + '"]');
+    const unit = sl.getAttribute('data-unit') || '';
+    sl.addEventListener('input', () => { if (out) out.textContent = sl.value + unit; });
+  });
+
+  // --- Dashboard widgets: keyboard reorder + show/hide + reset, announced. ---
+  const list = document.getElementById('widgetlist');
+  const countEl = document.getElementById('widget-count');
+  const status = document.getElementById('widget-reorder-status');
+  const total = list.querySelectorAll('.widgetitem').length;
+  function updateCount() {
+    const on = list.querySelectorAll('.widgetitem[data-enabled="1"]').length;
+    countEl.textContent = on + ' of ' + total + ' widgets visible';
+  }
+  function refresh() {
+    const items = Array.from(list.querySelectorAll('.widgetitem'));
+    items.forEach((li, i) => {
+      li.querySelector('.movebtn--up').disabled = i === 0;
+      li.querySelector('.movebtn--down').disabled = i === items.length - 1;
+    });
+  }
+  function announce(li, btn) {
+    const items = Array.from(list.querySelectorAll('.widgetitem'));
+    const i = items.indexOf(li);
+    status.textContent = 'Moved ' + li.dataset.name + ' to position ' + (i + 1) + ' of ' + items.length;
+    if (btn && !btn.disabled) btn.focus();
+    else li.querySelector('.movebtn:not([disabled])').focus();
+  }
+  refresh();
+  list.addEventListener('click', (e) => {
+    const move = e.target.closest('.movebtn--up, .movebtn--down');
+    if (move && !move.disabled) {
+      const li = move.closest('.widgetitem');
+      if (move.classList.contains('movebtn--up')) {
+        const prev = li.previousElementSibling;
+        if (prev) list.insertBefore(li, prev);
+      } else {
+        const next = li.nextElementSibling;
+        if (next) list.insertBefore(next, li);
+      }
+      refresh();
+      announce(li, move);
+      return;
+    }
+    const vis = e.target.closest('[data-vis]');
+    if (vis) {
+      const li = vis.closest('.widgetitem');
+      const on = li.getAttribute('data-enabled') === '1';
+      li.setAttribute('data-enabled', on ? '0' : '1');
+      li.classList.toggle('is-hidden', on);
+      vis.setAttribute('aria-pressed', on ? 'false' : 'true');
+      vis.textContent = on ? '🚫' : '👁';
+      vis.setAttribute('aria-label', (on ? 'Show ' : 'Hide ') + li.dataset.name);
+      updateCount();
+    }
+  });
+  document.getElementById('widget-reset').addEventListener('click', () => {
+    list.querySelectorAll('.widgetitem').forEach((li) => {
+      li.setAttribute('data-enabled', '1');
+      li.classList.remove('is-hidden');
+      const vis = li.querySelector('[data-vis]');
+      vis.setAttribute('aria-pressed', 'true');
+      vis.textContent = '👁';
+      vis.setAttribute('aria-label', 'Hide ' + li.dataset.name);
+    });
+    updateCount();
+    status.textContent = 'Widgets reset to default order and visibility.';
+  });
+
+  // --- Account form: real submit. ---
+  document.getElementById('account-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    if (!sup.value.trim()) {
-      sup.setAttribute('aria-invalid', 'true');
-      sup.classList.add('input--invalid');
-      err.hidden = false;
-      sup.focus();
-    } else {
-      sup.removeAttribute('aria-invalid');
-      sup.classList.remove('input--invalid');
-      err.hidden = true;
-      // pretend-save
-    }
-  });
-
-  sup.addEventListener('input', () => {
-    if (sup.value.trim()) {
-      sup.removeAttribute('aria-invalid');
-      sup.classList.remove('input--invalid');
-      err.hidden = true;
-    }
+    // pretend-save
   });
 </script>
